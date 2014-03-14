@@ -1,10 +1,11 @@
 % function plot_recordings(u,t,mode)
 %
-% u: displacement recordings
-% t: time axis
-% mode: 'dis' for displacement, 'vel' for velocity
+% v:        velocity recordings (dimensions (n_receivers, nt) )
+% t:        time axis
+% veldis:   the mode of the seismograms that we plot: 'displacement' or
+% 'velocity'
 
-function plot_recordings(u,t,veldis)
+function plot_recordings(vel,t,veldis)
 
 %==========================================================================
 %- plot recordings, ordered according to distance from the first source ---
@@ -33,19 +34,19 @@ else
     
 end
 
-%- convert to velocity if wanted ------------------------------------------
+%- convert to displacement if wanted ------------------------------------------
 
-if strcmp(veldis,'vel')
+if strcmp(veldis,'displacement')
     nt=length(t);
-    v=zeros(length(rec_x),nt-1);
+    u=zeros(length(rec_x),nt);
     
-    for k=1:length(rec_x)
-        v(k,:)=diff(u(k,:))/(t(2)-t(1));
-    end
+    u = cumsum(vel,2)*dt;
     
-    t=t(1:nt-1);
-    u=v;
-    
+    % now put the displacement values back in the vel variable so that it
+    % can be plotted.
+    vel=u;
+elseif (not(strcmp(veldis,'velocity')))
+    error('ERRORR your veldis input variable is wrong. Eejit.');
 end
 
 %- plot recordings with ascending distance from the first source ----------
@@ -56,13 +57,15 @@ hold on
 
 for k=1:length(rec_x)
     
-    m=max(abs(u(idx(k),:)));
+    m=max(abs(vel(idx(k),:)));
+    % traces om en om blauw en zwart kleuren
     if mod(k,2)
-        plot(t,spacing*(k-1)+u(idx(k),:)/m,'k','LineWidth',1)
+        plot(t,spacing*(k-1)+vel(idx(k),:)/m,'k','LineWidth',1)
     else
-        plot(t,spacing*(k-1)+u(idx(k),:)/m,'b','LineWidth',1)
+        plot(t,spacing*(k-1)+vel(idx(k),:)/m,'b','LineWidth',1)
     end
     
+    % afstanden geven in m of km
     if (max(rec_x)<=1000)
         text(min(t)-(t(end)-t(1))/6,spacing*(k-1)+0.3,['x=' num2str(rec_x(idx(k))) ' m, z=' num2str(rec_z(idx(k))) ' m'],'FontSize',14)
     else
@@ -70,6 +73,10 @@ for k=1:length(rec_x)
     end
     
 end
+
+% text on figure: velocity or displacement seismogram
+figure(recordings);
+title([veldis, ' seismograms'])
 
 xlabel('time [s]','FontSize',20);
 ylabel('normalised traces','FontSize',20);

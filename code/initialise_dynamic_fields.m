@@ -1,15 +1,27 @@
 % Initialises all the dynamic fields (in terms of zeros(nx,nz) and such)
 
+% Do I really need to make these ifs? Does it hurt to initialise dynamic
+% fiels which may not be used at all? -- NAB 13-3-2014
+
 % velocity fields (for one timestep)
 if(strcmp(wave_propagation_type,'SH'))
     vy=zeros(nx,nz);
+    % displacement
+    uy=zeros(nx,nz);
 elseif(strcmp(wave_propagation_type,'PSV'))
     vx=zeros(nx,nz);
     vz=zeros(nx,nz);
+    % displacement
+    ux=zeros(nx,nz);
+    uz=zeros(nx,nz);
 elseif(strcmp(wave_propagation_type,'both'))
     vy=zeros(nx,nz);
     vx=zeros(nx,nz);
     vz=zeros(nx,nz);
+    % displacement
+    ux=zeros(nx,nz);
+    uy=zeros(nx,nz);
+    uz=zeros(nx,nz);
 end
 
 if(strcmp(simulation_mode,'forward'))

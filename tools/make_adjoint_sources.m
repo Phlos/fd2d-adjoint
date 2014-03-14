@@ -5,15 +5,23 @@
 %
 % input:
 %-------
-% u:            synthetic displacement seismograms
-% u_0:          observed displacement seismograms
+% v:            synthetic velocity seismograms
+% v_0:          observed displacement seismograms
 % t:            time axis
-% veldis:       'dis' for displacements, 'vel' for velocities
+% veldis:       determines output type: 'displacement' or 'velocity'
 % measurement:  'waveform_difference' for L2 waveform difference
 %               'cc_time_shift' for cross-correlation time shift
+% appendix:     the appendix that gets added to each of the source time
+%               function names. This is necessary for example if you want 
+%               to calculate the source time functions for directions x, y,
+%               z. The way it works in the code: 
+%               for x '_1';   for y '_2';   for z '_3'
 %
-% When u_0, i.e. the observed displacement seismograms, are set to zero, 
-% the code performs data-independent measurements. 
+% When v_0, i.e. the observed velocity seismograms, are set to zero, 
+% the code performs data-independent measurements. This results in
+% sensitivity kernels (i.e. the sensitivity of a certain observable -
+% travel time, amplitude, ..., to a (infinitesimal) change in a model
+% parameter.
 %
 % output:
 %--------
@@ -25,7 +33,7 @@
 % 
 %==========================================================================
 
-function misfit=make_adjoint_sources(u,u_0,t,veldis,measurement)
+function misfit=make_adjoint_sources(v,v_0,t,veldis,measurement,appendix)
 %%
 %==========================================================================
 %- initialisations --------------------------------------------------------
@@ -48,53 +56,38 @@ misfit=0.0;
 % initialise source time function save variable
 adjoint_stf = zeros(nrec,nt); % adapt this to three dimensions when working!
 
-%- convert to velocity if wanted ------------------------------------------
+%- convert to displacement if wanted ------------------------------------------
 
-if strcmp(veldis,'vel')
+if strcmp(veldis,'displacement')
     
-    v=zeros(nrec,nt);
-    
-    for k=1:nrec
-        v(k,1:nt-1)=diff(u(k,:))/(t(2)-t(1));
-        v(k,nt)=0.0;
-    end
-   
-    u=v;
-    
+%     u=zeros(nrec,nt);
+    u=cumsum(vel,2)*dt;
+    v=u;
+elseif not(strcmp(veldis,'velocity'))
+    error('ERRORRRR your veldis variable is not ''displacement'' or ''velocity''');
 end
 
-%%
+
+
 %==========================================================================
-%- march through the various recodings ------------------------------------
+%% march through the various recordings -----------------------------------
 %==========================================================================
 
 pick_data = figure;
 adjoint_source = figure;
 
 for n=1:nrec
-%     for dir = 1:3
-%         if (dir==1)
-%             u=ux;
-%             u_0=ux_0;
-%         elseif (dir==2)
-%             u=uy;
-%             u_0=uy_0;
-%         elseif (dir==3)
-%             u=uz;
-%             u_0=uz_0;
-%         else
-%             disp 'ERROR direction exceeds dimensions'
-%         end
+
         fprintf(1,'station number %d\n',n)
         
         %- plot traces --------------------------------------------------------
         
         figure(pick_data);
 %         subplot(3,1,dir)
-        plot(t,u(n,:),'k')
+        plot(t,v(n,:),'k')
         hold on
-        plot(t,u_0(n,:),'r')
-        plot(t,u(n,:)-u_0(n,:),'k--')
+        plot(t,v_0(n,:),'r')
+        plot(t,v(n,:)-v_0(n,:),'k--')
         hold off
         
         title(['receiver ' num2str(n) ' ,synth - black, obs - red, diff - dashed'])
@@ -109,24 +102,24 @@ for n=1:nrec
         [right,~]=ginput(1);
         
         width=t(end)/10;
-        u(n,:)=taper(u(n,:),t,left,right,width);
-        u_0(n,:)=taper(u_0(n,:),t,left,right,width);
+        v(n,:)=taper(v(n,:),t,left,right,width);
+        v_0(n,:)=taper(v_0(n,:),t,left,right,width);
         
         %- compute misfit and adjoint source time function --------------------
         
         if strcmp(measurement,'waveform_difference')
-            [misfit_n,adstf]=waveform_difference(u(n,:),u_0(n,:),t);
+            [misfit_n,adstf]=waveform_difference(v(n,:),v_0(n,:),t);
         elseif strcmp(measurement,'cc_time_shift')
-            [misfit_n,adstf]=cc_time_shift(u(n,:),u_0(n,:),t);
+            [misfit_n,adstf]=cc_time_shift(v(n,:),v_0(n,:),t);
         end
         
         misfit=misfit+misfit_n;
         
         %- correct adjoint source time function for velocity measurement ------
-        
-        if strcmp(veldis,'vel')
-            adstf(1:nt-1)=-diff(adstf)/dt;
-        end
+        % ??????
+%         if strcmp(veldis,'vel')
+%             adstf(1:nt-1)=-diff(adstf)/dt;
+%         end
         
         
         %- plot adjoint source before time reversal ---------------------------
@@ -134,7 +127,7 @@ for n=1:nrec
         figure(adjoint_source);
         plot(t,adstf,'k')
         xlabel('t [s]')
-        title('adjoint source before time reversal')
+        title(['adjoint source (', veldis, 'seismograms) before time reversal'])
         pause(1.0)
         
         %- write adjoint source locations to file -----------------------------
@@ -143,7 +136,7 @@ for n=1:nrec
         
         %- write source time functions ----------------------------------------
         %  WITH time reversal!!!!!
-        fn=[adjoint_source_path 'src_' num2str(n)];
+        fn=[adjoint_source_path 'src_' num2str(n) appendix];
         fid_src=fopen(fn,'w');
         for k=1:nt
             fprintf(fid_src,'%g\n',adstf(nt-k+1));

@@ -6,35 +6,37 @@
 % K: sensitivity kernel with respect to density
 %==========================================================================
 
-function [Kx,Ky,Kz] = run_adjoint
+function [Krho,Kmu,Klambda] = run_adjoint
 disp 'Welcome to the ultimate adjoint experience!!'
 disp 'initialising...'
+
 %==========================================================================
 %% set paths and read input
 %==========================================================================
-%         global dummy
+
 % path(path,'helper_programmes/');
 path(path,'../input/');
 path(path,'../output/');
 path(path,'propagation/');
 
-% input parameters
-input_parameters;       % read all the input parameters from the input file
-nt=5*round(nt/5);
+% read input parameters from the input file
+input_parameters;
+nt=5*round(nt/5);   % to make sure nt is a multiple of 5 -- needed because
+                    % run_forward saves the forward field every 5 timesteps
+                    % only, and thus we need to compare.
 
 % adaptations to input parameters:
 % (needed to get run_adjoint to work like it should)
-simulation_mode='adjoint';                                                      % lichtelijk knullige manier om hem adjoint te laten werken
-
+simulation_mode='adjoint';                                                 
 orig_src_x = src_x;
 orig_src_z = src_z;
 
+% make figures appear right on the screen
+set_figure_properties;
 
-set_figure_properties;  % i.e. size of the figures & location on screen
-
+% load matfile containing the stored forward field. Takes a LONG time.
 disp '.... and loooooaaaading v_forward....'
 load ../output/v_forward.mat
-
 
 %==========================================================================
 % initialise simulation
@@ -76,17 +78,22 @@ fclose(fid);
 [orig_x_id,orig_z_id,nsorig] = compute_indices(orig_src_x,orig_src_z,Lx,Lz,dx,dz);
 
 %%
+
+
 %- read adjoint source time functions + plot 'em --------------------------
 
 stf=zeros(3,ns,nt);
 fig_adjoint_stf = figure;
+
+
+% read adjoint source time functions from file
 
 for n=1:ns          % loop over sources
     for dir= 1:3    % loop over directions 1,2,3 = x,y,z
         fid=fopen(['../input/sources/adjoint/src_' num2str(n) '_' num2str(dir)],'r');
         stf(dir,n,1:nt)=fscanf(fid,'%g',nt);
         
-        % plotting
+        % plotting the source time functions
         thee=0:dt:nt*dt-dt;
         length(thee);
         oempa=reshape(stf(dir,n,:),1,nt);
@@ -101,51 +108,12 @@ end
 
 
 
-
-%% initialise dynamic fields ----------------------------------------------
-% both forward and adjoint
-% initialise_dynamic_fields;  % this just makes all dynamic field (v, stress,
-                            % derivatives of v and stress wherever needed
-                            % with zeros(dimensions).
-
-
-% initialise absorbing boundary taper a la Cerjan ------------------------
-
-% absbound=ones(nx,nz);
-% init_absbound;
-
 %==========================================================================
-%% iterate
+%% RUN WAVEFIELD PROPAGATION
 %==========================================================================
-% disp 'iterating....'
+
 fig_adjoint = figure;
 
+% wavefield propagation is executed backwards in time for the adjoint case
 run_wavefield_propagation;
-% time loop over the iterations. NOTE - in the adjoint case this goes
-% BACKWARDS in time.
-% for n=1:nt
-% 
-%     
-%     %% compute divergence of current stress tensor and add external forces
-%     % same as forward
-%     
-%     DS=div_s(sxy,szy,dx,dz,nx,nz,order);
-% 
-%     for i=1:ns
-%         DS(src_x_id(i),src_z_id(i))=DS(src_x_id(i),src_z_id(i))+stf(i,n);
-%     end
-% 
-%     
-%     %% update velocity field ----------------------------------------------
-%     % same as forward
-%     vy=vy+dt*DS./rho;
-%     vy=vy.*absbound;
-%     
-%     %- compute derivatives of current velocity and update stress tensor ---
-%     
-%     sxy=sxy+dt*mu(1:nx-1,1:nz).*dx_v(vy,dx,dz,nx,nz,order);
-%     szy=szy+dt*mu(:,1:nz-1).*dz_v(vy,dx,dz,nx,nz,order);
-%     
-% 
-%     
-% end
+

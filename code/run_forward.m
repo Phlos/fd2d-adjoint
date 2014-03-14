@@ -7,14 +7,14 @@
 %
 % output:
 %--------
-% u: displacement seismograms
+% vx,vy,vz: velocity seismograms
 % t: time axis
 % rec_x: x-coordinate of receiver positions
 % rec_z: z-coordinate of receiver positions
 %
 %==========================================================================
 
-function [ux,uy,uz,t,rec_x,rec_z]=run_forward
+function [v_rec_x,v_rec_y,v_rec_z,t,rec_x,rec_z]=run_forward
 
 disp 'initialising...'
 %==========================================================================
@@ -31,7 +31,7 @@ nt=5*round(nt/5);
 set_figure_properties;  % i.e. size of the figures & location on screen
 
 %==========================================================================
-% initialise simulation
+%% initialise simulation
 %==========================================================================
 
 %% material and domain ----------------------------------------------------
@@ -45,7 +45,7 @@ plot_model;
 
 %% source & receiver initialisation
 
-% sources and receivers in forward simulations ('forward', 'forward_green') -
+% sources and receivers in forward simulations ----------------------------
 if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green'))
 
     %- time axis ----------------------------------------------------------
@@ -60,10 +60,15 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     %- make and plot source time function ---------------------------------
 
     make_source_time_function;
-    plot_source_time_function;                                              % add direction here! (and later on where DS is calculated, an if for in which direction the stf is)
+    plot_source_time_function;                                              % (and later on where DS is calculated, an if for in which direction the stf is)
+    
+    % add the same source time function to all the sources.
+    stf_all=zeros(3,ns,nt);
     
     for i=1:ns
-        stf_all(i,:) = stf;
+        stf_all(1,i,:) = stf*stf_PSV(1)/norm(stf_PSV);  % x direction
+        stf_all(2,i,:) = stf;                           % y direction
+        stf_all(3,i,:) = stf*stf_PSV(2)/norm(stf_PSV);  % z direction
         stf = stf_all;
     end
     
@@ -73,17 +78,17 @@ end
 %% initialise seismograms ------------------------------------------------- % Change this to save velocity seismograms only!
 % only for forward
 if(strcmp(wave_propagation_type,'SH'))
-    uy=zeros(n_receivers,nt);
+%     uy=zeros(n_receivers,nt);
     v_rec_y=zeros(n_receivers,nt);
 elseif(strcmp(wave_propagation_type,'PSV'))
-    ux=zeros(n_receivers,nt);
-    uz=zeros(n_receivers,nt);
+%     ux=zeros(n_receivers,nt);
+%     uz=zeros(n_receivers,nt);
     v_rec_x    =zeros(n_receivers,nt);
     v_rec_z    =zeros(n_receivers,nt);
 elseif(strcmp(wave_propagation_type,'both'))
-    ux=zeros(n_receivers,nt);
-    uz=zeros(n_receivers,nt);
-    uy=zeros(n_receivers,nt);
+%     ux=zeros(n_receivers,nt);
+%     uz=zeros(n_receivers,nt);
+%     uy=zeros(n_receivers,nt);
     v_rec_x    =zeros(n_receivers,nt);
     v_rec_y    =zeros(n_receivers,nt);
     v_rec_z    =zeros(n_receivers,nt);
@@ -117,21 +122,6 @@ if strcmp(simulation_mode,'forward')
 end
 
 
-%- displacement seismograms -----------------------------------------------
-
-if(strcmp(wave_propagation_type,'SH'))
-    uy=cumsum(v_rec_y,2)*dt;
-    ux=uy*0;
-    uz=uy*0;
-elseif(strcmp(wave_propagation_type,'PSV'))
-    ux=cumsum(v_rec_x,2)*dt;
-    uz=cumsum(v_rec_z,2)*dt;
-    uy=ux*0;
-elseif(strcmp(wave_propagation_type,'both'))
-    uy=cumsum(v_rec_y,2)*dt;
-    ux=cumsum(v_rec_x,2)*dt;
-    uz=cumsum(v_rec_z,2)*dt;
-end
 
 %- store the movie if wanted ----------------------------------------------
 

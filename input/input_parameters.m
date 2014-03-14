@@ -48,6 +48,10 @@ model_type=1;
 f_min=0.02;     % minimum frequency [Hz]
 f_max=0.10;     % maximum frequency [Hz]
 
+stf_PSV = [1 -5];    % direction of the source-time-function in P-SV wave 
+                    % propagation. The final stf will be normalised with
+                    % such that its original amplitude is preserved.
+
 %==========================================================================
 % simulation mode
 %==========================================================================

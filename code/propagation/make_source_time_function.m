@@ -19,12 +19,3 @@ else
     
 end
 
-%- plot -------------------------------------------------------------------
-
-% figure
-% set(gca,'FontSize',20)
-% hold on
-
-% plot(t,stf,'k');
-% xlabel('time [s]','FontSize',20);
-% title('source-time function','FontSize',20);
