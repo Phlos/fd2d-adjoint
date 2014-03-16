@@ -91,8 +91,8 @@ for n=1:nt
     %- compute derivatives of current velocity and update stress tensor ---
     
     if(strcmp(wave_propagation_type,'SH'))
-        sxy=sxy+dt*mu(1:nx-1,1:nz).*dx_v(vy,dx,dz,nx,nz,order);
-        szy=szy+dt*mu(:,1:nz-1).*dz_v(vy,dx,dz,nx,nz,order);
+        sxy=sxy+ dt* mu.* dx_v(vy,dx,dz,nx,nz,order);
+        szy=szy+ dt* mu.* dz_v(vy,dx,dz,nx,nz,order);
     elseif(strcmp(wave_propagation_type,'PSV'))
         % calc gradient of velocity field
         [dvxdx,dvxdz,dvzdx,dvzdz]=grad_v_PSV(vx,vz,dx,dz,nx,nz,order);
@@ -101,14 +101,14 @@ for n=1:nt
         szz=szz+dt*( (lambda+2*mu).*dvzdz(:,:) + lambda.*dvxdx(:,:) );
         sxz=sxz+dt*( mu.*(dvxdz(:,:) + dvzdx(:,:)) );
     elseif(strcmp(wave_propagation_type,'both'))
-        sxy=sxy+dt*mu(1:nx-1,1:nz).*dx_v(vy,dx,dz,nx,nz,order);
-        szy=szy+dt*mu(:,1:nz-1).*dz_v(vy,dx,dz,nx,nz,order);
+        sxy=sxy + dt*mu.* dx_v(vy,dx,dz,nx,nz,order);
+        szy=szy + dt*mu.* dz_v(vy,dx,dz,nx,nz,order);
         % calc gradient of velocity field (P-SV)
         [dvxdx,dvxdz,dvzdx,dvzdz]=grad_v_PSV(vx,vz,dx,dz,nx,nz,order);
         % stress update (P-SV)
         sxx=sxx+dt*( (lambda+2*mu).*dvxdx(:,:) + lambda.*dvzdz(:,:) );
         szz=szz+dt*( (lambda+2*mu).*dvzdz(:,:) + lambda.*dvxdx(:,:) );
-        sxz=sxz+dt*( mu.*(dvxdz(:,:) + dvzdx(:,:)) );
+        sxz=sxz+dt*( mu.* (dvxdz(:,:) + dvzdx(:,:)) );
     end
     
     

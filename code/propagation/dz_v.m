@@ -15,7 +15,7 @@ function out=dz_v(v,dx,dz,nx,nz,order)
 % velocity derivative in z-directions
 %==========================================================================
 
-out=zeros(nx,nz-1);
+out=zeros(nx,nz);
 
 if (order==2)
 

@@ -57,9 +57,9 @@ vz_fw_snapshot = squeeze(vz_forward(n/5,:,:));
 % calculate forward displacement field
 % PRETTY DAMN INEFFICIENT!!!
 
-ux_fw_snapshot = sum(vx_forward(n/5:end,:,:),1)*5*dt;
-uy_fw_snapshot = sum(vy_forward(n/5:end,:,:),1)*5*dt;                           % is it even correct? Do we get the right displacements at all?! Here we're
-uz_fw_snapshot = sum(vz_forward(n/5:end,:,:),1)*5*dt;                           % calculating the displacement field from only 1/5 of the velocity field..!
+ux_fw_snapshot = squeeze(sum(vx_forward(n/5:end,:,:),1)*5*dt);
+uy_fw_snapshot = squeeze(sum(vy_forward(n/5:end,:,:),1)*5*dt);                           % is it even correct? Do we get the right displacements at all?! Here we're
+uz_fw_snapshot = squeeze(sum(vz_forward(n/5:end,:,:),1)*5*dt);                           % calculating the displacement field from only 1/5 of the velocity field..!
 
 
 % strain tensor
@@ -80,38 +80,40 @@ interaction_vx=vx.*vx_fw_snapshot;
 interaction_vz=vz.*vz_fw_snapshot;
 
 % kernels
-Krho_y=Krho_y-interaction_vy*dt; % The minus sign is needed because we run backwards in time.
-Krho_x=Krho_x-interaction_vx*dt;
-Krho_z=Krho_z-interaction_vz*dt;
+K.rho.SH=K.rho.SH-interaction_vy*dt; % The minus sign is needed because we run backwards in time.
+K.rho.x=K.rho.x-interaction_vx*dt;
+K.rho.z=K.rho.z-interaction_vz*dt;
 
-Krho_SH =Krho_y;
-Krho_PSV=Krho_x+Krho_z;
+% K.rho.SH =K.rho.y;
+K.rho.PSV=K.rho.x+K.rho.z;
 
-Krho = [Krho_x Krho_y Krho_z Krho_PSV Krho_SH];
+
 
 %% mu -- shear modulus      	(calculated from gradient of displacement)
 
 % interaction
-interaction_muPSV = 2*duxdx*duxdx_fw + 2*duzdz*duzdz_fw ...
-                    + (duxdz + duzdx) * (duzdx_fw + duxdz_fw);
-interaction_muSH  = 1/2 * (duydx*duydx_fw + duydz*duydz_fw);
+interaction_muPSV = 2*duxdx.*duxdx_fw + 2*duzdz.*duzdz_fw ...
+                    + (duxdz + duzdx) .* (duzdx_fw + duxdz_fw);
+                
+interaction_muSH  = 1/2 * (duydx.*duydx_fw + duydz.*duydz_fw);
 
 % kernels
-Kmu_PSV = Kmu_PSV + interaction_muPSV*dt;
-Kmu_SH = Kmu_SH + interaction_muSH*dt;
+K.mu.PSV = K.mu.PSV + interaction_muPSV*dt;
+K.mu.SH = K.mu.SH + interaction_muSH*dt;
 
-Kmu = [Kmu_PSV Kmu_SH];
+% K.mu.y = K.mu.SH;
+
 
 
 
 %% lambda -- lamé's parameter	(calculated from divergence of displacement)
  
 % interaction
-interaction_lambdaPSV = (duxdx + duzdz) * (duxdx_fw + duzdz_fw);
+interaction_lambdaPSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
 
 % kernel
-Klambda_PSV = Klambda_PSV + interaction_lambdaPSV*dt;
+K.lambda.PSV = K.lambda.PSV + interaction_lambdaPSV*dt;
 
-Klambda = Klambda_PSV;
+
 
 

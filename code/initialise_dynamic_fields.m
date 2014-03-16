@@ -1,9 +1,15 @@
 % Initialises all the dynamic fields (in terms of zeros(nx,nz) and such)
 
 % Do I really need to make these ifs? Does it hurt to initialise dynamic
-% fiels which may not be used at all? -- NAB 13-3-2014
+% fields which may not be used at all? -- NAB 13-3-2014
+
+
+
+%% dynamic fields
+
 
 % velocity fields (for one timestep)
+
 if(strcmp(wave_propagation_type,'SH'))
     vy=zeros(nx,nz);
     % displacement
@@ -38,18 +44,32 @@ if(strcmp(simulation_mode,'forward'))
     end
 end
 
+
+
 % stress fields
+
 if(strcmp(wave_propagation_type,'SH'))
-    sxy=zeros(nx-1,nz); % stress component sigma_xy (nx-1 because of stag grid)
-    szy=zeros(nx,nz-1); % stress component sigma_zy
+    sxy=zeros(nx,nz); % stress component sigma_xy (nx-1 because of stag grid)
+    szy=zeros(nx,nz); % stress component sigma_zy
 elseif(strcmp(wave_propagation_type,'PSV'))
     sxx=zeros(nx,nz);                                                            %%%%%%%%% LET OP hier heb ik ze aangepast
     szz=zeros(nx,nz);                                                            % sxx: nx-1 --> nx;  szz nz-1 --> nz
     sxz=zeros(nx,nz);         
 elseif(strcmp(wave_propagation_type,'both'))
-    sxy=zeros(nx-1,nz); % stress component sigma_xy (nx-1 because of stag grid)
-    szy=zeros(nx,nz-1); % stress component sigma_zy
+    sxy=zeros(nx,nz); % stress component sigma_xy (nx-1 because of stag grid)
+    szy=zeros(nx,nz); % stress component sigma_zy
     sxx=zeros(nx,nz);                                                            %%%%%%%%% LET OP hier heb ik ze aangepast
     szz=zeros(nx,nz);                                                            % sxx: nx-1 --> nx;  szz nz-1 --> nz
     sxz=zeros(nx,nz);  
 end
+
+%% initialise kernels
+
+K.rho.SH   = 0;
+K.rho.x   = 0;
+K.rho.z   = 0;
+
+K.mu.PSV  = 0;
+K.mu.SH   = 0;
+
+K.lambda.PSV = 0;

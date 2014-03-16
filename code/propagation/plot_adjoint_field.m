@@ -3,7 +3,7 @@
 
 figure(fig_adjoint);
 ncols=4;
-K=0;
+% K=0;
 
 if(strcmp(wave_propagation_type,'SH'))
     set(fig_adjoint,'OuterPosition',pos_adj_1)
@@ -22,28 +22,28 @@ for row=1:nrows
     if(row==1)
         if(strcmp(wave_propagation_type,'SH'))
             v_current=vy;
-            snapshot = vy_forward_snapshot;
-            interaction = interaction_y;
-            K = Ky;
+            snapshot = vy_fw_snapshot;
+            interaction = interaction_vy;
+            Kaa = K.rho.y;
             direction = 'Y';
         elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
             v_current=vx;
-            snapshot = vx_forward_snapshot;
-            interaction = interaction_x;
-            K = Kx;
+            snapshot = vx_fw_snapshot;
+            interaction = interaction_vx;
+            Kaa = K.rho.x;
             direction = 'X';
         end
     elseif(row==2)
         v_current=vz;
-        snapshot = vz_forward_snapshot;
-        interaction = interaction_z;
-        K = Kz;
+        snapshot = vz_fw_snapshot;
+        interaction = interaction_vz;
+        Kaa = K.rho.z;
         direction = 'Z';
     elseif(row==3)
         v_current=vy;
-        snapshot = vy_forward_snapshot;
-        interaction = interaction_y;
-        K = Ky;
+        snapshot = vy_fw_snapshot;
+        interaction = interaction_vy;
+        Kaa = K.rho.y;
         direction = 'Y';
     end
 
@@ -110,7 +110,7 @@ text(0.05*Lx,0.92*Lz,timestamp) ;
 subplot(nrows,ncols,4*(row-1)+4);
 cla;
 hold on
-pcolor(X,Z,K');
+pcolor(X,Z,Kaa');
 plot_adjoint_src_rec;
 
 % experimenting with the caxis (0) -- this was not satisfactory
@@ -141,7 +141,7 @@ plot_adjoint_src_rec;
 %------------------
 % experimenting with the caxis (2) -- use standard deviation of K
 % works with 10*std for now, don't know about other configurations though
-cmax = min(max(K(:)),10*std(K(:)));
+% cmax = min(max(Kaa(:)),10*std(Kaa(:)));
 %------------------
 % experimenting with the caxis (3) -- location of maximum value
 % could still use it like in experiment (1) blanking out the max region
@@ -151,7 +151,16 @@ cmax = min(max(K(:)),10*std(K(:)));
 % p = plot(X(1,ie),Z(jee),'kx');
 % set(p,'Color','green','LineWidth',2);
 %------------------
-
+% experimenting with the caxis (3.1) -- around location of maximum value
+% [value, k] = max(kernel(:));
+% [ie, jee] = ind2sub(size(kernel), k);
+% K_no_origsrc = kernel;
+% blank=min(size(X))/15;
+% K_no_origsrc( ie-blank:ie+blank , jee-blank:jee+blank ) = 0;
+%------------------
+% experimenting with the caxis (4) -- percentile
+prc=99.9
+cmax = prctile(K(:),prc)
 
 
 caxis([-cmax cmax]);
