@@ -22,7 +22,7 @@ elseif (strcmp(simulation_mode,'adjoint'))
         set(fig_adjoint,'OuterPosition',pos_adj_3)
         nrows=3;
     end
-    disp 'nrows',num2str(nrows)
+%     disp 'nrows',num2str(nrows)
 else
     disp 'WARNING: the simulation mode is not one accounted for'
 end

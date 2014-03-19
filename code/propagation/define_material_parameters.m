@@ -13,12 +13,14 @@ function [mu,rho,lambda]=define_material_parameters(nx,nz,model_type)
 
 if (model_type==1)
     
+    % homogeneous
     rho=3000.0*ones(nx,nz);
     mu=4.8e10*ones(nx,nz);
     lambda=mu;
     
 elseif (model_type==2)
     
+    % homogeneous with density perturbation
     rho=3000.0*ones(nx,nz);
     mu=4.8e10*ones(nx,nz);
     lambda=mu;
@@ -27,6 +29,7 @@ elseif (model_type==2)
     
 elseif (model_type==3)
     
+    % two halves with different rho, mu, lambda
     rho=3000.0*ones(nx,nz);
     mu=2.8e10*ones(nx,nz);
     
@@ -73,15 +76,24 @@ elseif (model_type==6)
     
     rho(98:102,123:127)=rho(98:102,123:127)+2000.0;
     
+elseif (model_type==11)
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    
 elseif (model_type==100)
     
     rho=3000.0*ones(nx,nz);
     mu=ones(nx,nz);
 %     lambda=3e10*ones(nx,nz);
-    lambda=mu;
     
     mu(1:330,:)=3.675e10;
     mu(331:end,:)=2.7e10;
+    lambda=mu;
     
 else
     

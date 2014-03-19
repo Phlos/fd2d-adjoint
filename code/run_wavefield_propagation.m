@@ -27,6 +27,7 @@ position_figures;
 for n=1:nt
     
     %- compute divergence of current stress tensor ------------------------
+    %  forward -- unit of force: [kg m^-2 s^-2] = [N] 
     
     if(strcmp(wave_propagation_type,'SH'))
         DSY=div_s(sxy,szy,dx,dz,nx,nz,order);

@@ -1,14 +1,12 @@
 %==========================================================================
 % compute and store adjoint sources -- one direction at a time! (x,y or z)
 %
-% function misfit=make_adjoint_sources(u,u_0,t,veldis,measurement)
-%
 % input:
 %-------
 % v:            synthetic velocity seismograms
-% v_0:          observed displacement seismograms
+% v_0:          observed velocity seismograms
 % t:            time axis
-% veldis:       determines output type: 'displacement' or 'velocity'
+% output:       determines output type: 'displacement' or 'velocity'
 % measurement:  'waveform_difference' for L2 waveform difference
 %               'cc_time_shift' for cross-correlation time shift
 % appendix:     the appendix that gets added to each of the source time
@@ -18,10 +16,10 @@
 %               for x '_1';   for y '_2';   for z '_3'
 %
 % When v_0, i.e. the observed velocity seismograms, are set to zero, 
-% the code performs data-independent measurements. This results in
-% sensitivity kernels (i.e. the sensitivity of a certain observable -
-% travel time, amplitude, ..., to a (infinitesimal) change in a model
-% parameter.
+% the code performs data-independent measurements. 
+%
+% To get 'banana-doughnut kernels', i.e. travel time sensitivity kernels,
+% use for measurement: 'cc_time_shift' and for output 'vel'.
 %
 % output:
 %--------
@@ -33,7 +31,7 @@
 % 
 %==========================================================================
 
-function misfit=make_adjoint_sources(v,v_0,t,veldis,measurement,appendix)
+function misfit=make_adjoint_sources(v,v_0,t,output,measurement,direction)
 %%
 %==========================================================================
 %- initialisations --------------------------------------------------------
@@ -48,8 +46,8 @@ nrec = length(rec_x);
 
 fid_loc=fopen([adjoint_source_path 'source_locations'],'w');
 
-nt=length(t)
-dt=t(2)-t(1)
+nt=length(t);
+dt=t(2)-t(1);
 
 misfit=0.0;
 
@@ -58,13 +56,13 @@ adjoint_stf = zeros(nrec,nt); % adapt this to three dimensions when working!
 
 %- convert to displacement if wanted ------------------------------------------
 
-if strcmp(veldis,'displacement')
+if strcmp(output,'displacement')
     
 %     u=zeros(nrec,nt);
     u=cumsum(vel,2)*dt;
     v=u;
-elseif not(strcmp(veldis,'velocity'))
-    error('ERRORRRR your veldis variable is not ''displacement'' or ''velocity''');
+elseif not(strcmp(output,'velocity'))
+    error('ERRORRRR your output variable is not ''displacement'' or ''velocity''');
 end
 
 
@@ -113,11 +111,11 @@ for n=1:nrec
             [misfit_n,adstf]=cc_time_shift(v(n,:),v_0(n,:),t);
         end
         
-        misfit=misfit+misfit_n;
+        misfit=misfit+misfit_n
         
         %- correct adjoint source time function for velocity measurement ------
         % ??????
-%         if strcmp(veldis,'vel')
+%         if strcmp(veldis,'displacement')
 %             adstf(1:nt-1)=-diff(adstf)/dt;
 %         end
         
@@ -127,7 +125,7 @@ for n=1:nrec
         figure(adjoint_source);
         plot(t,adstf,'k')
         xlabel('t [s]')
-        title(['adjoint source (', veldis, 'seismograms) before time reversal'])
+        title(['adjoint source (', output, 'seismograms) before time reversal'])
         pause(1.0)
         
         %- write adjoint source locations to file -----------------------------
@@ -136,17 +134,22 @@ for n=1:nrec
         
         %- write source time functions ----------------------------------------
         %  WITH time reversal!!!!!
-        fn=[adjoint_source_path 'src_' num2str(n) appendix];
+        fn=[adjoint_source_path 'src_' num2str(n) direction];
         fid_src=fopen(fn,'w');
         for k=1:nt
             fprintf(fid_src,'%g\n',adstf(nt-k+1));
         end
         fclose(fid_src);
+        
+        %- save source time functions to adjoint_stf
+        adjoint_stf(n,:) = adstf;
+        
 %     end
 end
 
 % save stf variable to a .mat file
-save('../input/sources/adjoint/adjoint_sources','adjoint_stf','-v7.3')
+filename=['../input/sources/adjoint/adjoint_sources',direction];
+save(filename,'adjoint_stf','-v7.3')
 
 %==========================================================================
 %- clean up ---------------------------------------------------------------

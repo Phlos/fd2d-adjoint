@@ -10,12 +10,19 @@ if strcmp(simulation_mode,'forward_green')
     
     stf=1.0e9*ones(1,length(t));
     
-else
+elseif (strcmp(stf_type,'delta_bp'))
     
     stf=zeros(1,length(t));
-    stf(1)=1e9;
+    stf(1)=1e7;
     stf=butterworth_lp(stf,t,5,f_max,'silent');
     stf=butterworth_hp(stf,t,3,f_min,'silent');
+    
+elseif (strcmp(stf_type,'ricker'))
+    
+%     stf=zeros(1,length(t));
+    
+    alfa = 2 * tauw_0 / tauw;
+    stf = ( -2*alfa^3 / pi) * (t-tee_0) .* exp( -alfa^2 * (t-tee_0).^2);
     
 end
 

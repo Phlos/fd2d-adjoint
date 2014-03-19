@@ -72,48 +72,52 @@ duydz_fw = dz_v(uy_fw_snapshot,dx,dz,nx,nz,order);                              
 
 
 
-%% rho -- density               (calculated from velocities)
-
-% interaction
-interaction_vy=vy.*vy_fw_snapshot;
-interaction_vx=vx.*vx_fw_snapshot;
-interaction_vz=vz.*vz_fw_snapshot;
-
-% kernels
-K.rho.SH=K.rho.SH-interaction_vy*dt; % The minus sign is needed because we run backwards in time.
-K.rho.x=K.rho.x-interaction_vx*dt;
-K.rho.z=K.rho.z-interaction_vz*dt;
-
-% K.rho.SH =K.rho.y;
-K.rho.PSV=K.rho.x+K.rho.z;
-
-
-
-%% mu -- shear modulus      	(calculated from gradient of displacement)
-
-% interaction
-interaction_muPSV = 2*duxdx.*duxdx_fw + 2*duzdz.*duzdz_fw ...
-                    + (duxdz + duzdx) .* (duzdx_fw + duxdz_fw);
-                
-interaction_muSH  = 1/2 * (duydx.*duydx_fw + duydz.*duydz_fw);
-
-% kernels
-K.mu.PSV = K.mu.PSV + interaction_muPSV*dt;
-K.mu.SH = K.mu.SH + interaction_muSH*dt;
-
-% K.mu.y = K.mu.SH;
-
-
-
-
-%% lambda -- lamé's parameter	(calculated from divergence of displacement)
- 
-% interaction
-interaction_lambdaPSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
-
-% kernel
-K.lambda.PSV = K.lambda.PSV + interaction_lambdaPSV*dt;
-
-
-
-
+%% calculate travel time kernels
+if strcmp(kerneltype,'traveltime')
+    %% rho -- density               (calculated from velocities)
+    
+    % interaction
+    interaction_vy=vy.*vy_fw_snapshot;
+    interaction_vx=vx.*vx_fw_snapshot;
+    interaction_vz=vz.*vz_fw_snapshot;
+    
+    % kernels
+    
+    K.rho.SH=K.rho.SH+interaction_vy*5*dt; % The minus sign is needed because we run backwards in time.
+    K.rho.x=K.rho.x+interaction_vx*5*dt;
+    K.rho.z=K.rho.z+interaction_vz*5*dt;
+    
+    % K.rho.SH =K.rho.y;
+    K.rho.PSV=K.rho.x+K.rho.z;
+    
+    
+    
+    %% mu -- shear modulus      	(calculated from gradient of displacement)
+    
+    % interaction
+    interaction_muPSV = 2*duxdx.*duxdx_fw + 2*duzdz.*duzdz_fw ...
+        + (duxdz + duzdx) .* (duzdx_fw + duxdz_fw);
+    
+    interaction_muSH  = 1/2 * (duydx.*duydx_fw + duydz.*duydz_fw);
+    
+    % kernels
+    K.mu.PSV = K.mu.PSV + interaction_muPSV*5*dt;
+    K.mu.SH = K.mu.SH + interaction_muSH*5*dt;
+    
+    % K.mu.y = K.mu.SH;
+    
+    
+    
+    
+    %% lambda -- lamé's parameter	(calculated from divergence of displacement)
+    
+    % interaction
+    interaction_lambdaPSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
+    
+    % kernel
+    K.lambda.PSV = K.lambda.PSV + interaction_lambdaPSV*5*dt;
+    
+else
+    error('Sorry, you have to specify you want travel time kernels')
+    
+end

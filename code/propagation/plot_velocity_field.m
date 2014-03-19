@@ -102,6 +102,8 @@
 
         timestamp=['t [s] = ',num2str(n*dt)];
         timestamp_text = text(0.05*Lx,0.92*Lz,timestamp) ;
+        text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
+                      'HorizontalAlignment','right')
 
         
     for p=1:5

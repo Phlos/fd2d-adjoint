@@ -24,14 +24,16 @@ for row=1:nrows
             v_current=vy;
             snapshot = vy_fw_snapshot;
             interaction = interaction_vy;
-            Kaa = K.rho.y;
+            Kaa = K.rho.SH;
             direction = 'Y';
+            prc=99.985;
         elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
             v_current=vx;
             snapshot = vx_fw_snapshot;
             interaction = interaction_vx;
             Kaa = K.rho.x;
             direction = 'X';
+            prc=99.97;
         end
     elseif(row==2)
         v_current=vz;
@@ -39,12 +41,14 @@ for row=1:nrows
         interaction = interaction_vz;
         Kaa = K.rho.z;
         direction = 'Z';
+        prc=99.97;
     elseif(row==3)
         v_current=vy;
         snapshot = vy_fw_snapshot;
         interaction = interaction_vy;
-        Kaa = K.rho.y;
+        Kaa = K.rho.SH;
         direction = 'Y';
+        prc=99.99;
     end
 
 %% plot adjoint field ---------------------------------------------
@@ -55,7 +59,9 @@ pcolor(X,Z,v_current');
 hold on
 plot_adjoint_src_rec;
 
-caxis([-0.8*max(max(abs(v_current))) 0.8*max(max(abs(v_current)))]);
+scale = 0.8*max(abs(v_current(:)));
+
+caxis([-scale scale]);
 colormap(cm);
 axis image
 shading interp
@@ -65,6 +71,8 @@ title(['adjoint velocity field [m/s] (',direction,' component)']);
 
 timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
 text(0.05*Lx,0.92*Lz,timestamp) ;
+text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
+                      'HorizontalAlignment','right')
 
 
 %% plot forward field --------------------------------------------------
@@ -75,7 +83,9 @@ pcolor(X,Z,snapshot');
 hold on
 plot_adjoint_src_rec;
 
-caxis([-0.8*max(max(abs(snapshot))) 0.8*max(max(abs(snapshot)))]);
+scale = 0.8*max(max(abs(snapshot)));
+
+caxis([-scale scale]);
 colormap(cm);
 axis image
 shading interp
@@ -85,6 +95,8 @@ title(['forward velocity field [m/s] (',direction,' component)']);
 
 timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
 text(0.05*Lx,0.92*Lz,timestamp) ;
+text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
+                      'HorizontalAlignment','right')
 
 %% plot interaction ----------------------------------------------------
 
@@ -94,16 +106,20 @@ hold on
 pcolor(X,Z,interaction');
 plot_adjoint_src_rec;
 
-caxis([-0.8*max(max(abs(interaction))) 0.8*max(max(abs(interaction)))]);
+scale = 0.8*max(max(abs(interaction)));
+
+caxis([-scale scale]);
 colormap(cm);
 axis image
 shading interp
 xlabel('x [m]');
 ylabel('z [m]');
-title(['interaction (forward \cdot adjoint) (',direction,' component)']);
+title(['forward \cdot adjoint velocity (',direction,' component)']);
 
 timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
 text(0.05*Lx,0.92*Lz,timestamp) ;
+text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
+                      'HorizontalAlignment','right')
 
 %% plot kernel ---------------------------------------------------------
 
@@ -131,11 +147,7 @@ plot_adjoint_src_rec;
 % for i=1:nsorig
 %     iks = orig_x_id(i);
 %     zet = orig_z_id(i);
-%     for j=iks-5:iks+5
-%         for k=zet-5:zet+5
-%             K_no_origsrc(j,k) = 0;
-%         end
-%     end
+%     K_no_origsrc(iks-5:iks+5 , zet-5:zet+5) = 0;
 % end
 % cmax = max(max(abs(K_no_origsrc)));
 %------------------
@@ -159,8 +171,8 @@ plot_adjoint_src_rec;
 % K_no_origsrc( ie-blank:ie+blank , jee-blank:jee+blank ) = 0;
 %------------------
 % experimenting with the caxis (4) -- percentile
-prc=99.9
-cmax = prctile(K(:),prc)
+
+cmax = prctile(Kaa(:),prc);
 
 
 caxis([-cmax cmax]);
@@ -169,10 +181,12 @@ axis image
 shading interp
 xlabel('x [m]');
 ylabel('z [m]');
-title(['sensitivity kernel (',direction,' component)']);
+title(['\rho kernel (',direction,' component)']);
 
 timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
 text(0.05*Lx,0.92*Lz,timestamp) ;
+text(0.95*Lx,0.92*Lz,['max = \pm', num2str(cmax)], ... 
+                      'HorizontalAlignment','right')
 
 
 end

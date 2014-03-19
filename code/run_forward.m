@@ -40,7 +40,7 @@ set_figure_properties;  % i.e. size of the figures & location on screen
 
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
-plot_model;
+% plot_model;
 
 
 %% source & receiver initialisation
@@ -60,7 +60,7 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     %- make and plot source time function ---------------------------------
 
     make_source_time_function;
-    plot_source_time_function;                                              % (and later on where DS is calculated, an if for in which direction the stf is)
+    plot_source_time_function;
     
     % add the same source time function to all the sources.
     stf_all=zeros(3,ns,nt);
@@ -112,21 +112,27 @@ disp 'saving output...'
 
 if strcmp(simulation_mode,'forward')
     if(strcmp(wave_propagation_type,'SH'))
-        save('../output/v_forward_total','vy_forward','-v7.3');
+        save('../output/v_forward','vy_forward','v_rec_y','-v7.3');
+        save('../output/v_rec', 'v_rec_y', '-v7.3');
     elseif(strcmp(wave_propagation_type,'PSV'))
-        save('../output/vx_forward','vx_forward','vz_forward','-v7.3');
-%         save('../output/vz_forward','vz_forward');
+        save('../output/v_forward','vx_forward','vz_forward', ...
+                                    'v_rec_x','v_rec_z','-v7.3');
+        save('../output/v_rec', 'v_rec_x','v_rec_z', '-v7.3');
     elseif(strcmp(wave_propagation_type,'both'))
-        save('../output/v_forward','vx_forward','vy_forward','vz_forward','-v7.3');
+        save('../output/v_forward','vx_forward','vy_forward','vz_forward',...
+                                   'v_rec_x','v_rec_y','v_rec_z','-v7.3');
+        save('../output/v_rec', 'v_rec_x','v_rec_y','v_rec_z', '-v7.3');
     end
 end
+
+copyfile('../input/input_parameters.m','../output/')
 
 
 
 %- store the movie if wanted ----------------------------------------------
 
 if strcmp(make_movie,'yes')
-    disp 'storing movie...'
+    disp(['storing movie: ',movie_file]);
     % profile needs to be 'Uncompressed AVI' on my (ubuntu) computer. 
     % (Matlab says that win7+/mac10.x+ can do mpeg-4)
     writerObj=VideoWriter(movie_file,'Uncompressed AVI');   

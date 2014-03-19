@@ -1,4 +1,4 @@
-function plot_kernel(X,Z,kernel,kname,prc)
+function plot_kernel(X,Z,kernel,kname,prc,stf_PSV)
 
 % plot some random sensitivity kernel
 %
@@ -17,36 +17,14 @@ function plot_kernel(X,Z,kernel,kname,prc)
 load 'cm_velocity.mat';
 
 
-% cmax = min(max(kernel(:)),8*std(kernel(:)));
-% caxis([-cmax cmax]);
-
-% experimenting with the caxis (3) -- location of maximum value
-% could still use it like in experiment (1) blanking out the max region
-% [value, k] = max(kernel(:));
-% [ie, jee] = ind2sub(size(kernel), k);
-% max_loc = [X(1,ie),Z(jee)];
-
-% K_no_origsrc = kernel;
-% blank=min(size(X))/15;
-% K_no_origsrc( ie-blank:ie+blank , jee-blank:jee+blank ) = 0; 
-
-% ALTERNATIVE:
-% the same but for every source instead of only the maximum location
-% for i=1:ns_orig
-%     iks = orig_x_id(i);
-%     zet = orig_z_id(i);
-%     K_no_origscr( iks-blank:iks+blank , zet-blank:zet+blank ) = 0;
-% end
-
 
 % figure(figname);
 pcolor(X,Z,kernel');
-% if(test);
-%     pcolor(X,Z,K_no_origsrc');
-% end
-title({['kernel for ', kname]; '(source direction x,z = (1,-5) )'});
+
+title({['kernel for ', kname]; ...
+        ['(source direction x,z = (',num2str(stf_PSV), ') )']});
 shading interp
-colorbar
+% colorbar
 axis image
 % colormap(flipud(cm));
 colormap(cm);
@@ -58,7 +36,11 @@ hold on;
 
 % cmax = max(max(abs(K_no_origsrc)));
 cmax = prctile(kernel(:),prc);
+
 caxis([-cmax cmax]);
+
+text(0.95*max(X(:)),0.92*max(Z(:)),['max = \pm', num2str(cmax)], ... 
+                      'HorizontalAlignment','right')
 
 hold off;
 

@@ -6,7 +6,7 @@
 % K: sensitivity kernel with respect to density
 %==========================================================================
 
-function [K] = run_adjoint(vx_forward, vy_forward, vz_forward)
+function [K] = run_adjoint(kerneltype)%(vx_forward, vy_forward, vz_forward)
 disp 'Welcome to the ultimate adjoint experience!!'
 disp 'initialising...'
 
@@ -18,6 +18,7 @@ disp 'initialising...'
 path(path,'../input/');
 path(path,'../output/');
 path(path,'propagation/');
+path(path,'../tools/');
 
 % read input parameters from the input file
 input_parameters;
@@ -35,8 +36,8 @@ orig_src_z = src_z;
 set_figure_properties;
 
 % load matfile containing the stored forward field. Takes a LONG time.
-% disp '.... and loooooaaaading v_forward....'
-% load ../output/v_forward.mat
+disp '.... and loooooaaaading v_forward....'
+load ../output/v_forward.mat
 
 %==========================================================================
 % initialise simulation
@@ -45,8 +46,7 @@ set_figure_properties;
 %% material and domain ----------------------------------------------------
 
 [mu,rho,lambda]=define_material_parameters(nx,nz,model_type);
-size(mu)
-size(rho)
+
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
 plot_model; % hoeft niet in adjoint? is tenslotte 't zelfde model
