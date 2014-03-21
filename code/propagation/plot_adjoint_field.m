@@ -5,16 +5,9 @@ figure(fig_adjoint);
 ncols=4;
 % K=0;
 
-if(strcmp(wave_propagation_type,'SH'))
-    set(fig_adjoint,'OuterPosition',pos_adj_1)
-    nrows=1;
-elseif(strcmp(wave_propagation_type,'PSV'))
-    set(fig_adjoint,'OuterPosition',pos_adj_2)
-    nrows=2;
-elseif(strcmp(wave_propagation_type,'both'))
-    set(fig_adjoint,'OuterPosition',pos_adj_3)
-    nrows=3;
-end
+
+
+timestamp=['t [s] = ',num2str(nt*dt-(n-plot_every)*dt)]
 
 
 %% every row is a direction: x, y or z
@@ -69,7 +62,7 @@ xlabel('x [m]');
 ylabel('z [m]');
 title(['adjoint velocity field [m/s] (',direction,' component)']);
 
-timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
+% timestamp=['t [s] = ',num2str(nt*dt-(n-plot_every)*dt)];
 text(0.05*Lx,0.92*Lz,timestamp) ;
 text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
                       'HorizontalAlignment','right')
@@ -93,7 +86,7 @@ xlabel('x [m]');
 ylabel('z [m]');
 title(['forward velocity field [m/s] (',direction,' component)']);
 
-timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
+% timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
 text(0.05*Lx,0.92*Lz,timestamp) ;
 text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
                       'HorizontalAlignment','right')
@@ -116,7 +109,7 @@ xlabel('x [m]');
 ylabel('z [m]');
 title(['forward \cdot adjoint velocity (',direction,' component)']);
 
-timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
+% timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
 text(0.05*Lx,0.92*Lz,timestamp) ;
 text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
                       'HorizontalAlignment','right')
@@ -173,23 +166,43 @@ plot_adjoint_src_rec;
 % experimenting with the caxis (4) -- percentile
 
 cmax = prctile(Kaa(:),prc);
-
-
 caxis([-cmax cmax]);
+
 colormap(cm);
+
+% colorbar;
+
 axis image
 shading interp
 xlabel('x [m]');
 ylabel('z [m]');
 title(['\rho kernel (',direction,' component)']);
 
-timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
+% timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
 text(0.05*Lx,0.92*Lz,timestamp) ;
 text(0.95*Lx,0.92*Lz,['max = \pm', num2str(cmax)], ... 
                       'HorizontalAlignment','right')
 
 
+                  
+       
 end
+
+%% record movie -------------------------------------------------------
+    
+    if strcmp(make_movie_adj,'yes')
+    
+        if exist('movie_index','var')
+            movie_index=movie_index+1;
+        else
+            movie_index=1;
+        end
+        
+        M(movie_index)=getframe(gcf);
+        
+    end
+           
+
 hold off
 % pause(0.01)
 

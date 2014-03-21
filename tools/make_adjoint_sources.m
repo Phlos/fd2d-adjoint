@@ -31,7 +31,7 @@
 % 
 %==========================================================================
 
-function misfit=make_adjoint_sources(v,v_0,t,output,measurement,direction)
+function [adjoint_stf, misfit] = make_adjoint_sources(v,v_0,t,output,measurement,direction)
 %%
 %==========================================================================
 %- initialisations --------------------------------------------------------
@@ -40,6 +40,9 @@ function misfit=make_adjoint_sources(v,v_0,t,output,measurement,direction)
 path(path,'../input/');
 path(path,'../code/propagation/');
 path(path,'./misfits/')
+
+% delete previous instances of files
+ delete(['../input/sources/adjoint/src*',direction])
 
 input_parameters;
 nrec = length(rec_x);
@@ -71,7 +74,7 @@ end
 %% march through the various recordings -----------------------------------
 %==========================================================================
 
-pick_data = figure;
+% pick_data = figure;
 adjoint_source = figure;
 
 for n=1:nrec
@@ -80,8 +83,8 @@ for n=1:nrec
         
         %- plot traces --------------------------------------------------------
         
-        figure(pick_data);
-%         subplot(3,1,dir)
+        figure(adjoint_source);
+        subplot(2,1,1)
         plot(t,v(n,:),'k')
         hold on
         plot(t,v_0(n,:),'r')
@@ -90,7 +93,7 @@ for n=1:nrec
         
         title(['receiver ' num2str(n) ' ,synth - black, obs - red, diff - dashed'])
         xlabel('t [s]')
-        ylabel('displacement [m]')
+        ylabel('velocity [m]')
         
         %- select time windows and taper seismograms --------------------------
         
@@ -111,7 +114,7 @@ for n=1:nrec
             [misfit_n,adstf]=cc_time_shift(v(n,:),v_0(n,:),t);
         end
         
-        misfit=misfit+misfit_n
+        misfit=misfit+misfit_n;
         
         %- correct adjoint source time function for velocity measurement ------
         % ??????
@@ -123,6 +126,7 @@ for n=1:nrec
         %- plot adjoint source before time reversal ---------------------------
         
         figure(adjoint_source);
+        subplot(2,1,2);
         plot(t,adstf,'k')
         xlabel('t [s]')
         title(['adjoint source (', output, 'seismograms) before time reversal'])

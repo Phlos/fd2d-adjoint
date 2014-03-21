@@ -14,7 +14,7 @@
 %
 %==========================================================================
 
-function [v_rec_x,v_rec_y,v_rec_z,t,rec_x,rec_z]=run_forward
+function [v_rec_x,v_rec_y,v_rec_z,t,rec_x,rec_z , test]=run_forward
 
 disp 'initialising...'
 %==========================================================================
@@ -25,6 +25,7 @@ path(path,'propagation/');
 path(path,'../input/');
 
 input_parameters;
+% wave_propagation_type
 nt=5*round(nt/5);
 
 
@@ -40,7 +41,7 @@ set_figure_properties;  % i.e. size of the figures & location on screen
 
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
-% plot_model;
+plot_model;
 
 
 %% source & receiver initialisation
@@ -74,6 +75,9 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     
 end
 
+%% check values
+
+test_input_compatibility;
 
 %% initialise seismograms ------------------------------------------------- % Change this to save velocity seismograms only!
 % only for forward
@@ -125,7 +129,7 @@ if strcmp(simulation_mode,'forward')
     end
 end
 
-copyfile('../input/input_parameters.m','../output/')
+copyfile('../input/input_parameters.m','../output/input_parameters_out.m')
 
 
 

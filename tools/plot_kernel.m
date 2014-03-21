@@ -39,7 +39,7 @@ cmax = prctile(kernel(:),prc);
 
 caxis([-cmax cmax]);
 
-text(0.95*max(X(:)),0.92*max(Z(:)),['max = \pm', num2str(cmax)], ... 
+text(0.95*max(X(:)),0.92*max(Z(:)),['max = \pm', num2str(cmax,'%3.1e')], ... 
                       'HorizontalAlignment','right')
 
 hold off;

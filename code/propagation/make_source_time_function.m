@@ -13,7 +13,7 @@ if strcmp(simulation_mode,'forward_green')
 elseif (strcmp(stf_type,'delta_bp'))
     
     stf=zeros(1,length(t));
-    stf(1)=1e7;
+    stf(1)=3e1;
     stf=butterworth_lp(stf,t,5,f_max,'silent');
     stf=butterworth_hp(stf,t,3,f_min,'silent');
     

@@ -3,6 +3,9 @@
 %==========================================================================
 
 adjoint_source_path='../input/sources/adjoint/';
+adjoint_source_component='x';   % 'x' or 'z' -- the P-SV source direction
+                                % the sensitivity kernel is calculated
+                                % based on the component given here. 
 
 %==========================================================================
 % set basic simulation parameters
@@ -10,18 +13,18 @@ adjoint_source_path='../input/sources/adjoint/';
 
 wave_propagation_type='both';   % can be 'PSV' or 'SH' or 'both'
 
-Lx=1.5e6;     % model extension in x-direction [m]
-Lz=1.1e6;     % model extension in z-direction [m]
+Lx=2.20e5;     % model extension in x-direction [m]
+Lz=1.3e5;     % model extension in z-direction [m]
 
-nx=450;     % grid points in x-direction
-nz=330;     % grid points in z-direction
+nx=660;     % grid points in x-direction
+nz=390;     % grid points in z-direction
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
 % dt=0.33;     % time step [s] fine for SH in a grid   dx=dz=3.34e3 m
 % dt=0.1;      % time step [s] fine for P-SV in a grid dx=dz=3.34e3 m
-dt=0.1;      % time step [s]
-nt=1200;     % number of iterations
+dt=0.01;      % time step [s]
+nt=700;     % number of iterations
 
 order=4;    % finite-difference order (2 or 4)
 
@@ -50,12 +53,12 @@ stf_type = 'delta_bp';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed
                         % delta function)
 % needed for 'ricker'
 tauw_0  = 2.628;      % seconds
-tauw    = 32.0;       % source duration, seconds
-tee_0   = 20.0;        % source start time, seconds
+tauw    = 4.0;        % source duration, seconds
+tee_0   = 4.0;        % source start time, seconds
 
-% needed for 'delta_bp'                        
-f_min=0.01;     % minimum frequency [Hz]
-f_max=0.05;     % maximum frequency [Hz]
+% needed for 'delta_bp'    
+f_min=0.2;     % minimum frequency [Hz]
+f_max=1.00;     % maximum frequency [Hz]
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 
@@ -77,8 +80,8 @@ simulation_mode='forward';
 % source positions
 %==========================================================================
 
-src_x=[Lx*5/12];
-src_z=[Lz*6/11];
+src_x=[0.6e5];
+src_z=[0.7e5];
 
 %==========================================================================
 % receiver positions
@@ -99,8 +102,8 @@ src_z=[Lz*6/11];
 %rec_z=[70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 70.0 70.0 70.0 70.0 70.0  70.0  70.0  70.0  180.0 180.0 180.0 180.0 180.0 180.0 180.0 180.0];
 
 %- just one receiver
-rec_x=[Lx*7/12];
-rec_z=[Lz*6/11];
+rec_x=[1.6e5];
+rec_z=[0.7e5];
 
 %- a large number of receivers in a closed rectangular configuration
 %rec_x=[50.0  50.0  50.0  50.0  50.0   50.0    70.0  90.0 110.0 130.0   70.0  90.0 110.0 130.0  150.0 150.0 150.0 150.0 150.0  150.0];
@@ -111,7 +114,7 @@ rec_z=[Lz*6/11];
 % absorbing boundaries
 %==========================================================================
 
-width=200000.0;     % width of the boundary layer in m
+width=25000.0;     % width of the boundary layer in m
 
 absorb_left=1;  % absorb waves on the left boundary
 absorb_right=1; % absorb waves on the right boundary
@@ -123,11 +126,13 @@ absorb_bottom=1;% absorb waves on the bottom boundary
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-plot_every=10;
+plot_every=50;
 
 %==========================================================================
 % make wavepropagation movie
 %==========================================================================
 
-make_movie='no';                           % 'yes' or 'no'
-movie_file='../output/model11_P-SV-SH';     % output file name, should be .mp4
+make_movie='n';                                   % 'yes' or 'no'
+make_movie_adj='no';                               % 'yes' or 'no'
+movie_file='../output/model11_tromp-ricker';        % output file name
+movie_file_adj='../output/model11_tromp-ricker_adjoint';

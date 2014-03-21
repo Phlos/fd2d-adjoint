@@ -2,8 +2,8 @@
 %
 % function [misfit,adsrc]=cc_time_shift(u,u_0,t)
 %
-% u: synthetic displacement seismogram
-% u_0: observed displacement seismogram
+% u: synthetic velocity seismogram
+% u_0: observed velocity seismogram
 % t: time axis
 
 function [misfit,adstf]=cc_time_shift(u,u_0,t)
@@ -25,11 +25,11 @@ end
 
 dt=t(2)-t(1);
 nt=length(t);
-v=zeros(1,nt);
+% v=zeros(1,nt);
 
-v(1:nt-1)=diff(u)/dt;
+% v(1:nt-1)=diff(u)/dt;
 
-adstf=v/(sum(v.*v)*dt);
+adstf=u/(sum(u.*u)*dt);
 
 %- compute misfit ---------------------------------------------------------
 

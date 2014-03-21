@@ -50,10 +50,13 @@ for k = 1:size(vel,1)
     m=max(abs(vel(k,:)));
     % traces om en om blauw en zwart kleuren
     if mod(k,2)
-        plot(t,spacing*(k-1) + vel(k,:)/m,'k','LineWidth',1)
+        plot(t,spacing*(size(vel,1)-k) + vel(k,:)/m,'k','LineWidth',1)
     else
-        plot(t,spacing*(k-1) + vel(k,:)/m,'b','LineWidth',1)
+        plot(t,spacing*(size(vel,1)-k) + vel(k,:)/m,'b','LineWidth',1)
     end
+    
+    tekstje = ['trace nr ', num2str(k), ' (max: ', num2str(m,'%3.1e'), ')' ];
+    text(min(t)-(t(end)-t(1))/6,spacing*(size(vel,1)-k)+0.3,tekstje,'FontSize',14)
     
 %     % afstanden geven in m of km
 %     if (max(rec_x)<=1000)
@@ -70,4 +73,4 @@ title([veldis, ' seismograms'])
 
 xlabel('time [s]','FontSize',20);
 ylabel('normalised traces','FontSize',20);
-axis([min(t)-(t(end)-t(1))/5 max(t)+(t(end)-t(1))/10 -1.5 spacing*length(rec_x)+1])
+axis([min(t)-(t(end)-t(1))/5 max(t)+(t(end)-t(1))/10 -1.5 spacing*size(vel,1)])

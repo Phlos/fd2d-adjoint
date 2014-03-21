@@ -22,6 +22,8 @@ disp 'iterating...'
 
 position_figures;
 
+% figure;
+% plot(t,squeeze(stf(1,1,:)))
 
 %%
 for n=1:nt
@@ -37,6 +39,8 @@ for n=1:nt
         DSY=div_s(sxy,szy,dx,dz,nx,nz,order);
         [DSX,DSZ]=div_s_PSV(sxx,szz,sxz,dx,dz,nx,nz,order);
     end
+    
+    test.DSX_before_stf(n) = DSX(src_x_id(1),src_z_id(1));
     
     %- add point sources --------------------------------------------------
     
@@ -56,25 +60,37 @@ for n=1:nt
 
         end
         
+
     end
     
     
     %- update velocity field ----------------------------------------------
     
+%     test_vx_source = vx(src_x_id(1),src_z_id(1)) + ...
+%             dt*DSX(src_x_id(1),src_z_id(1)) / rho(src_x_id(1),src_z_id(1));
+% size(test_vx_source)
+    
     if(strcmp(wave_propagation_type,'SH'))
         vy=vy+dt*DSY./rho;
     elseif(strcmp(wave_propagation_type,'PSV'))
-        vx=vx+dt*DSX(:,:)./rho;
-        vz=vz+dt*DSZ(:,:)./rho;
+        vx=vx+dt*DSX./rho;
+        vz=vz+dt*DSZ./rho;
     elseif(strcmp(wave_propagation_type,'both'))
         vy=vy+dt*DSY./rho;
-        vx=vx+dt*DSX(:,:)./rho;
-        vz=vz+dt*DSZ(:,:)./rho;
+        vx=vx+dt*DSX./rho;
+        vz=vz+dt*DSZ./rho;
     end
     
                         % just a test to see whether DS and v produce values
                         % [max(max(DS)),max(max(DSX)),max(max(DSZ)); max(max(v)),max(max(vx)),max(max(vz))]
     
+    test.stf(n) = stf(1,1,n);
+    test.DSX(n) = DSX(src_x_id(1),src_z_id(1));
+    test.vx(n)  = vx(src_x_id(1),src_z_id(1));
+    disp(['stf ',num2str(stf(1,1,n)), ...
+              '  DSX  ', num2str(DSX(src_x_id(1),src_z_id(1))) ...
+              '  vx   ', num2str(vx(src_x_id(1),src_z_id(1)))]) % ...
+%               '  testvx ', num2str(test_vx_source)])
     
     %- apply absorbing boundary taper -------------------------------------
     
@@ -153,6 +169,7 @@ for n=1:nt
         % plot velocity field every so manyth time step -------------------
         
         if (mod(n,plot_every)==0)
+            disp(['time: ', num2str(n*dt)]);
             plot_velocity_field;
         end
         
@@ -168,7 +185,9 @@ for n=1:nt
             compute_kernels;
             
             % plot adjoint fields (i.e. adjoint field + the above)
-            plot_adjoint_field;
+            if (mod(n,plot_every)==0)
+                plot_adjoint_field;
+            end
             
         end
     end
