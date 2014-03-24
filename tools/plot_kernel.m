@@ -1,4 +1,4 @@
-function plot_kernel(X,Z,kernel,kname,prc,stf_PSV)
+function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,stf_PSV)
 
 % plot some random sensitivity kernel
 %
@@ -7,7 +7,12 @@ function plot_kernel(X,Z,kernel,kname,prc,stf_PSV)
 % X,Z:      X and Z grids
 % kernel:   the sensitivity kernel you want to plot
 % kname:    kernel name (should be string)
-% prc:      percentile of the colours for the colorbar maximum
+% cmaxtype: 'perc' or 'fixed'. Should the maxima of the kernel plot be
+%           determined by a percentile of the kernel values ('perc'), or do
+%           you want a fixed value ('fixed')
+% cmax:     either the percentile of the colours for the colorbar maximum
+%           in case cmaxtype = 'perc', or the maximum value of the
+%           colourscale in case cmaxtype = 'fixed'.
 % 
 % output:
 % -------
@@ -16,7 +21,13 @@ function plot_kernel(X,Z,kernel,kname,prc,stf_PSV)
 
 load 'cm_velocity.mat';
 
-
+if strcmp(cmaxtype,'perc')
+    scale = prctile(kernel(:),cmax);
+elseif strcmp(cmaxtype,'fixed')
+    scale = cmax;
+else
+    error('Invalid cmaxtype. Allowed values are ''perc'' or ''fixed''.')
+end
 
 % figure(figname);
 pcolor(X,Z,kernel');
@@ -35,11 +46,11 @@ hold on;
 % set(p,'Color','green');
 
 % cmax = max(max(abs(K_no_origsrc)));
-cmax = prctile(kernel(:),prc);
 
-caxis([-cmax cmax]);
 
-text(0.95*max(X(:)),0.92*max(Z(:)),['max = \pm', num2str(cmax,'%3.1e')], ... 
+caxis([-scale scale]);
+
+text(0.95*max(X(:)),0.92*max(Z(:)),['max = \pm', num2str(scale,'%3.1e')], ... 
                       'HorizontalAlignment','right')
 
 hold off;

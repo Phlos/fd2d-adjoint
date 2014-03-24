@@ -57,3 +57,8 @@ pos_adj_3 = [edge,...
         6/6*scn_width,...
         3/4*scn_height];
 
+% position for the kernel plots
+pos_knl = [edge,...                 % left
+        0,...                       % bottom
+        scn_width*2/3 - edge,...    % width
+        scn_height-10];             % height

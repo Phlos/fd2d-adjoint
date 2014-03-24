@@ -6,7 +6,7 @@
 % K: sensitivity kernel with respect to density
 %==========================================================================
 
-function [K] = run_adjoint(kerneltype)%(vx_forward, vy_forward, vz_forward)
+function [K] = run_adjoint(stf,kerneltype) %(vx_forward, vy_forward, vz_forward)
 disp 'Welcome to the ultimate adjoint experience!!'
 disp 'initialising...'
 
@@ -84,44 +84,47 @@ fclose(fid);
 
 %- read adjoint source time functions + plot 'em --------------------------
 
-stf=zeros(3,ns,nt);
+% stf=zeros(3,ns,nt);
 fig_adjoint_stf = figure;
 
-direction = zeros(1,2);
+% direction = zeros(1,2);
 
 % read adjoint source time functions from file
 
-if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-    if strcmp(adjoint_source_component,'x')
-        direction(1)=1;
-    elseif strcmp(adjoint_source_component,'z')
-        direction(1)=3;
-    else
-        error('the direction of the source component that you gave is invalid')
-    end
-end
+% if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
+%     if strcmp(adjoint_source_component,'x')
+%         direction(1)=1;
+%     elseif strcmp(adjoint_source_component,'z')
+%         direction(1)=3;
+%     else
+%         error('the direction of the source component that you gave is invalid')
+%     end
+% end
 
-if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-    direction(2)=2;
-end
+% if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
+%     direction(2)=2;
+% end
 
+figure(fig_adjoint_stf);
 for n=1:ns          % loop over sources
-%     for dir= 1:3    % loop over directions 1,2,3 = x,y,z
-    for dir = direction;
-        disp(['reading direction ',num2str(dir),'.'])
-        fid=fopen(['../input/sources/adjoint/src_' num2str(n) '_' num2str(dir)],'r');
-        stf(dir,n,1:nt)=fscanf(fid,'%g',nt);
+    for dir= 1:3    % loop over directions 1,2,3 = x,y,z
+%     for dir = direction;
+%         disp(['reading direction ',num2str(dir),'.'])
+%         fid=fopen(['../input/sources/adjoint/src_' num2str(n) '_' num2str(dir)],'r');
+%         stf(dir,n,1:nt)=fscanf(fid,'%g',nt);
         
         % plotting the source time functions
+        
+        
+        subplot(3,1,dir);
+        dir
         thee=0:dt:nt*dt-dt;
         length(thee);
         oempa=reshape(stf(dir,n,:),1,nt);
         size(oempa);
         size(thee);
-        figure(fig_adjoint_stf);
-        clf;
+%         clf;
         plot(thee,oempa);
-        pause(0.1);
     end
 end
 

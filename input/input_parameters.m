@@ -3,7 +3,7 @@
 %==========================================================================
 
 adjoint_source_path='../input/sources/adjoint/';
-adjoint_source_component='x';   % 'x' or 'z' -- the P-SV source direction
+% adjoint_source_component='x';   % 'x' or 'z' -- the P-SV source direction
                                 % the sensitivity kernel is calculated
                                 % based on the component given here. 
 
@@ -24,7 +24,7 @@ nz=390;     % grid points in z-direction
 % dt=0.33;     % time step [s] fine for SH in a grid   dx=dz=3.34e3 m
 % dt=0.1;      % time step [s] fine for P-SV in a grid dx=dz=3.34e3 m
 dt=0.01;      % time step [s]
-nt=700;     % number of iterations
+nt=6000;     % number of iterations
 
 order=4;    % finite-difference order (2 or 4)
 
@@ -49,7 +49,7 @@ model_type=11;
 % source-time function
 %==========================================================================
 
-stf_type = 'delta_bp';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed 
+stf_type = 'ricker';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed 
                         % delta function)
 % needed for 'ricker'
 tauw_0  = 2.628;      % seconds
@@ -81,7 +81,7 @@ simulation_mode='forward';
 %==========================================================================
 
 src_x=[0.6e5];
-src_z=[0.7e5];
+src_z=[0.9e5];
 
 %==========================================================================
 % receiver positions
@@ -103,7 +103,7 @@ src_z=[0.7e5];
 
 %- just one receiver
 rec_x=[1.6e5];
-rec_z=[0.7e5];
+rec_z=[0.9e5];
 
 %- a large number of receivers in a closed rectangular configuration
 %rec_x=[50.0  50.0  50.0  50.0  50.0   50.0    70.0  90.0 110.0 130.0   70.0  90.0 110.0 130.0  150.0 150.0 150.0 150.0 150.0  150.0];
@@ -118,7 +118,7 @@ width=25000.0;     % width of the boundary layer in m
 
 absorb_left=1;  % absorb waves on the left boundary
 absorb_right=1; % absorb waves on the right boundary
-absorb_top=1;   % absorb waves on the top boundary
+absorb_top=0;   % absorb waves on the top boundary
 absorb_bottom=1;% absorb waves on the bottom boundary
 
 %==========================================================================
@@ -132,7 +132,7 @@ plot_every=50;
 % make wavepropagation movie
 %==========================================================================
 
-make_movie='n';                                   % 'yes' or 'no'
-make_movie_adj='no';                               % 'yes' or 'no'
+make_movie='yes';                                   % 'yes' or 'no'
+make_movie_adj='yes';                               % 'yes' or 'no'
 movie_file='../output/model11_tromp-ricker';        % output file name
 movie_file_adj='../output/model11_tromp-ricker_adjoint';

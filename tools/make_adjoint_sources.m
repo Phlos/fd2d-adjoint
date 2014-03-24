@@ -25,6 +25,8 @@
 %--------
 % misfit:       The total misfit, calculated according to the current
 %               chosen misfit functional.
+% adjoint_stf:  The adjoint source time function for the specifict
+%               direction. Time-reversed!!
 %
 % 'output' in terms of files written:
 % adjoint sources are saved into ../input/sources/adjoint 
@@ -109,9 +111,9 @@ for n=1:nrec
         %- compute misfit and adjoint source time function --------------------
         
         if strcmp(measurement,'waveform_difference')
-            [misfit_n,adstf]=waveform_difference(v(n,:),v_0(n,:),t);
+            [misfit_n,adstf_nonreversed]=waveform_difference(v(n,:),v_0(n,:),t);
         elseif strcmp(measurement,'cc_time_shift')
-            [misfit_n,adstf]=cc_time_shift(v(n,:),v_0(n,:),t);
+            [misfit_n,adstf_nonreversed]=cc_time_shift(v(n,:),v_0(n,:),t);
         end
         
         misfit=misfit+misfit_n;
@@ -127,7 +129,7 @@ for n=1:nrec
         
         figure(adjoint_source);
         subplot(2,1,2);
-        plot(t,adstf,'k')
+        plot(t,adstf_nonreversed,'k')
         xlabel('t [s]')
         title(['adjoint source (', output, 'seismograms) before time reversal'])
         pause(1.0)
@@ -141,12 +143,13 @@ for n=1:nrec
         fn=[adjoint_source_path 'src_' num2str(n) direction];
         fid_src=fopen(fn,'w');
         for k=1:nt
-            fprintf(fid_src,'%g\n',adstf(nt-k+1));
+            fprintf(fid_src,'%g\n',adstf_nonreversed(nt-k+1));
         end
         fclose(fid_src);
         
-        %- save source time functions to adjoint_stf
-        adjoint_stf(n,:) = adstf;
+        %- save stf to adjoint_stf -- and time-reverse!! (using flipud)
+        
+        adjoint_stf(n,:) = fliplr(adstf_nonreversed);
         
 %     end
 end

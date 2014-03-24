@@ -22,8 +22,6 @@ disp 'iterating...'
 
 position_figures;
 
-% figure;
-% plot(t,squeeze(stf(1,1,:)))
 
 %%
 for n=1:nt
@@ -87,9 +85,9 @@ for n=1:nt
     test.stf(n) = stf(1,1,n);
     test.DSX(n) = DSX(src_x_id(1),src_z_id(1));
     test.vx(n)  = vx(src_x_id(1),src_z_id(1));
-    disp(['stf ',num2str(stf(1,1,n)), ...
-              '  DSX  ', num2str(DSX(src_x_id(1),src_z_id(1))) ...
-              '  vx   ', num2str(vx(src_x_id(1),src_z_id(1)))]) % ...
+%     disp(['stf ',num2str(stf(1,1,n)), ...
+%               '  DSX  ', num2str(DSX(src_x_id(1),src_z_id(1))) ...
+%               '  vx   ', num2str(vx(src_x_id(1),src_z_id(1)))]) % ...
 %               '  testvx ', num2str(test_vx_source)])
     
     %- apply absorbing boundary taper -------------------------------------
@@ -128,6 +126,19 @@ for n=1:nt
         sxz=sxz+dt*( mu.* (dvxdz(:,:) + dvzdx(:,:)) );
     end
     
+    %- compute displacement field -----------------------------------------
+    
+    if(strcmp(wave_propagation_type,'SH'))
+        uy = uy + vy.*dt;
+    elseif(strcmp(wave_propagation_type,'PSV'))
+        ux = ux + vx.*dt;
+        uz = uz + vz.*dt;
+    elseif(strcmp(wave_propagation_type,'both'))
+        ux = ux + vx.*dt;
+        uy = uy + vy.*dt;
+        uz = uz + vz.*dt;
+    end
+    
     
     %% forward calculations
     if (strcmp(simulation_mode,'forward'))
@@ -151,17 +162,26 @@ for n=1:nt
         
         % store time-reversed history ----------------------------------------
         
-        % save every 5th velocity field to the big-ass 3 direction matrix
+        % save every 5th velocity&displacement field to the big-ass 3 direction matrix
         if (mod(n,5)==0)
             if(strcmp(wave_propagation_type,'SH'))
                 vy_forward(nt/5+1-n/5,:,:)=vy(:,:);
+                % displacement
+                uy_forward(nt/5+1-n/5,:,:)=uy(:,:);
             elseif(strcmp(wave_propagation_type,'PSV'))
                 vx_forward(nt/5+1-n/5,:,:)=vx(:,:);
                 vz_forward(nt/5+1-n/5,:,:)=vz(:,:);
+                % displacement
+                ux_forward(nt/5+1-n/5,:,:)=ux(:,:);
+                uz_forward(nt/5+1-n/5,:,:)=uz(:,:);
             elseif(strcmp(wave_propagation_type,'both'))
                 vy_forward(nt/5+1-n/5,:,:)=vy(:,:);
                 vx_forward(nt/5+1-n/5,:,:)=vx(:,:);
                 vz_forward(nt/5+1-n/5,:,:)=vz(:,:);
+                % displacement
+                uy_forward(nt/5+1-n/5,:,:)=uy(:,:);
+                ux_forward(nt/5+1-n/5,:,:)=ux(:,:);
+                uz_forward(nt/5+1-n/5,:,:)=uz(:,:);
             end
         end
 

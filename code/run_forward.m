@@ -14,7 +14,7 @@
 %
 %==========================================================================
 
-function [v_rec_x,v_rec_y,v_rec_z,t,rec_x,rec_z , test]=run_forward
+function [v_rec_x,v_rec_y,v_rec_z,t,rec_x,rec_z, test]=run_forward
 
 disp 'initialising...'
 %==========================================================================
@@ -111,20 +111,28 @@ run_wavefield_propagation;
 %==========================================================================
 %% output 
 %==========================================================================
+
+
 disp 'saving output...'
 %- store time-reversed forward field --------------------------------------
 
+disp 'v_forward...'
 if strcmp(simulation_mode,'forward')
     if(strcmp(wave_propagation_type,'SH'))
-        save('../output/v_forward','vy_forward','v_rec_y','-v7.3');
+        save('../output/v_forward','vy_forward','-v7.3');
+        save('../output/u_forward','uy_forward','-v7.3');
         save('../output/v_rec', 'v_rec_y', '-v7.3');
     elseif(strcmp(wave_propagation_type,'PSV'))
         save('../output/v_forward','vx_forward','vz_forward', ...
-                                    'v_rec_x','v_rec_z','-v7.3');
+                                   '-v7.3');
+        save('../output/u_forward','ux_forward','uz_forward', ...
+                                   '-v7.3');
         save('../output/v_rec', 'v_rec_x','v_rec_z', '-v7.3');
     elseif(strcmp(wave_propagation_type,'both'))
         save('../output/v_forward','vx_forward','vy_forward','vz_forward',...
-                                   'v_rec_x','v_rec_y','v_rec_z','-v7.3');
+                                   '-v7.3');
+        save('../output/u_forward','ux_forward','uy_forward','uz_forward',...
+                                   '-v7.3');
         save('../output/v_rec', 'v_rec_x','v_rec_y','v_rec_z', '-v7.3');
     end
 end

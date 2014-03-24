@@ -7,8 +7,9 @@ ncols=4;
 
 
 
-timestamp=['t [s] = ',num2str(nt*dt-(n-plot_every)*dt)]
+timestamp=['t [s] = ',num2str(nt*dt-(n-plot_every)*dt)];
 
+disp(timestamp);
 
 %% every row is a direction: x, y or z
 for row=1:nrows
