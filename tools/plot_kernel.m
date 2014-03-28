@@ -22,7 +22,7 @@ function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,stf_PSV)
 load 'cm_velocity.mat';
 
 if strcmp(cmaxtype,'perc')
-    scale = prctile(kernel(:),cmax);
+    scale = prctile(abs(kernel(:)),cmax);
 elseif strcmp(cmaxtype,'fixed')
     scale = cmax;
 else

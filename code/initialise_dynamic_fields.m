@@ -49,14 +49,14 @@ end
 % stress fields
 
 if(strcmp(wave_propagation_type,'SH'))
-    sxy=zeros(nx,nz); % stress component sigma_xy (nx-1 because of stag grid)
+    sxy=zeros(nx,nz); % stress component sigma_xy 
     szy=zeros(nx,nz); % stress component sigma_zy
 elseif(strcmp(wave_propagation_type,'PSV'))
     sxx=zeros(nx,nz);                                                            %%%%%%%%% LET OP hier heb ik ze aangepast
     szz=zeros(nx,nz);                                                            % sxx: nx-1 --> nx;  szz nz-1 --> nz
     sxz=zeros(nx,nz);         
 elseif(strcmp(wave_propagation_type,'both'))
-    sxy=zeros(nx,nz); % stress component sigma_xy (nx-1 because of stag grid)
+    sxy=zeros(nx,nz); 
     szy=zeros(nx,nz); % stress component sigma_zy
     sxx=zeros(nx,nz);                                                            %%%%%%%%% LET OP hier heb ik ze aangepast
     szz=zeros(nx,nz);                                                            % sxx: nx-1 --> nx;  szz nz-1 --> nz

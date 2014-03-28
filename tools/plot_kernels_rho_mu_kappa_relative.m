@@ -7,7 +7,7 @@ kernels_together = [K_rel.rho1.PSV; K_rel.rho1.SH; ...
 fig_knl = figure;
 set(fig_knl,'OuterPosition',pos_knl)
                 
-scale = prctile(kernels_together(:),99.97);
+scale = prctile(abs(kernels_together(:)),99.97);
 
 subplot (3,2,1);
 plot_kernel(X,Z,K_rel.rho1.PSV,'relative density PSV','fixed',scale,stf_PSV);
@@ -22,3 +22,7 @@ subplot (3,2,4);
 plot_kernel(X,Z,K_rel.mu1.SH,'relative mu SH','fixed',scale,stf_PSV);
 subplot (3,2,6);
 plot_kernel(X,Z,zeros(size(X')),'relative kappa SH','perc',100,stf_PSV);
+
+caxis([-scale scale]);
+h = colorbar('horiz');
+set(h,'Position',[0.3 0.05 0.4 0.02])

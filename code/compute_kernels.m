@@ -25,23 +25,11 @@
 
 
 
-%% get necessary adjoint fields from velocity field
+%% get necessary dynamic fields
 
-% displacement field (calc'd every 5th timestep)
-if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-ux = ux + vx*5*dt;                                                              % IS THIS CORRECT / ACCURATE ENOUGH? --> test with source freq. and dt.
-uz = uz + vz*5*dt;
-end
-if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-uy = uy + vy*5*dt;  
-end
 
-% This MAY be wrong: if the displacement at the end of the forward
-% calculation hasn't 'died out' yet, my implementation in the code
-% artificially sets displacement at T_end at zero (i.e. in
-% 'initialise_dynamic_fields.m'. 
-% However: I think that the adjoint method requires u and v to be zero at
-% T_end anyway, which would mean it's perfectly all right.                      % final displacement possibly needs to be saved
+
+% adjoint
 
 % strain tensor
 if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
@@ -53,64 +41,74 @@ duydx = dx_v(uy,dx,dz,nx,nz,order);
 duydz = dz_v(uy,dx,dz,nx,nz,order);
 end
 
-%% get necessary forward fields
 
-% get forward velocity field (remember: saved backwards in time)
-if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-vy_fw_snapshot = squeeze(vy_forward(n/5,:,:));
-end
+% forward
+
+% forward velocity field (remember: saved backwards in time)
 if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-vx_fw_snapshot = squeeze(vx_forward(n/5,:,:));
-vz_fw_snapshot = squeeze(vz_forward(n/5,:,:));
-end
-
-% calculate forward displacement field
-% PRETTY DAMN INEFFICIENT!!!
-
-if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-ux_fw_snapshot = squeeze(sum(vx_forward(n/5:end,:,:),1)*5*dt);
-uz_fw_snapshot = squeeze(sum(vz_forward(n/5:end,:,:),1)*5*dt);                           % calculating the displacement field from only 1/5 of the velocity field..!
+    vx_fw = squeeze(v_fw.x(n/5,:,:));
+    vz_fw = squeeze(v_fw.z(n/5,:,:));
 end
 if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-uy_fw_snapshot = squeeze(sum(vy_forward(n/5:end,:,:),1)*5*dt);                           % is it even correct? Do we get the right displacements at all?! Here we're
+    vy_fw = squeeze(v_fw.y(n/5,:,:));
 end
 
-% strain tensor
-
+% forward displacement field
 if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-[duxdx_fw,duxdz_fw,duzdx_fw,duzdz_fw] = grad_v_PSV(ux_fw_snapshot, ...
-                                    uz_fw_snapshot,dx,dz,nx,nz,order);
+    ux_fw = squeeze(u_fw.x(n/5,:,:));
+    uz_fw = squeeze(u_fw.z(n/5,:,:));
 end
 if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-% could do this for uy with the function gradient() too.
-duydx_fw = dx_v(uy_fw_snapshot,dx,dz,nx,nz,order);
-duydz_fw = dz_v(uy_fw_snapshot,dx,dz,nx,nz,order);                                                                             % HOW does it work for SH?!
+    uy_fw = squeeze(u_fw.y(n/5,:,:));
 end
+
+% forward strain tensor
+if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
+    [duxdx_fw,duxdz_fw,duzdx_fw,duzdz_fw] = grad_v_PSV(ux_fw, ...
+                                                  uz_fw,dx,dz,nx,nz,order);
+end
+if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
+    duydx_fw = dx_v(uy_fw,dx,dz,nx,nz,order);   % could do this for uy with the function gradient() too.
+    duydz_fw = dz_v(uy_fw,dx,dz,nx,nz,order);                                                                             % HOW does it work for SH?!
+end
+
+
+
+
 
 
 %% calculate travel time kernels
-if strcmp(kerneltype,'traveltime')
+
+% if strcmp(kerneltype,'traveltime')
+    
     %% rho -- density               (calculated from velocities)
     
     % interaction
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-    interaction_vy=vy.*vy_fw_snapshot;
+        interaction_vy = vy.*vy_fw;
     end
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-    interaction_vx=vx.*vx_fw_snapshot;
-    interaction_vz=vz.*vz_fw_snapshot;
+        interaction_vx = vx.*vx_fw;
+        interaction_vz = vz.*vz_fw;
     end
     
     % kernels
-    
+    % Here, two minus signs cancel each other out. Normally, the density
+    % kernel would be -v*v_fw (see Andreas' book or anything for details).
+    % As v = (u(t+dt) - u(t)) / dt, but we've calculated the adjoint v
+    % backwards in time, that becomes v = (u(t) - u(tt+dt)) / dt. Therefore
+    % we need another minus to compensate.
+    % => doesn't this mean that the mu and lambda kernels should have an
+    %    extra minus?!! because those are the quantities derived from the v
+    %    field which is calculated directly in the wave propagation. Think
+    %    about this.
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-    K.rho.SH=K.rho.SH+interaction_vy*5*dt; % The minus sign is needed because we run backwards in time.
+        K.rho.SH = K.rho.SH + interaction_vy*5*dt;   
     end
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-    K.rho.x=K.rho.x+interaction_vx*5*dt;
-    K.rho.z=K.rho.z+interaction_vz*5*dt;
-    % K.rho.SH =K.rho.y;
-    K.rho.PSV=K.rho.x+K.rho.z;
+        K.rho.x   = K.rho.x + interaction_vx*5*dt;
+        K.rho.z   = K.rho.z + interaction_vz*5*dt;
+        K.rho.PSV = K.rho.x+K.rho.z;
     end
     
 
@@ -120,37 +118,40 @@ if strcmp(kerneltype,'traveltime')
     %% mu -- shear modulus      	(calculated from gradient of displacement)
     
     % interaction
-    
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-    interaction_muPSV = 2*duxdx.*duxdx_fw + 2*duzdz.*duzdz_fw ...
-        + (duxdz + duzdx) .* (duzdx_fw + duxdz_fw);
+        interaction_muPSV = 2*duxdx.*duxdx_fw + 2*duzdz.*duzdz_fw ...
+                            + (duxdz + duzdx) .* (duzdx_fw + duxdz_fw);
     end
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-    interaction_muSH  = 1/2 * (duydx.*duydx_fw + duydz.*duydz_fw);
+        interaction_muSH  = 1/2 * (duydx.*duydx_fw + duydz.*duydz_fw);
     end
     
     % kernels
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-    K.mu.PSV = K.mu.PSV + interaction_muPSV*5*dt;
+        K.mu.PSV = K.mu.PSV + interaction_muPSV*5*dt;
     end
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-    K.mu.SH = K.mu.SH + interaction_muSH*5*dt;
+        K.mu.SH = K.mu.SH + interaction_muSH*5*dt;
     end
-    % K.mu.y = K.mu.SH;
     
     
     
     
     %% lambda -- lamé's parameter	(calculated from divergence of displacement)
     
-    % interaction
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-    interaction_lambdaPSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
-    
-    % kernel
-    K.lambda.PSV = K.lambda.PSV + interaction_lambdaPSV*5*dt;
+        % interaction
+        interaction_lambdaPSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
+        
+        % kernel
+        K.lambda.PSV = K.lambda.PSV + interaction_lambdaPSV*5*dt;
     end
-else
-    error('Sorry, you have to specify you want travel time kernels')
     
-end
+    
+    
+    
+    
+% else
+%     error('Sorry, you have to specify you want travel time kernels')
+%     
+% end

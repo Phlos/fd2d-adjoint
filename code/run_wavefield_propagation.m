@@ -38,7 +38,7 @@ for n=1:nt
         [DSX,DSZ]=div_s_PSV(sxx,szz,sxz,dx,dz,nx,nz,order);
     end
     
-    test.DSX_before_stf(n) = DSX(src_x_id(1),src_z_id(1));
+%     test.DSX_before_stf(n) = DSX(src_x_id(1),src_z_id(1));
     
     %- add point sources --------------------------------------------------
     
@@ -82,9 +82,9 @@ for n=1:nt
                         % just a test to see whether DS and v produce values
                         % [max(max(DS)),max(max(DSX)),max(max(DSZ)); max(max(v)),max(max(vx)),max(max(vz))]
     
-    test.stf(n) = stf(1,1,n);
-    test.DSX(n) = DSX(src_x_id(1),src_z_id(1));
-    test.vx(n)  = vx(src_x_id(1),src_z_id(1));
+%     test.stf(n) = stf(1,1,n);
+%     test.DSX(n) = DSX(src_x_id(1),src_z_id(1));
+%     test.vx(n)  = vx(src_x_id(1),src_z_id(1));
 %     disp(['stf ',num2str(stf(1,1,n)), ...
 %               '  DSX  ', num2str(DSX(src_x_id(1),src_z_id(1))) ...
 %               '  vx   ', num2str(vx(src_x_id(1),src_z_id(1)))]) % ...
@@ -148,14 +148,14 @@ for n=1:nt
         
         for k=1:n_receivers
             if(strcmp(wave_propagation_type,'SH'))
-                v_rec_y(k,n)=vy(rec_x_id(k),rec_z_id(k));
+                v_rec.y(k,n)=vy(rec_x_id(k),rec_z_id(k));
             elseif(strcmp(wave_propagation_type,'PSV'))
-                v_rec_x(k,n)=vx(rec_x_id(k),rec_z_id(k));
-                v_rec_z(k,n)=vz(rec_x_id(k),rec_z_id(k));
+                v_rec.x(k,n)=vx(rec_x_id(k),rec_z_id(k));
+                v_rec.z(k,n)=vz(rec_x_id(k),rec_z_id(k));
             elseif(strcmp(wave_propagation_type,'both'))
-                v_rec_y(k,n)=vy(rec_x_id(k),rec_z_id(k));
-                v_rec_x(k,n)=vx(rec_x_id(k),rec_z_id(k));
-                v_rec_z(k,n)=vz(rec_x_id(k),rec_z_id(k));
+                v_rec.y(k,n)=vy(rec_x_id(k),rec_z_id(k));
+                v_rec.x(k,n)=vx(rec_x_id(k),rec_z_id(k));
+                v_rec.z(k,n)=vz(rec_x_id(k),rec_z_id(k));
             end
         end
         

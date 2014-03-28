@@ -16,14 +16,14 @@ for row=1:nrows
     if(row==1)
         if(strcmp(wave_propagation_type,'SH'))
             v_current=vy;
-            snapshot = vy_fw_snapshot;
+            snapshot = vy_fw;
             interaction = interaction_vy;
             Kaa = K.rho.SH;
             direction = 'Y';
             prc=99.985;
         elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
             v_current=vx;
-            snapshot = vx_fw_snapshot;
+            snapshot = vx_fw;
             interaction = interaction_vx;
             Kaa = K.rho.x;
             direction = 'X';
@@ -31,14 +31,14 @@ for row=1:nrows
         end
     elseif(row==2)
         v_current=vz;
-        snapshot = vz_fw_snapshot;
+        snapshot = vz_fw;
         interaction = interaction_vz;
         Kaa = K.rho.z;
         direction = 'Z';
         prc=99.97;
     elseif(row==3)
         v_current=vy;
-        snapshot = vy_fw_snapshot;
+        snapshot = vy_fw;
         interaction = interaction_vy;
         Kaa = K.rho.SH;
         direction = 'Y';

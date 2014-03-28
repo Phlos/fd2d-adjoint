@@ -1,10 +1,8 @@
 % travel time kernel calculation routine
 
-% MAKE SURE V_OBS IS PRESENT!!!
-
 % run forward
 cd ../code/
-[v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward;
+[v_rec,t,u_fw,v_fw,rec_x,rec_z,test]=run_forward;
 
 
 cd ../tools/
@@ -13,7 +11,7 @@ v_rec_3 = [v_rec.x; v_rec.y; v_rec.z;];
 plot_seismograms(v_rec_3,t,'velocity');
 
 % make adjoint sources
-adstf = make_all_adjoint_sources(v_rec,v_obs,t,'waveform_difference');
+adstf = make_tt_adjoint_sources(v_rec,t);
 
 % check the adjoint source time functions
 plot_vrec_to_adjointstf(t,v_rec.x,squeeze(adstf(1,:,:)));
@@ -22,7 +20,7 @@ plot_vrec_to_adjointstf(t,v_rec.z,squeeze(adstf(3,:,:)));
 
 % run adjoint 
 cd ../code/
-K = run_adjoint(u_fw,v_fw,adstf,'waveform_difference');
+K = run_adjoint(u_fw,v_fw,adstf,'traveltime');
 
 Lx=;     % model extension in x-direction [m]
 Lz=;     % model extension in z-direction [m]

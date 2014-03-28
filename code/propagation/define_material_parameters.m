@@ -41,10 +41,10 @@ elseif (model_type==4)
     
     rho=3000.0*ones(nx,nz);
     mu=2.8e10*ones(nx,nz);
-    lambda=mu;
     
     rho(1:round(nx/2),:)=rho(1:round(nx/2),:)+200.0;
     mu(1:round(nx/2),:)=mu(1:round(nx/2),:)+3.5e10;
+    lambda=mu;
     
     rho(98:102,123:127)=rho(98:102,123:127)+2000.0;
     
@@ -84,6 +84,22 @@ elseif (model_type==11)
     lambda = 3.42e10*ones(nx,nz);  % Pa
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
+    
+elseif (model_type==12)
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    
+    left = round(nx/2-nx/20);
+    right = round(nx/2+nx/20);
+    top = round(nz/2+nz/20);
+    bottom = round(nz/2-nz/20);
+    
+    mu(left:right,bottom:top) = mu(left:right,bottom:top) + 1e10;
     
 elseif (model_type==100)
     

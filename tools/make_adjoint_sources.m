@@ -56,7 +56,7 @@ dt=t(2)-t(1);
 
 misfit=0.0;
 
-% initialise source time function save variable
+% initialise source time function output variable
 adjoint_stf = zeros(nrec,nt); % adapt this to three dimensions when working!
 
 %- convert to displacement if wanted ------------------------------------------
@@ -64,8 +64,10 @@ adjoint_stf = zeros(nrec,nt); % adapt this to three dimensions when working!
 if strcmp(output,'displacement')
     
 %     u=zeros(nrec,nt);
-    u=cumsum(vel,2)*dt;
+    u=cumsum(v,2)*dt;
     v=u;
+    u_0 = cumsum(v_0,2)*dt;
+    v_0 = u_0;
 elseif not(strcmp(output,'velocity'))
     error('ERRORRRR your output variable is not ''displacement'' or ''velocity''');
 end

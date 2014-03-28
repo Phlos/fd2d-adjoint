@@ -3,9 +3,7 @@
 %==========================================================================
 
 adjoint_source_path='../input/sources/adjoint/';
-% adjoint_source_component='x';   % 'x' or 'z' -- the P-SV source direction
-                                % the sensitivity kernel is calculated
-                                % based on the component given here. 
+
 
 %==========================================================================
 % set basic simulation parameters
@@ -24,7 +22,7 @@ nz=390;     % grid points in z-direction
 % dt=0.33;     % time step [s] fine for SH in a grid   dx=dz=3.34e3 m
 % dt=0.1;      % time step [s] fine for P-SV in a grid dx=dz=3.34e3 m
 dt=0.01;      % time step [s]
-nt=6000;     % number of iterations
+nt=4000;      % number of iterations
 
 order=4;    % finite-difference order (2 or 4)
 
@@ -38,9 +36,10 @@ model_type=11;
 % 2=homogeneous with localised density perturbation
 % 3=layered medium
 % 4=layered with localised density perturbation
-% 5=vertical gradient medium
-% 6=vertical gradient medium with localised density perturbation
+% 5=vertical gradient mu medium
+% 6=vertical gradient mu medium with localised density perturbation
 % 11= homogeneous with values from Tromp et al 2005
+% 12= like 11, but with a positive mu anomaly in the centre
 % 100= layered: left = high velocity, right = low velocity (any difference with model 3???)
 
 % 'initial'= read initial model for waveform inversion (mu_initial, rho_initial)
@@ -57,8 +56,8 @@ tauw    = 4.0;        % source duration, seconds
 tee_0   = 4.0;        % source start time, seconds
 
 % needed for 'delta_bp'    
-f_min=0.2;     % minimum frequency [Hz]
-f_max=1.00;     % maximum frequency [Hz]
+f_min=0.2;          % minimum frequency [Hz]
+f_max=1.00;         % maximum frequency [Hz]
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 
@@ -80,12 +79,40 @@ simulation_mode='forward';
 % source positions
 %==========================================================================
 
-src_x=[0.6e5];
-src_z=[0.9e5];
+centre=[Lx/2 Lz/2];
+numrec=6;
+circlesize = 0.4*min(Lx,Lz);
+dphi = 2*pi/(numrec-1);
+
+src_x=zeros(1,numrec);
+src_z=zeros(1,numrec);
+
+n=1;
+for phi = -pi/2+dphi/2 : dphi : 3*pi/2+dphi/2;
+    src_x(n)=centre(1) + circlesize*cos(phi);
+    src_z(n)=centre(2) + circlesize*sin(phi);
+    n=n+1;
+end
+
+% src_x=[0.6e5];
+% src_z=[0.7e5];
 
 %==========================================================================
 % receiver positions
 %==========================================================================
+
+% centre=[dx*nx/2 dz*nz/2];
+% numrec=6;
+% circlesize = 0.4*min(Lx,Lz);
+
+rec_x=zeros(1,numrec);
+rec_z=zeros(1,numrec);
+n=1;
+for phi=-pi/2:2*pi/(numrec-1):3*pi/2;
+    rec_x(n)=centre(1) + circlesize*cos(phi);
+    rec_z(n)=centre(2) + circlesize*sin(phi);
+    n=n+1;
+end
 
 % a set of receivers in 1/3 circle around the source (hardcoded distances!)
 % rec_x=zeros(1,6);
@@ -103,7 +130,7 @@ src_z=[0.9e5];
 
 %- just one receiver
 rec_x=[1.6e5];
-rec_z=[0.9e5];
+rec_z=[0.7e5];
 
 %- a large number of receivers in a closed rectangular configuration
 %rec_x=[50.0  50.0  50.0  50.0  50.0   50.0    70.0  90.0 110.0 130.0   70.0  90.0 110.0 130.0  150.0 150.0 150.0 150.0 150.0  150.0];
@@ -118,7 +145,7 @@ width=25000.0;     % width of the boundary layer in m
 
 absorb_left=1;  % absorb waves on the left boundary
 absorb_right=1; % absorb waves on the right boundary
-absorb_top=0;   % absorb waves on the top boundary
+absorb_top=1;   % absorb waves on the top boundary
 absorb_bottom=1;% absorb waves on the bottom boundary
 
 %==========================================================================
@@ -129,10 +156,17 @@ absorb_bottom=1;% absorb waves on the bottom boundary
 plot_every=50;
 
 %==========================================================================
-% make wavepropagation movie
+% output: movies, matfiles, etc.
 %==========================================================================
 
+%- matfiles ---
+
+save_u_fw = 'no';       % 'yes' or 'no' -- save the u_forward matfile
+save_v_fw = 'no';       % 'yes' or 'no' -- save the v_forward matfile
+
+
+%- movies -----
 make_movie='yes';                                   % 'yes' or 'no'
 make_movie_adj='yes';                               % 'yes' or 'no'
-movie_file='../output/model11_tromp-ricker';        % output file name
+movie_file='../output/model12_tromp-ricker';        % output file name
 movie_file_adj='../output/model11_tromp-ricker_adjoint';

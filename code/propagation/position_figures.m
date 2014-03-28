@@ -8,9 +8,9 @@ if (strcmp(simulation_mode,'forward'))
         set(fig_vel,'OuterPosition',pos_vel);
     end
 elseif (strcmp(simulation_mode,'adjoint'))
-    Kx=0;       % what were these for again?!
-    Ky=0;       % ?
-    Kz=0;       % ?
+%     Kx=0;       % what were these for again?!
+%     Ky=0;       % ?
+%     Kz=0;       % ?
     fig_adjoint = figure;
     if(strcmp(wave_propagation_type,'SH'))
         set(fig_adjoint,'OuterPosition',pos_adj_1)

@@ -17,3 +17,8 @@ subplot(3,2,4)
 plot_kernel(X,Z,K.mu.SH,'mu - SH','perc',99.95,stf_PSV);
 subplot(3,2,6)
 plot_kernel(X,Z,zeros(size(X')),'lambda - SH','perc',100,stf_PSV);
+
+h = colorbar('horiz');
+set(h,'XTick',[-1;0;1])
+set(h,'Xticklabel',{'-max','0', 'max'})
+set(h,'Position',[0.3 0.05 0.4 0.02])

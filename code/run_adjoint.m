@@ -6,7 +6,7 @@
 % K: sensitivity kernel with respect to density
 %==========================================================================
 
-function [K] = run_adjoint(stf,kerneltype) %(vx_forward, vy_forward, vz_forward)
+function [K] = run_adjoint(u_fw,v_fw,stf,kerneltype) %(vx_forward, vy_forward, vz_forward)
 disp 'Welcome to the ultimate adjoint experience!!'
 disp 'initialising...'
 
@@ -35,9 +35,19 @@ orig_src_z = src_z;
 % make figures appear right on the screen
 set_figure_properties;
 
+% extract the u_fw and v_fw fields
+ux_forward = u_fw.x;
+uy_forward = u_fw.y;
+uz_forward = u_fw.z;
+vx_forward = v_fw.x;
+vy_forward = v_fw.y;
+vz_forward = v_fw.z;
+
 % load matfile containing the stored forward field. Takes a LONG time.
-disp '.... and loooooaaaading v_forward....'
-load ../output/v_forward.mat
+% disp '.... and loooooaaaading v_forward....'
+% load ../output/v_forward.mat
+% disp '.... and loooooaaaading u_forward....'
+% load ../output/u_forward.mat
 
 %==========================================================================
 % initialise simulation
@@ -84,48 +94,22 @@ fclose(fid);
 
 %- read adjoint source time functions + plot 'em --------------------------
 
-% stf=zeros(3,ns,nt);
 fig_adjoint_stf = figure;
-
-% direction = zeros(1,2);
-
-% read adjoint source time functions from file
-
-% if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-%     if strcmp(adjoint_source_component,'x')
-%         direction(1)=1;
-%     elseif strcmp(adjoint_source_component,'z')
-%         direction(1)=3;
-%     else
-%         error('the direction of the source component that you gave is invalid')
-%     end
-% end
-
-% if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-%     direction(2)=2;
-% end
 
 figure(fig_adjoint_stf);
 for n=1:ns          % loop over sources
     for dir= 1:3    % loop over directions 1,2,3 = x,y,z
-%     for dir = direction;
 %         disp(['reading direction ',num2str(dir),'.'])
 %         fid=fopen(['../input/sources/adjoint/src_' num2str(n) '_' num2str(dir)],'r');
 %         stf(dir,n,1:nt)=fscanf(fid,'%g',nt);
         
         % plotting the source time functions
-        
-        
         subplot(3,1,dir);
-        dir
         thee=0:dt:nt*dt-dt;
-        length(thee);
         oempa=reshape(stf(dir,n,:),1,nt);
-        size(oempa);
-        size(thee);
-%         clf;
         plot(thee,oempa);
     end
+    pause(0.5);
 end
 
 
@@ -134,24 +118,9 @@ end
 %% RUN WAVEFIELD PROPAGATION
 %==========================================================================
 
-fig_adjoint = figure;
-
-if(strcmp(wave_propagation_type,'SH'))
-    set(fig_adjoint,'OuterPosition',pos_adj_1)
-    nrows=1;
-elseif(strcmp(wave_propagation_type,'PSV'))
-    set(fig_adjoint,'OuterPosition',pos_adj_2)
-    nrows=2;
-elseif(strcmp(wave_propagation_type,'both'))
-    set(fig_adjoint,'OuterPosition',pos_adj_3)
-    nrows=3;
-end
 
 % wavefield propagation is executed backwards in time for the adjoint case
 run_wavefield_propagation;
-
-
-
 
 
 %==========================================================================
@@ -159,19 +128,8 @@ run_wavefield_propagation;
 %==========================================================================
 
 disp 'storing kernels...'
+save('../output/kernels','K','-v7.3');
 
-%  if(strcmp(wave_propagation_type,'SH'))
-        save('../output/kernels','K','-v7.3');
-%         save('../output/v_rec', 'v_rec_y', '-v7.3');
-%     elseif(strcmp(wave_propagation_type,'PSV'))
-%         save('../output/v_forward','vx_forward','vz_forward', ...
-%                                     'v_rec_x','v_rec_z','-v7.3');
-%         save('../output/v_rec', 'v_rec_x','v_rec_z', '-v7.3');
-%     elseif(strcmp(wave_propagation_type,'both'))
-%         save('../output/v_forward','vx_forward','vy_forward','vz_forward',...
-%                                    'v_rec_x','v_rec_y','v_rec_z','-v7.3');
-%         save('../output/v_rec', 'v_rec_x','v_rec_y','v_rec_z', '-v7.3');
-%     end
 
 if strcmp(make_movie_adj,'yes')
     disp(['storing movie: ',movie_file_adj]);
