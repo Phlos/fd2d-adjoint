@@ -2,7 +2,7 @@
 
 % run forward
 cd ../code/
-[v_rec,t,u_fw,v_fw,rec_x,rec_z,test]=run_forward;
+[v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward;
 
 
 cd ../tools/
@@ -12,6 +12,7 @@ plot_seismograms(v_rec_3,t,'velocity');
 
 % make adjoint sources
 adstf = make_tt_adjoint_sources(v_rec,t);
+% adstf = make_all_adjoint_sources(v_rec,v_obs,t,'waveform_difference');
 
 % check the adjoint source time functions
 plot_vrec_to_adjointstf(t,v_rec.x,squeeze(adstf(1,:,:)));
@@ -29,7 +30,7 @@ nz=;     % grid points in z-direction
 stf_PSV=;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 [mu,rho,lambda]=define_material_parameters(nx,nz,11);
-set_figure_properties;
+set_figure_properties_doffer;
 
 cd ../tools/
 calculate_other_kernels;

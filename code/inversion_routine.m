@@ -31,7 +31,7 @@ nz=;     % grid points in z-direction
 stf_PSV=;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 [mu,rho,lambda]=define_material_parameters(nx,nz,11);
-set_figure_properties;
+set_figure_properties_doffer;
 
 cd ../tools/
 calculate_other_kernels;

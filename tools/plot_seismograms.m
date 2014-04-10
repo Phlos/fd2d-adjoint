@@ -41,7 +41,7 @@ end
 %- plot seismograms ----------
 
 recordings = figure;
-set(gca,'FontSize',20)
+% set(gca)
 hold on
 
 % for k=1:length(rec_x)
@@ -56,7 +56,7 @@ for k = 1:size(vel,1)
     end
     
     tekstje = ['trace nr ', num2str(k), ' (max: ', num2str(m,'%3.1e'), ')' ];
-    text(min(t)-(t(end)-t(1))/6,spacing*(size(vel,1)-k)+0.3,tekstje,'FontSize',14)
+    text(min(t)-(t(end)-t(1))/6,spacing*(size(vel,1)-k)+0.3,tekstje)
     
 %     % afstanden geven in m of km
 %     if (max(rec_x)<=1000)
@@ -69,8 +69,8 @@ end
 
 % text on figure: velocity or displacement seismogram
 figure(recordings);
-title([veldis, ' seismograms'])
+title([veldis, ' seismograms']);
 
-xlabel('time [s]','FontSize',20);
-ylabel('normalised traces','FontSize',20);
+xlabel('time [s]');
+ylabel('normalised traces');
 axis([min(t)-(t(end)-t(1))/5 max(t)+(t(end)-t(1))/10 -1.5 spacing*size(vel,1)])

@@ -12,7 +12,7 @@ title('original seismograms');
 
 % adjoint source, NON time reversed (= tapered velocity seismogram)
 subplot(3,1,2);
-plot(t,flipud(stf),'r');
+plot(t,fliplr(stf),'r');
 title('non time-reversed');
 
 % adjoint source, time reversed

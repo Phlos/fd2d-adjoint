@@ -29,7 +29,7 @@ input_parameters;
 nt=5*round(nt/5);
 
 
-set_figure_properties;  % i.e. size of the figures & location on screen
+set_figure_properties_doffer;  % i.e. size of the figures & location on screen
 
 %==========================================================================
 %% initialise simulation
@@ -60,9 +60,9 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     
     %- make and plot source time function ---------------------------------
 
-    make_source_time_function;
+    stf = make_source_time_function(t,stf_type,simulation_mode,f_min,f_max,tauw_0,tauw,tee_0);
     plot_source_time_function;
-    
+    %%
     % add the same source time function to all the sources.
     stf_all=zeros(3,ns,nt);
     
@@ -70,9 +70,9 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
         stf_all(1,i,:) = stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
         stf_all(2,i,:) = stf;                           % y direction
         stf_all(3,i,:) = stf.*stf_PSV(2)./norm(stf_PSV);  % z direction
-        stf = stf_all;
     end
     
+    stf = stf_all;
 end
 
 %% check values
@@ -80,8 +80,8 @@ end
 test_input_compatibility;
 
 disp 'You need to clear big variables from your workspace - else i''m SLOW.'
-clearok = input('''yes'' to exit script, ''no'' to continue. ','s');
-if (strcmp(clearok,'no') || strcmp(clearok,'n'))
+clearok = input('''yes'' to continue, ''no'' to exit script. ','s');
+if (strcmp(clearok,'yes') || strcmp(clearok,'y'))
 %     clearvars u_fw v_fw;
 else
     error('Stopping script - do something with the variables yourself eh!')
@@ -124,13 +124,18 @@ run_wavefield_propagation;
 disp 'saving output...'
 %- store time-reversed forward field --------------------------------------
 
+if(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
 u_fw.x = ux_forward;
-u_fw.y = uy_forward;
 u_fw.z = uz_forward;
-
 v_fw.x = vx_forward;
-v_fw.y = vy_forward;
 v_fw.z = vz_forward;
+end
+if(strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both') )
+u_fw.y = uy_forward;
+v_fw.y = vy_forward;
+end
+
+
 
 % % This is taking way too long. Only compute if explicitly asked
 
@@ -175,7 +180,8 @@ if strcmp(make_movie,'yes')
     disp(['storing movie: ',movie_file]);
     % profile needs to be 'Uncompressed AVI' on my (ubuntu) computer. 
     % (Matlab says that win7+/mac10.x+ can do mpeg-4)
-    writerObj=VideoWriter(movie_file,'Uncompressed AVI');   
+    writerObj=VideoWriter(movie_file,'Uncompressed AVI');  
+    writerObj.FrameRate = 10;
     open(writerObj);
     writeVideo(writerObj,M);
     close(writerObj);

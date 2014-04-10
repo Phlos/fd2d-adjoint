@@ -77,7 +77,7 @@ end
 
 
 
-%% calculate travel time kernels
+%% calculate kernels
 
 % if strcmp(kerneltype,'traveltime')
     
@@ -85,29 +85,34 @@ end
     
     % interaction
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-        interaction_vy = vy.*vy_fw;
+        interaction.rho.y = vy.*vy_fw;
     end
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-        interaction_vx = vx.*vx_fw;
-        interaction_vz = vz.*vz_fw;
+        interaction.rho.x = vx.*vx_fw;
+        interaction.rho.z = vz.*vz_fw;
+        interaction.rho.PSV = interaction.rho.x + interaction.rho.z;
     end
     
     % kernels
+    
+    % NOTE:
     % Here, two minus signs cancel each other out. Normally, the density
-    % kernel would be -v*v_fw (see Andreas' book or anything for details).
-    % As v = (u(t+dt) - u(t)) / dt, but we've calculated the adjoint v
-    % backwards in time, that becomes v = (u(t) - u(tt+dt)) / dt. Therefore
-    % we need another minus to compensate.
+    % kernel would be -v*v_fw (see Andreas' book for details).
+    % Normally, v = (u(t+dt) - u(t)) / dt, but we've calculated the adjoint 
+    % v backwards in time, so that the executed calculation instead becomes 
+    % v = (u(t) - u(t+dt)) / dt. Therefore we need another minus to 
+    % compensate.
     % => doesn't this mean that the mu and lambda kernels should have an
     %    extra minus?!! because those are the quantities derived from the v
     %    field which is calculated directly in the wave propagation. Think
     %    about this.
+    
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-        K.rho.SH = K.rho.SH + interaction_vy*5*dt;   
+        K.rho.SH = K.rho.SH + interaction.rho.y*5*dt;   
     end
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-        K.rho.x   = K.rho.x + interaction_vx*5*dt;
-        K.rho.z   = K.rho.z + interaction_vz*5*dt;
+        K.rho.x   = K.rho.x + interaction.rho.x*5*dt;
+        K.rho.z   = K.rho.z + interaction.rho.z*5*dt;
         K.rho.PSV = K.rho.x+K.rho.z;
     end
     
@@ -119,32 +124,32 @@ end
     
     % interaction
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-        interaction_muPSV = 2*duxdx.*duxdx_fw + 2*duzdz.*duzdz_fw ...
+        interaction.mu.PSV = 2*duxdx.*duxdx_fw + 2*duzdz.*duzdz_fw ...
                             + (duxdz + duzdx) .* (duzdx_fw + duxdz_fw);
     end
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-        interaction_muSH  = 1/2 * (duydx.*duydx_fw + duydz.*duydz_fw);
+        interaction.mu.SH  = 1 * (duydx.*duydx_fw + duydz.*duydz_fw);
     end
     
     % kernels
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-        K.mu.PSV = K.mu.PSV + interaction_muPSV*5*dt;
+        K.mu.PSV = K.mu.PSV + interaction.mu.PSV*5*dt;
     end
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-        K.mu.SH = K.mu.SH + interaction_muSH*5*dt;
+        K.mu.SH = K.mu.SH + interaction.mu.SH*5*dt;
     end
     
     
     
     
-    %% lambda -- lamÃ©'s parameter	(calculated from divergence of displacement)
+    %% lambda -- lamé's parameter	(calculated from divergence of displacement)
     
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
         % interaction
-        interaction_lambdaPSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
+        interaction.lambda.PSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
         
         % kernel
-        K.lambda.PSV = K.lambda.PSV + interaction_lambdaPSV*5*dt;
+        K.lambda.PSV = K.lambda.PSV + interaction.lambda.PSV*5*dt;
     end
     
     

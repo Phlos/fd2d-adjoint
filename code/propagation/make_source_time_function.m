@@ -1,3 +1,5 @@
+
+function stf = make_source_time_function(t,stf_type,simulation_mode,f_min,f_max,tauw_0,tauw,tee_0)
 %- compute source-time function -------------------------------------------
 
 if strcmp(simulation_mode,'forward_green')

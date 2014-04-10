@@ -1,5 +1,10 @@
 % plot kernels for SH and P-SV in rho, mu, lambda
 
+cd ../code/
+[X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
+[mu,rho,lambda]=define_material_parameters(nx,nz,11);
+set_figure_properties_doffer;
+
 fig_knl = figure;
 set(fig_knl,'OuterPosition',pos_knl)
 

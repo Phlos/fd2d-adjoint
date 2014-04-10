@@ -2,13 +2,13 @@
 
 fig_stf = figure;
 set(fig_stf,'OuterPosition',pos_stf);
-set(gca,'FontSize',20)
+% set(gca,'FontSize',20)
 hold on
 
 subplot(2,1,1);
 plot(t,stf,'k');
-    xlabel('time [s]','FontSize',20);
-    title('source-time function','FontSize',20);
+    xlabel('time [s]');
+    title('source-time function');
     
 % frequency spectrum
 
@@ -20,5 +20,5 @@ f = Fs/2*linspace(0,1,NFFT/2+1);
 spectrum=2*abs(Y(1:NFFT/2+1));
 % figure;
 plot(f,spectrum);
-    xlabel('frequency [Hz]','FontSize',20);
-    title('... and its frequency (amp) spectrum','FontSize',20);
+    xlabel('frequency [Hz]');
+    title('... and its frequency (amp) spectrum');

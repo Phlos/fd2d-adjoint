@@ -65,6 +65,15 @@ end
 
 %% initialise kernels
 
+interaction.rho.x = 0;
+interaction.rho.y = 0;
+interaction.rho.z = 0;
+
+interaction.mu.PSV = 0;
+interaction.mu.SH = 0;
+
+interaction.lambda.PSV =0;
+
 K.rho.SH   = 0;
 K.rho.x   = 0;
 K.rho.z   = 0;

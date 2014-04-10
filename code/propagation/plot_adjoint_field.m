@@ -15,45 +15,46 @@ disp(timestamp);
 for row=1:nrows
     if(row==1)
         if(strcmp(wave_propagation_type,'SH'))
-            v_current=vy;
-            snapshot = vy_fw;
-            interaction = interaction_vy;
+            v_adj_snap=vy;
+            v_fw_snap = vy_fw;
+            interact = interaction.rho.y;
             Kaa = K.rho.SH;
             direction = 'Y';
             prc=99.985;
         elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-            v_current=vx;
-            snapshot = vx_fw;
-            interaction = interaction_vx;
+            v_adj_snap=vx;
+            v_fw_snap = vx_fw;
+            interact = interaction.rho.x;
             Kaa = K.rho.x;
             direction = 'X';
             prc=99.97;
         end
     elseif(row==2)
-        v_current=vz;
-        snapshot = vz_fw;
-        interaction = interaction_vz;
+        v_adj_snap=vz;
+        v_fw_snap = vz_fw;
+        interact = interaction.rho.z;
         Kaa = K.rho.z;
         direction = 'Z';
         prc=99.97;
     elseif(row==3)
-        v_current=vy;
-        snapshot = vy_fw;
-        interaction = interaction_vy;
+        v_adj_snap=vy;
+        v_fw_snap = vy_fw;
+        interact = interaction.rho.y;
         Kaa = K.rho.SH;
         direction = 'Y';
         prc=99.99;
     end
 
 %% plot adjoint field ---------------------------------------------
-max_v = max(v_current(:));
+max_v = max(v_adj_snap(:));
 subplot(nrows,ncols,4*(row-1)+1);
 cla;
-pcolor(X,Z,v_current');
+pcolor(X,Z,v_adj_snap');
 hold on
 plot_adjoint_src_rec;
 
-scale = 0.8*max(abs(v_current(:)));
+% scale = 0.8*max(abs(v_current(:)));
+scale=prctile(abs(v_adj_snap(:)),99.97);
 
 caxis([-scale scale]);
 colormap(cm);
@@ -73,11 +74,12 @@ text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
 
 subplot(nrows,ncols,4*(row-1)+2);
 cla;
-pcolor(X,Z,snapshot');
+pcolor(X,Z,v_fw_snap');
 hold on
 plot_adjoint_src_rec;
 
-scale = 0.8*max(max(abs(snapshot)));
+% scale = 0.8*max(max(abs(snapshot)));
+scale=prctile(abs(v_fw_snap(:)),99.97);
 
 caxis([-scale scale]);
 colormap(cm);
@@ -97,10 +99,10 @@ text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
 subplot(nrows,ncols,4*(row-1)+3);
 cla;
 hold on
-pcolor(X,Z,interaction');
+pcolor(X,Z,interact');
 plot_adjoint_src_rec;
 
-scale = 0.8*max(max(abs(interaction)));
+scale = 0.8*max(max(abs(interact)));
 
 caxis([-scale scale]);
 colormap(cm);
@@ -201,6 +203,13 @@ end
         
         M(movie_index)=getframe(gcf);
         
+    end
+    
+    temps = n*dt;
+    if any(savetimes == temps)
+        filename = [snapshotfile,'_adjoint_t',num2str(temps),'.png'];
+        disp(['saving at time ',num2str(temps),' with filename ',filename, '!'])
+        print(gcf,'-dpng','-r1000',filename)
     end
            
 

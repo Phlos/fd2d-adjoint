@@ -19,7 +19,7 @@ function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,stf_PSV)
 % a plot of the sensitivity kernel
 %==========================================================================
 
-load 'cm_velocity.mat';
+load '../code/propagation/cm_velocity.mat';
 
 if strcmp(cmaxtype,'perc')
     scale = prctile(abs(kernel(:)),cmax);

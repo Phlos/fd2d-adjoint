@@ -2,6 +2,7 @@ function [adstf, misfit] = make_all_adjoint_sources(v_rec,v_obs,t,measurement)
 
 % wrapper to make the adjoint sources for waveform inversion
 if strcmp(measurement,'waveform_difference')
+    size(v_rec.y)
     [adstf_x, misfit.x] = make_adjoint_sources(v_rec.x,v_obs.x, ...
                           t,'displacement',measurement,'_1');
     [adstf_z, misfit.z] = make_adjoint_sources(v_rec.z,v_obs.z, ...

@@ -1,4 +1,10 @@
 %==========================================================================
+% project name (all file names will be changed accordingly)
+%==========================================================================
+
+project_name='PSV_radiation';
+
+%==========================================================================
 % path where seismic sources are located
 %==========================================================================
 
@@ -9,7 +15,7 @@ adjoint_source_path='../input/sources/adjoint/';
 % set basic simulation parameters
 %==========================================================================
 
-wave_propagation_type='both';   % can be 'PSV' or 'SH' or 'both'
+wave_propagation_type='PSV';   % can be 'PSV' or 'SH' or 'both'
 
 Lx=2.20e5;     % model extension in x-direction [m]
 Lz=1.3e5;     % model extension in z-direction [m]
@@ -22,7 +28,7 @@ nz=390;     % grid points in z-direction
 % dt=0.33;     % time step [s] fine for SH in a grid   dx=dz=3.34e3 m
 % dt=0.1;      % time step [s] fine for P-SV in a grid dx=dz=3.34e3 m
 dt=0.01;      % time step [s]
-nt=4000;      % number of iterations
+nt=3800;      % number of iterations
 
 order=4;    % finite-difference order (2 or 4)
 
@@ -53,7 +59,7 @@ stf_type = 'ricker';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed
 % needed for 'ricker'
 tauw_0  = 2.628;      % seconds
 tauw    = 4.0;        % source duration, seconds
-tee_0   = 4.0;        % source start time, seconds
+tee_0   = 3.0;        % source start time, seconds
 
 % needed for 'delta_bp'    
 f_min=0.2;          % minimum frequency [Hz]
@@ -79,23 +85,23 @@ simulation_mode='forward';
 % source positions
 %==========================================================================
 
-centre=[Lx/2 Lz/2];
-numrec=6;
-circlesize = 0.4*min(Lx,Lz);
-dphi = 2*pi/(numrec-1);
+% centre=[Lx/2 Lz/2];
+% numrec=8;
+% circlesize = 0.25*min(Lx,Lz);
+% dphi = 2*pi/(numrec);
+% 
+% src_x=zeros(1,numrec);
+% src_z=zeros(1,numrec);
+% 
+% n=1;
+% for phi = -pi : dphi : pi-dphi ;
+%     src_x(n)=centre(1) + circlesize*cos(phi);
+%     src_z(n)=centre(2) + circlesize*sin(phi);
+%     n=n+1;
+% end
 
-src_x=zeros(1,numrec);
-src_z=zeros(1,numrec);
-
-n=1;
-for phi = -pi/2+dphi/2 : dphi : 3*pi/2+dphi/2;
-    src_x(n)=centre(1) + circlesize*cos(phi);
-    src_z(n)=centre(2) + circlesize*sin(phi);
-    n=n+1;
-end
-
-% src_x=[0.6e5];
-% src_z=[0.7e5];
+src_x=[0.6e5];
+src_z=[0.7e5];
 
 %==========================================================================
 % receiver positions
@@ -105,14 +111,15 @@ end
 % numrec=6;
 % circlesize = 0.4*min(Lx,Lz);
 
-rec_x=zeros(1,numrec);
-rec_z=zeros(1,numrec);
-n=1;
-for phi=-pi/2:2*pi/(numrec-1):3*pi/2;
-    rec_x(n)=centre(1) + circlesize*cos(phi);
-    rec_z(n)=centre(2) + circlesize*sin(phi);
-    n=n+1;
-end
+% rec_x=zeros(1,numrec);
+% rec_z=zeros(1,numrec);
+% 
+% n=1;
+% for phi=-pi+dphi/2 : dphi : pi-dphi/2 ;
+%     rec_x(n)=centre(1) + circlesize*cos(phi);
+%     rec_z(n)=centre(2) + circlesize*sin(phi);
+%     n=n+1;
+% end
 
 % a set of receivers in 1/3 circle around the source (hardcoded distances!)
 % rec_x=zeros(1,6);
@@ -153,11 +160,23 @@ absorb_bottom=1;% absorb waves on the bottom boundary
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-plot_every=50;
+plot_every=25;
+
+plot_forward_frames='PSV-SH';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' -- which frames should be plotted in the forward calculation
+% some test about plotting the frames differently
+% plot_frame.PSV='no';
+% plot_frame.SH='yes';
+% plot_frame.X='yes';
+% plot_frame.Z='no';
 
 %==========================================================================
 % output: movies, matfiles, etc.
 %==========================================================================
+
+%- screenshots of wave propagation
+
+snapshotfile = ['../output/',project_name];
+savetimes = [5.0 7 10 15 20 25 27];
 
 %- matfiles ---
 
@@ -168,5 +187,5 @@ save_v_fw = 'no';       % 'yes' or 'no' -- save the v_forward matfile
 %- movies -----
 make_movie='yes';                                   % 'yes' or 'no'
 make_movie_adj='yes';                               % 'yes' or 'no'
-movie_file='../output/model12_tromp-ricker';        % output file name
-movie_file_adj='../output/model11_tromp-ricker_adjoint';
+movie_file=['../output/',project_name,'_forward'];        % output file name
+movie_file_adj=['../output/',project_name,'_adjoint'];

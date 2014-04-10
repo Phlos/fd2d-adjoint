@@ -38,22 +38,24 @@ for n=1:nt
         [DSX,DSZ]=div_s_PSV(sxx,szz,sxz,dx,dz,nx,nz,order);
     end
     
-%     test.DSX_before_stf(n) = DSX(src_x_id(1),src_z_id(1));
+%       test.DSX_before_stf1(n) = DSX(src_x_id(1),src_z_id(1));
+%       test.DSX_before_stf2(n) = DSX(src_x_id(2),src_z_id(2));
     
     %- add point sources --------------------------------------------------
     
     if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green') ||  strcmp(simulation_mode,'adjoint') )
     
         for i=1:ns
+            
             if(strcmp(wave_propagation_type,'SH'))
-                DSY(src_x_id(i),src_z_id(i))=DSY(src_x_id(i),src_z_id(i))+stf(2,i,n);
+                DSY(src_x_id(i),src_z_id(i))= DSY(src_x_id(i),src_z_id(i)) + stf(2,i,n);
             elseif(strcmp(wave_propagation_type,'PSV'))
-                DSX(src_x_id(i),src_z_id(i))=DSX(src_x_id(i),src_z_id(i))+stf(1,i,n);                   %%%%%%%%% Beetje krukkig zo... kan het mooier?
-                DSZ(src_x_id(i),src_z_id(i))=DSZ(src_x_id(i),src_z_id(i))+stf(3,i,n);
+                DSX(src_x_id(i),src_z_id(i))= DSX(src_x_id(i),src_z_id(i)) + stf(1,i,n);                   %%%%%%%%% Beetje krukkig zo... kan het mooier?
+                DSZ(src_x_id(i),src_z_id(i))= DSZ(src_x_id(i),src_z_id(i)) + stf(3,i,n);
             elseif(strcmp(wave_propagation_type,'both'))
-                DSY(src_x_id(i),src_z_id(i))=DSY(src_x_id(i),src_z_id(i))+stf(2,i,n);
-                DSX(src_x_id(i),src_z_id(i))=DSX(src_x_id(i),src_z_id(i))+stf(1,i,n);                   %%%%%%%%% Beetje krukkig zo... kan het mooier?
-                DSZ(src_x_id(i),src_z_id(i))=DSZ(src_x_id(i),src_z_id(i))+stf(3,i,n);
+                DSY(src_x_id(i),src_z_id(i))= DSY(src_x_id(i),src_z_id(i)) + stf(2,i,n);
+                DSX(src_x_id(i),src_z_id(i))= DSX(src_x_id(i),src_z_id(i)) + stf(1,i,n);                   %%%%%%%%% Beetje krukkig zo... kan het mooier?
+                DSZ(src_x_id(i),src_z_id(i))= DSZ(src_x_id(i),src_z_id(i)) + stf(3,i,n);
             end
 
         end
@@ -64,8 +66,10 @@ for n=1:nt
     
     %- update velocity field ----------------------------------------------
     
-%     test_vx_source = vx(src_x_id(1),src_z_id(1)) + ...
+%     test.vx_source1 = vx(src_x_id(1),src_z_id(1)) + ...
 %             dt*DSX(src_x_id(1),src_z_id(1)) / rho(src_x_id(1),src_z_id(1));
+%     test.vx_source2 = vx(src_x_id(2),src_z_id(2)) + ...
+%             dt*DSX(src_x_id(2),src_z_id(2)) / rho(src_x_id(2),src_z_id(2));
 % size(test_vx_source)
     
     if(strcmp(wave_propagation_type,'SH'))
@@ -83,7 +87,8 @@ for n=1:nt
                         % [max(max(DS)),max(max(DSX)),max(max(DSZ)); max(max(v)),max(max(vx)),max(max(vz))]
     
 %     test.stf(n) = stf(1,1,n);
-%     test.DSX(n) = DSX(src_x_id(1),src_z_id(1));
+%     test.DSX1(n) = DSX(src_x_id(1),src_z_id(1));
+%     test.DSX2(n) = DSX(src_x_id(2),src_z_id(2));
 %     test.vx(n)  = vx(src_x_id(1),src_z_id(1));
 %     disp(['stf ',num2str(stf(1,1,n)), ...
 %               '  DSX  ', num2str(DSX(src_x_id(1),src_z_id(1))) ...

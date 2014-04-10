@@ -92,12 +92,13 @@ for n=1:nrec
         plot(t,v(n,:),'k')
         hold on
         plot(t,v_0(n,:),'r')
-        plot(t,v(n,:)-v_0(n,:),'k--')
+        plot(t,v(n,:)-v_0(n,:),'k--','LineWidth',2)
         hold off
         
         title(['receiver ' num2str(n) ' ,synth - black, obs - red, diff - dashed'])
         xlabel('t [s]')
         ylabel('velocity [m]')
+        
         
         %- select time windows and taper seismograms --------------------------
         
@@ -106,7 +107,7 @@ for n=1:nrec
         disp('select right window');
         [right,~]=ginput(1);
         
-        width=t(end)/10;
+        width=t(end)/10;                                                    % why divide by ten??
         v(n,:)=taper(v(n,:),t,left,right,width);
         v_0(n,:)=taper(v_0(n,:),t,left,right,width);
         
@@ -136,6 +137,13 @@ for n=1:nrec
         title(['adjoint source (', output, 'seismograms) before time reversal'])
         pause(1.0)
         
+        %- save stf to adjoint_stf -- and time-reverse!! (using flipud)
+        
+        adjoint_stf(n,:) = fliplr(adstf_nonreversed);
+        
+        
+        
+        
         %- write adjoint source locations to file -----------------------------
         
         fprintf(fid_loc,'%g %g\n',rec_x(n),rec_z(n));
@@ -149,9 +157,7 @@ for n=1:nrec
         end
         fclose(fid_src);
         
-        %- save stf to adjoint_stf -- and time-reverse!! (using flipud)
-        
-        adjoint_stf(n,:) = fliplr(adstf_nonreversed);
+
         
 %     end
 end
