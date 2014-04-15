@@ -13,6 +13,9 @@ function plot_seismograms(vel,t,veldis)
 
 %- initialisations and parameters -----------------------------------------
 
+path(path,'../code');
+path(path,'../code/propagation');
+set_figure_properties_doffer;
 spacing=1.5;
 sort=0;
 
@@ -40,37 +43,49 @@ end
 
 %- plot seismograms ----------
 
+
 recordings = figure;
-% set(gca)
-hold on
+set(recordings,'OuterPosition',pos_seis);
 
 % for k=1:length(rec_x)
-for k = 1:size(vel,1)
+for j = 1:size(vel,3)
     
-    m=max(abs(vel(k,:)));
-    % traces om en om blauw en zwart kleuren
-    if mod(k,2)
-        plot(t,spacing*(size(vel,1)-k) + vel(k,:)/m,'k','LineWidth',1)
-    else
-        plot(t,spacing*(size(vel,1)-k) + vel(k,:)/m,'b','LineWidth',1)
+    dir = char('X' + j-1);
+    m=max(max(abs(vel(:,:,j))));
+    
+    subplot(3,1,j);
+    hold on
+    
+    for k = 1:size(vel,1)
+        
+        
+        % traces om en om blauw en zwart kleuren
+        if mod(k,2)
+            plot(t,spacing*(size(vel,1)-k) + vel(k,:,j)/m,'k','LineWidth',1)
+        else
+            plot(t,spacing*(size(vel,1)-k) + vel(k,:,j)/m,'b','LineWidth',1)
+        end
+        
+        tekstje = ['trace nr ', num2str(k) ];
+        text(min(t)-(t(end)-t(1))/6,spacing*(size(vel,1)-k)+0.3,tekstje)
+        
+        %     % afstanden geven in m of km
+        %     if (max(rec_x)<=1000)
+        %         text(min(t)-(t(end)-t(1))/6,spacing*(k-1)+0.3,['x=' num2str(rec_x(k)) ' m, z=' num2str(rec_z(k)) ' m'],'FontSize',14)
+        %     else
+        %         text(min(t)-(t(end)-t(1))/6,spacing*(k-1)+0.3,['x=' num2str(rec_x(k)/1000) ' km, z=' num2str(rec_z(k)/1000) ' km'],'FontSize',14)
+        %     end
+        
     end
     
-    tekstje = ['trace nr ', num2str(k), ' (max: ', num2str(m,'%3.1e'), ')' ];
-    text(min(t)-(t(end)-t(1))/6,spacing*(size(vel,1)-k)+0.3,tekstje)
+    % text on figure: velocity or displacement seismogram
+    title([veldis, ' seismograms -- ', dir, ' direction , (max: ', num2str(m,'%3.1e'), ')']);
     
-%     % afstanden geven in m of km
-%     if (max(rec_x)<=1000)
-%         text(min(t)-(t(end)-t(1))/6,spacing*(k-1)+0.3,['x=' num2str(rec_x(k)) ' m, z=' num2str(rec_z(k)) ' m'],'FontSize',14)
-%     else
-%         text(min(t)-(t(end)-t(1))/6,spacing*(k-1)+0.3,['x=' num2str(rec_x(k)/1000) ' km, z=' num2str(rec_z(k)/1000) ' km'],'FontSize',14)
-%     end
-    
+    xlabel('time [s]');
+    ylabel('normalised traces');
+    axis([min(t)-(t(end)-t(1))/5 max(t)+(t(end)-t(1))/10 -1.5 spacing*size(vel,1)])
+
 end
 
-% text on figure: velocity or displacement seismogram
-figure(recordings);
-title([veldis, ' seismograms']);
 
-xlabel('time [s]');
-ylabel('normalised traces');
-axis([min(t)-(t(end)-t(1))/5 max(t)+(t(end)-t(1))/10 -1.5 spacing*size(vel,1)])
+% figure(recordings);

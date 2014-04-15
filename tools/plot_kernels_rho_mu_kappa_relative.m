@@ -1,6 +1,18 @@
 % plot relative kernels rho mu kappa
 
-% figure position and size
+function plot_kernels_rho_vs_vp_relative(K_rel)
+
+%- initialise input -------------------------------------------------------
+path(path,'../code');
+path(path,'../input');
+input_parameters;
+set_figure_properties_doffer;
+
+[X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
+[mu,rho,lambda]=define_material_parameters(nx,nz,11);
+
+%- plot -------------------------------------------------------------------
+
 kernels_together = [K_rel.rho1.PSV; K_rel.rho1.SH; ...
                     K_rel.mu.PSV; K_rel.mu1.SH; ...
                     K_rel.kappa1.PSV];

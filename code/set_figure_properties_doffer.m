@@ -89,6 +89,12 @@ pos_adj_3 = [verti_scn_width + edge + 20,...
 %         6/6*scn_width,...
 %         3/4*scn_height];
 
+% position for the seismogram plots
+pos_seis = [60,...                  % left
+        80,...                         % bottom
+        verti_scn_width - 120,...    % width
+        verti_scn_height*2/3];        % height
+
 % position for the kernel plots
 pos_knl = [edge,...                 % left
         0,...                       % bottom

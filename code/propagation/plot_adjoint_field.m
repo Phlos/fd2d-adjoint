@@ -6,8 +6,8 @@ ncols=4;
 % K=0;
 
 
-
-timestamp=['t [s] = ',num2str(nt*dt-(n-plot_every)*dt)];
+temps = nt*dt - (n-plot_every)*dt;
+timestamp=['t [s] = ',num2str(temps)];
 
 disp(timestamp);
 
@@ -44,10 +44,37 @@ for row=1:nrows
         direction = 'Y';
         prc=99.99;
     end
+    
+    
+%% plot forward field --------------------------------------------------
 
+subplot(nrows,ncols,4*(row-1)+1);
+cla;
+pcolor(X,Z,v_fw_snap');
+hold on
+plot_adjoint_src_rec;
+
+% scale = 0.8*max(max(abs(snapshot)));
+scale=prctile(abs(v_fw_snap(:)),99.97);
+
+caxis([-scale scale]);
+colormap(cm);
+axis image
+shading interp
+xlabel('x [m]');
+ylabel('z [m]');
+title(['forward velocity field [m/s] (',direction,' component)']);
+
+% timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
+text(0.05*Lx,0.92*Lz,timestamp) ;
+text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
+                      'HorizontalAlignment','right')
+  
+                  
+                  
 %% plot adjoint field ---------------------------------------------
 max_v = max(v_adj_snap(:));
-subplot(nrows,ncols,4*(row-1)+1);
+subplot(nrows,ncols,4*(row-1)+2);
 cla;
 pcolor(X,Z,v_adj_snap');
 hold on
@@ -70,29 +97,7 @@ text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
                       'HorizontalAlignment','right')
 
 
-%% plot forward field --------------------------------------------------
 
-subplot(nrows,ncols,4*(row-1)+2);
-cla;
-pcolor(X,Z,v_fw_snap');
-hold on
-plot_adjoint_src_rec;
-
-% scale = 0.8*max(max(abs(snapshot)));
-scale=prctile(abs(v_fw_snap(:)),99.97);
-
-caxis([-scale scale]);
-colormap(cm);
-axis image
-shading interp
-xlabel('x [m]');
-ylabel('z [m]');
-title(['forward velocity field [m/s] (',direction,' component)']);
-
-% timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
-text(0.05*Lx,0.92*Lz,timestamp) ;
-text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ... 
-                      'HorizontalAlignment','right')
 
 %% plot interaction ----------------------------------------------------
 
@@ -205,7 +210,7 @@ end
         
     end
     
-    temps = n*dt;
+    
     if any(savetimes == temps)
         filename = [snapshotfile,'_adjoint_t',num2str(temps),'.png'];
         disp(['saving at time ',num2str(temps),' with filename ',filename, '!'])

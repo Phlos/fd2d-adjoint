@@ -7,11 +7,11 @@ cd ../code/
 
 cd ../tools/
 % check what the seismograms look like
-v_rec_3 = [v_rec.x; v_rec.y; v_rec.z;];
+v_rec_3 = cat(3, [v_rec.x], [v_rec.y], [v_rec.z]);
 plot_seismograms(v_rec_3,t,'velocity');
 
 % make adjoint sources
-adstf = make_tt_adjoint_sources(v_rec,t);
+adstf = make_tt_adjoint_sources(v_rec,v_obs,t);
 % adstf = make_all_adjoint_sources(v_rec,v_obs,t,'waveform_difference');
 
 % check the adjoint source time functions

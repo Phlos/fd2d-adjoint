@@ -27,9 +27,7 @@
 
 %% get necessary dynamic fields
 
-
-
-% adjoint
+%- adjoint ----------------------------------------------------------------
 
 % strain tensor
 if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
@@ -42,7 +40,7 @@ duydz = dz_v(uy,dx,dz,nx,nz,order);
 end
 
 
-% forward
+%- forward ----------------------------------------------------------------
 
 % forward velocity field (remember: saved backwards in time)
 if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
@@ -96,7 +94,29 @@ end
     % kernels
     
     % NOTE:
-    % Here, two minus signs cancel each other out. Normally, the density
+    % all the kernels are calculated with a minus sign, while Andreas' book
+    % says only rho should be minus. I think this is correct - because now
+    % the kernels are what I expect them to be. I am still (11-4-2014) 
+    % utterly confused about this whole minus sign business, but I think 
+    % the following is the case:
+    % - the adjoint field is calculated backwards in time, which means that
+    %   displacements are calculated from velocities in the wrong way.
+    % - to counteract this, the kernels which make use of the displacement
+    %   fields (mu and lambda) have to be corrected with an extra minus.
+    %      --- Nienke Blom, 11-4-2014
+    
+    
+    if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
+        K.rho.SH = K.rho.SH - interaction.rho.y*5*dt;   
+    end
+    if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
+        K.rho.x   = K.rho.x - interaction.rho.x*5*dt;
+        K.rho.z   = K.rho.z - interaction.rho.z*5*dt;
+        K.rho.PSV = K.rho.x+K.rho.z;
+    end
+    
+    % previously I had all with +, i.e. the minus of the Krho was minused:
+    % Here, two minus signs canceled each other out. Normally, the density
     % kernel would be -v*v_fw (see Andreas' book for details).
     % Normally, v = (u(t+dt) - u(t)) / dt, but we've calculated the adjoint 
     % v backwards in time, so that the executed calculation instead becomes 
@@ -106,17 +126,7 @@ end
     %    extra minus?!! because those are the quantities derived from the v
     %    field which is calculated directly in the wave propagation. Think
     %    about this.
-    
-    if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-        K.rho.SH = K.rho.SH + interaction.rho.y*5*dt;   
-    end
-    if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-        K.rho.x   = K.rho.x + interaction.rho.x*5*dt;
-        K.rho.z   = K.rho.z + interaction.rho.z*5*dt;
-        K.rho.PSV = K.rho.x+K.rho.z;
-    end
-    
-
+    %      --- Nienke Blom, ~20-3-2014
     
     
     
@@ -133,10 +143,10 @@ end
     
     % kernels
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-        K.mu.PSV = K.mu.PSV + interaction.mu.PSV*5*dt;
+        K.mu.PSV = K.mu.PSV - interaction.mu.PSV*5*dt;
     end
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-        K.mu.SH = K.mu.SH + interaction.mu.SH*5*dt;
+        K.mu.SH = K.mu.SH - interaction.mu.SH*5*dt;
     end
     
     
@@ -149,13 +159,11 @@ end
         interaction.lambda.PSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
         
         % kernel
-        K.lambda.PSV = K.lambda.PSV + interaction.lambda.PSV*5*dt;
+        K.lambda.PSV = K.lambda.PSV - interaction.lambda.PSV*5*dt;
     end
     
     
-    
-    
-    
+
 % else
 %     error('Sorry, you have to specify you want travel time kernels')
 %     
