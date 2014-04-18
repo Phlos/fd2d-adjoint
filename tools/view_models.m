@@ -6,7 +6,7 @@ function view_models(modeltype)
 path(path,'../code')
 
 input_parameters;
-set_figure_properties;
+set_figure_properties_doffer;
 
 [mu,rho,lambda]=define_material_parameters(nx,nz,modeltype);               
 

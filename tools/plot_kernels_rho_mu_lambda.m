@@ -1,12 +1,16 @@
 % plot kernels for SH and P-SV in rho, mu, lambda
 
-cd ../code/
+function plot_kernels_rho_mu_lambda(K)
+
+path(path,'../code');
+path(path,'../input');
+
 input_parameters;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 [mu,rho,lambda]=define_material_parameters(nx,nz,11);
 set_figure_properties_doffer;
 
-cd ../tools/
+
 
 fig_knl = figure;
 set(fig_knl,'OuterPosition',pos_knl)
@@ -30,3 +34,5 @@ h = colorbar('horiz');
 set(h,'XTick',[-1;0;1])
 set(h,'Xticklabel',{'-max','0', 'max'})
 set(h,'Position',[0.3 0.05 0.4 0.02])
+
+end

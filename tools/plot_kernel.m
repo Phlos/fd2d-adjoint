@@ -1,4 +1,4 @@
-function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,stf_PSV)
+function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,stf_PSV,varargin)
 
 % plot some random sensitivity kernel
 %
@@ -19,7 +19,8 @@ function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,stf_PSV)
 % a plot of the sensitivity kernel
 %==========================================================================
 
-load '../code/propagation/cm_velocity.mat';
+checkargs(varargin);
+
 
 if strcmp(cmaxtype,'perc')
     scale = prctile(abs(kernel(:)),cmax);
@@ -32,20 +33,15 @@ end
 % figure(figname);
 pcolor(X,Z,kernel');
 
-title({['kernel for ', kname]; ...
-        ['(source direction x,z = (',num2str(stf_PSV), ') )']});
+% title({['kernel for ', kname]; ...
+%         ['(source direction x,z = (',num2str(stf_PSV), ') )']});
+title({['kernel for ', kname]});
 shading interp
 % colorbar
 axis image
 % colormap(flipud(cm));
-colormap(cm);
+% colormap(cm);
 hold on;
-
-
-% p = plot(X(1,ie),Z(jee),'kx');
-% set(p,'Color','green');
-
-% cmax = max(max(abs(K_no_origsrc)));
 
 
 caxis([-scale scale]);
@@ -54,5 +50,19 @@ text(0.95*max(X(:)),0.92*max(Z(:)),['max = \pm', num2str(scale,'%3.1e')], ...
                       'HorizontalAlignment','right')
 
 hold off;
+
+end
+
+function checkargs(arg)
+
+narg = length(arg);
+if narg == 1
+    colormap(arg{1})
+elseif narg == 0;
+    load '../code/propagation/cm_velocity.mat';
+    colormap(cm);
+else
+    error('wrong number of variable arguments')
+end
 
 end

@@ -25,7 +25,6 @@ path(path,'propagation/');
 % path(path,'../input/');
 
 input_parameters;
-% wave_propagation_type
 
 %- edit some plotting parameters for run_forward
 plot_forward_frames = 'PSV-SH';
@@ -96,17 +95,11 @@ end
 %% initialise seismograms ------------------------------------------------- % Change this to save velocity seismograms only!
 % only for forward
 if(strcmp(wave_propagation_type,'SH'))
-%     uy=zeros(n_receivers,nt);
     v_rec.y=zeros(n_receivers,nt);
 elseif(strcmp(wave_propagation_type,'PSV'))
-%     ux=zeros(n_receivers,nt);
-%     uz=zeros(n_receivers,nt);
     v_rec.x    =zeros(n_receivers,nt);
     v_rec.z    =zeros(n_receivers,nt);
 elseif(strcmp(wave_propagation_type,'both'))
-%     ux=zeros(n_receivers,nt);
-%     uz=zeros(n_receivers,nt);
-%     uy=zeros(n_receivers,nt);
     v_rec.x    =zeros(n_receivers,nt);
     v_rec.y    =zeros(n_receivers,nt);
     v_rec.z    =zeros(n_receivers,nt);
@@ -173,22 +166,22 @@ if strcmp(simulation_mode,'forward')
     end
 end
 
-disp 'saving seismograms...'
-save('../output/v_rec', 'v_rec', '-v7.3');
+% disp 'saving seismograms...'
+% save('../output/v_rec', 'v_rec', '-v7.3');
 
-copyfile('../input/input_parameters.m','../output/input_parameters_out.m')
+% copyfile('../input/input_parameters.m','../output/input_parameters_out.m')
 
 
 
 %- store the movie if wanted ----------------------------------------------
 
-if strcmp(make_movie,'yes')
-    disp(['storing movie: ',movie_file]);
-    % profile needs to be 'Uncompressed AVI' on my (ubuntu) computer. 
-    % (Matlab says that win7+/mac10.x+ can do mpeg-4)
-    writerObj=VideoWriter(movie_file,'Uncompressed AVI');  
-    writerObj.FrameRate = 10;
-    open(writerObj);
-    writeVideo(writerObj,M);
-    close(writerObj);
-end
+% if strcmp(make_movie,'yes')
+%     disp(['storing movie: ',movie_file]);
+%     % profile needs to be 'Uncompressed AVI' on my (ubuntu) computer. 
+%     % (Matlab says that win7+/mac10.x+ can do mpeg-4)
+%     writerObj=VideoWriter(movie_file,'Uncompressed AVI');  
+%     writerObj.FrameRate = 10;
+%     open(writerObj);
+%     writeVideo(writerObj,M);
+%     close(writerObj);
+% end

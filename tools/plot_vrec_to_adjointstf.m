@@ -6,18 +6,18 @@ figure;
 
 % original recorded velocity seismogram
 subplot(3,1,1);
-plot(t,v_rec,'b');
+plot(t,v_rec);
 title('original seismograms');
 
 
 % adjoint source, NON time reversed (= tapered velocity seismogram)
 subplot(3,1,2);
-plot(t,fliplr(stf),'r');
+plot(t,fliplr(stf));
 title('non time-reversed');
 
 % adjoint source, time reversed
 subplot(3,1,3);
-plot(t,stf,'g');
+plot(t,stf);
 title('time-reversed');
 
 end

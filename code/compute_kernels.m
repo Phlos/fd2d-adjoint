@@ -162,7 +162,24 @@ end
         K.lambda.PSV = K.lambda.PSV - interaction.lambda.PSV*5*dt;
     end
     
-    
+%% fill out the kernels which are not calculated but which one may want to plot
+
+if (strcmp(wave_propagation_type,'SH'))
+    K.mu.PSV = zeros(size(K.mu.SH));
+    K.rho.PSV = zeros(size(K.rho.SH));
+    K.lambda.PSV = zeros(size(K.rho.SH));
+end
+
+if (strcmp(wave_propagation_type,'PSV'))
+    K.mu.SH = zeros(size(K.mu.PSV));
+    K.rho.SH = zeros(size(K.rho.PSV));
+end
+
+%- total kernels, used for the inversion based on rho mu lambda
+%  parametrisation.
+K.rho.total = K.rho.PSV + K.rho.SH;
+K.mu.total = K.mu.PSV + K.mu.SH;
+K.lambda.total = K.lambda.PSV;
 
 % else
 %     error('Sorry, you have to specify you want travel time kernels')

@@ -22,11 +22,11 @@ path(path,'../tools/');
 
 % read input parameters from the input file
 input_parameters;
-rec_x
+
 nt=5*round(nt/5);   % to make sure nt is a multiple of 5 -- needed because
                     % run_forward saves the forward field every 5 timesteps
                     % only, and thus we need to compare.
-
+disp 'bips'
 % adaptations to input parameters:
 % (needed to get run_adjoint to work like it should)
 simulation_mode='adjoint';                                                 
@@ -116,7 +116,7 @@ for n=1:ns          % loop over sources
         oempa=reshape(stf(dir,n,:),1,nt);
         plot(thee,oempa);
     end
-    pause(0.5);
+    pause(0.05);
 end
 
 
@@ -135,7 +135,8 @@ run_wavefield_propagation;
 %==========================================================================
 
 disp 'storing kernels...'
-save('../output/kernels','K','-v7.3');
+kernelsavename = ['../output/',project_name,'_kernels'];
+save(kernelsavename,'K','-v7.3');
 
 
 if strcmp(make_movie_adj,'yes')

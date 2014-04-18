@@ -14,9 +14,7 @@
 %
 %==========================================================================
 
-function [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward(varargin)
-
-[updateParams, updateable] = checkargs(varargin(:));
+function [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward_test(varargin)
 
 disp 'initialising...'
 %==========================================================================
@@ -32,7 +30,10 @@ nt=5*round(nt/5);
 
 set_figure_properties_doffer;  % i.e. size of the figures & location on screen
 
+[updateParams, updateable] = checkargs(varargin(:));
 
+% blabla = varargin{1};
+% fieldNames = fieldnames(blabla)
 
 %==========================================================================
 %% initialise simulation
@@ -40,10 +41,9 @@ set_figure_properties_doffer;  % i.e. size of the figures & location on screen
 
 %% material and domain ----------------------------------------------------
 
-if strcmp(updateParams,'no')
-    [mu,rho,lambda]=define_material_parameters(nx,nz,model_type);
-elseif strcmp(updateParams,'yes')
-    disp 'updating parameters...'
+[mu,rho,lambda]=define_material_parameters(nx,nz,model_type);               
+
+if strcmp(updateParams,'yes')
     rho = updateable.rho;
     mu = updateable.mu;
     lambda = updateable.lambda;
@@ -100,11 +100,17 @@ end
 %% initialise seismograms ------------------------------------------------- % Change this to save velocity seismograms only!
 % only for forward
 if(strcmp(wave_propagation_type,'SH'))
+%     uy=zeros(n_receivers,nt);
     v_rec.y=zeros(n_receivers,nt);
 elseif(strcmp(wave_propagation_type,'PSV'))
+%     ux=zeros(n_receivers,nt);
+%     uz=zeros(n_receivers,nt);
     v_rec.x    =zeros(n_receivers,nt);
     v_rec.z    =zeros(n_receivers,nt);
 elseif(strcmp(wave_propagation_type,'both'))
+%     ux=zeros(n_receivers,nt);
+%     uz=zeros(n_receivers,nt);
+%     uy=zeros(n_receivers,nt);
     v_rec.x    =zeros(n_receivers,nt);
     v_rec.y    =zeros(n_receivers,nt);
     v_rec.z    =zeros(n_receivers,nt);
@@ -175,7 +181,7 @@ disp 'saving seismograms...'
 savename = ['../output/',project_name,'_v_rec'];
 save(savename, 'v_rec', '-v7.3');
 
-savename = ['../output/',project_name,'_input_parameters.m'];
+savename = ['../output/',project_name,'input_parameters.m'];
 copyfile('../input/input_parameters.m',savename)
 
 
@@ -194,8 +200,6 @@ if strcmp(make_movie,'yes')
 end
 
 end
-
-
 
 function [updateParams, updateable] = checkargs(arg)
 

@@ -33,7 +33,9 @@
 % 
 %==========================================================================
 
-function [adjoint_stf, misfit] = make_adjoint_sources(v,v_0,t,veldis,measurement,direction)
+function [adjoint_stf, misfit] = make_adjoint_sources(v,v_0,t,veldis, ...
+                                                      measurement, ...
+                                                      direction, mode)
 %%
 %==========================================================================
 %- initialisations --------------------------------------------------------
@@ -75,9 +77,9 @@ elseif not(strcmp(veldis,'velocity'))
 end
 
 
-
-reply = input('Do you want to manually pick the seismograms? ','s');
-if (strcmp(reply,'yes') || strcmp(reply,'y'))
+if strcmp(mode,'manual')
+% reply = input('Do you want to manually pick the seismograms? ','s');
+% if (strcmp(reply,'yes') || strcmp(reply,'y'))
     disp 'Manual labour... here we go!'
 end
     
@@ -91,7 +93,9 @@ adjoint_source = figure;
 
 for n=1:nrec
     
-    fprintf(1,'station number %d\n',n)
+    if strcmp(mode,'manual')
+        fprintf(1,'station number %d\n',n)
+    end
     
     %- plot traces --------------------------------------------------------
     
@@ -111,10 +115,12 @@ for n=1:nrec
     
     
     %- select time windows and taper seismograms --------------------------
-    if (strcmp(reply,'no') || strcmp(reply,'n'))
+    if strcmp(mode,'auto')
+%     if (strcmp(reply,'no') || strcmp(reply,'n'))
         left = t(1);
         right = t(end);
-    elseif (strcmp(reply,'yes') || strcmp(reply,'y'))
+    elseif strcmp(mode,'manual')
+%     elseif (strcmp(reply,'yes') || strcmp(reply,'y'))
         disp('select left window');
         [left,~]=ginput(1);
         disp('select right window');
@@ -162,10 +168,11 @@ for n=1:nrec
     title(['adjoint source (', veldis, ' seismograms) after time reversal'])
     
     
-    
-    if (strcmp(reply,'no') || strcmp(reply,'n'))
-        pause(0.1)
-    elseif (strcmp(reply,'yes') || strcmp(reply,'yes'))
+    if strcmp(mode,'auto')
+%     if (strcmp(reply,'no') || strcmp(reply,'n'))
+        pause(0.05)
+    elseif strcmp(mode,'manual')
+%     elseif (strcmp(reply,'yes') || strcmp(reply,'yes'))
         pause(1.0)
     end
     

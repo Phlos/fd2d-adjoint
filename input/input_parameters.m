@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='PSV_radiation';
+project_name='rho_anomaly_square_testmodel';
 
 %==========================================================================
 % path where seismic sources are located
@@ -17,10 +17,10 @@ adjoint_source_path='../input/sources/adjoint/';
 
 wave_propagation_type='both';   % can be 'PSV' or 'SH' or 'both'
 
-Lx=2.20e5;     % model extension in x-direction [m]
+Lx=1.50e5;     % model extension in x-direction [m]
 Lz=1.3e5;     % model extension in z-direction [m]
 
-nx=660;     % grid points in x-direction
+nx=450;     % grid points in x-direction
 nz=390;     % grid points in z-direction
 
 % The necesssary time step (in order to obtain a stable model run) may vary
@@ -36,7 +36,7 @@ order=4;    % finite-difference order (2 or 4)
 % model type
 %==========================================================================
 
-model_type=13;
+model_type=11;
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -164,7 +164,8 @@ absorb_bottom=1;% absorb waves on the bottom boundary
 % plot every 'plot every'th image (otherwise computationally rather heavy)
 plot_every=100;
 
-plot_forward_frames='PSV-SH';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' -- which frames should be plotted in the forward calculation
+plot_forward_frames='PSV-SH';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
+                             % which frames should be plotted in the forward calculation
 % some test about plotting the frames differently
 % plot_frame.PSV='no';
 % plot_frame.SH='yes';
@@ -178,7 +179,8 @@ plot_forward_frames='PSV-SH';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' -- which frames s
 %- screenshots of wave propagation
 
 snapshotfile = ['../output/',project_name];
-savetimes = [5.0 7 10 15 20 25 27];
+% savetimes = [0 5 7 10 15 20 25 27];
+savetimes = [];
 
 %- matfiles ---
 

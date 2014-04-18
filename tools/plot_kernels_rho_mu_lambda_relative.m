@@ -1,6 +1,6 @@
 % plot relative kernels rho mu lambda
 
-function plot_kernels_rho_vs_vp_relative(K_rel)
+function plot_kernels_rho_mu_lambda_relative(K_rel)
 
 %- initialise input -------------------------------------------------------
 path(path,'../code');

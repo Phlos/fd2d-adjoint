@@ -194,7 +194,7 @@ for n=1:nt
         % plot velocity field every so manyth time step -------------------
         
         if (mod(n,plot_every)==0)
-            disp(['time: ', num2str(n*dt)]);
+%             disp(['time: ', num2str(n*dt)]);
             plot_velocity_field;
         end
         
