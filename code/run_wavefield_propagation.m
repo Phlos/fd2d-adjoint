@@ -26,6 +26,8 @@ position_figures;
 %%
 for n=1:nt
     
+    
+    
     %- compute divergence of current stress tensor ------------------------
     %  forward -- unit of force: [kg m^-2 s^-2] = [N] 
     
