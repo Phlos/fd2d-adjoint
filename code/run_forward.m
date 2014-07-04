@@ -30,7 +30,7 @@ input_parameters;
 
 nt=5*round(nt/5);
 
-set_figure_properties_doffer;  % i.e. size of the figures & location on screen
+set_figure_properties_maggi;  % i.e. size of the figures & location on screen
 
 
 
@@ -209,7 +209,7 @@ if narg == 1;
 else
     updateParams = 'no';
     updateable = 0;
-    disp(['number of input arguments to run_forward_test: ', num2str(narg)]);
+    disp(['number of input arguments to run_forward: ', num2str(narg)]);
     return
     
 end

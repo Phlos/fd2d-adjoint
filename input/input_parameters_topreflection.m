@@ -2,14 +2,16 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='muanom_sq';
+project_name='top-reflection';
 
 %==========================================================================
 % path where seismic sources are located
 %==========================================================================
 
 adjoint_source_path='../input/sources/adjoint/';
-
+% adjoint_source_component='x';   % 'x' or 'z' -- the P-SV source direction
+                                % the sensitivity kernel is calculated
+                                % based on the component given here. 
 
 %==========================================================================
 % set basic simulation parameters
@@ -17,18 +19,18 @@ adjoint_source_path='../input/sources/adjoint/';
 
 wave_propagation_type='PSV';   % can be 'PSV' or 'SH' or 'both'
 
-Lx=1.50e5;     % model extension in x-direction [m]
-Lz=1.3e5;     % model extension in z-direction [m]
+Lx=2.20e5;     % model extension in x-direction [m]
+Lz=1.1e5;     % model extension in z-direction [m]
 
-nx=450;     % grid points in x-direction
-nz=390;     % grid points in z-direction
+nx=660;     % grid points in x-direction
+nz=330;     % grid points in z-direction
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
 % dt=0.33;     % time step [s] fine for SH in a grid   dx=dz=3.34e3 m
 % dt=0.1;      % time step [s] fine for P-SV in a grid dx=dz=3.34e3 m
 dt=0.01;      % time step [s]
-nt=2700;      % number of iterations
+nt=5000;     % number of iterations
 
 order=4;    % finite-difference order (2 or 4)
 
@@ -42,11 +44,9 @@ model_type=11;
 % 2=homogeneous with localised density perturbation
 % 3=layered medium
 % 4=layered with localised density perturbation
-% 5=vertical gradient mu medium
-% 6=vertical gradient mu medium with localised density perturbation
+% 5=vertical gradient medium
+% 6=vertical gradient medium with localised density perturbation
 % 11= homogeneous with values from Tromp et al 2005
-% 12= like 11, but with a positive mu anomaly in the centre
-% 13= like 12, but now it's a density anomaly.
 % 100= layered: left = high velocity, right = low velocity (any difference with model 3???)
 
 % 'initial'= read initial model for waveform inversion (mu_initial, rho_initial)
@@ -63,8 +63,8 @@ tauw    = 4.0;        % source duration, seconds
 tee_0   = 2.5;        % source start time, seconds
 
 % needed for 'delta_bp'    
-f_min=0.2;          % minimum frequency [Hz]
-f_max=1.00;         % maximum frequency [Hz]
+f_min=0.2;     % minimum frequency [Hz]
+f_max=1.00;     % maximum frequency [Hz]
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 
@@ -86,42 +86,12 @@ simulation_mode='forward';
 % source positions
 %==========================================================================
 
-centre=[Lx/2 Lz/2];
-numrec=8;
-circlesize = 0.25*min(Lx,Lz);
-dphi = 2*pi/(numrec);
-
-src_x=zeros(1,numrec);
-src_z=zeros(1,numrec);
-
-n=1;
-for phi = -pi : dphi : pi-dphi ;
-    src_x(n)=centre(1) + circlesize*cos(phi);
-    src_z(n)=centre(2) + circlesize*sin(phi);
-    n=n+1;
-end
-
-% src_x=[0.6e5];
-% src_z=[0.7e5];
+src_x=[0.6e5];
+src_z=[0.7e5];
 
 %==========================================================================
 % receiver positions
 %==========================================================================
-
-
-centre=[Lx/2 Lz/2];
-numrec=6;
-circlesize = 0.25*min(Lx,Lz);
-
-rec_x=zeros(1,numrec);
-rec_z=zeros(1,numrec);
-
-n=1;
-for phi=-pi+dphi/2 : dphi : pi-dphi/2 ;
-    rec_x(n)=centre(1) + circlesize*cos(phi);
-    rec_z(n)=centre(2) + circlesize*sin(phi);
-    n=n+1;
-end
 
 % a set of receivers in 1/3 circle around the source (hardcoded distances!)
 % rec_x=zeros(1,6);
@@ -138,8 +108,8 @@ end
 %rec_z=[70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 70.0 70.0 70.0 70.0 70.0  70.0  70.0  70.0  180.0 180.0 180.0 180.0 180.0 180.0 180.0 180.0];
 
 %- just one receiver
-% rec_x=[1.6e5];
-% rec_z=[0.7e5];
+rec_x=[1.6e5];
+rec_z=[0.7e5];
 
 %- a large number of receivers in a closed rectangular configuration
 %rec_x=[50.0  50.0  50.0  50.0  50.0   50.0    70.0  90.0 110.0 130.0   70.0  90.0 110.0 130.0  150.0 150.0 150.0 150.0 150.0  150.0];
@@ -154,7 +124,7 @@ width=25000.0;     % width of the boundary layer in m
 
 absorb_left=1;  % absorb waves on the left boundary
 absorb_right=1; % absorb waves on the right boundary
-absorb_top=1;   % absorb waves on the top boundary
+absorb_top=0;   % absorb waves on the top boundary
 absorb_bottom=1;% absorb waves on the bottom boundary
 
 %==========================================================================
@@ -162,15 +132,10 @@ absorb_bottom=1;% absorb waves on the bottom boundary
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-plot_every=100;
+plot_every=25;
 
-plot_forward_frames='PSV-SH';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
+plot_forward_frames='X-Y';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation
-% some test about plotting the frames differently
-% plot_frame.PSV='no';
-% plot_frame.SH='yes';
-% plot_frame.X='yes';
-% plot_frame.Z='no';
 
 %==========================================================================
 % output: movies, matfiles, etc.
@@ -179,8 +144,8 @@ plot_forward_frames='PSV-SH';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV'
 %- screenshots of wave propagation
 
 snapshotfile = ['../output/',project_name];
-% savetimes = [0 5 7 10 15 20 25 27];
-savetimes = [];
+savetimes = [0 5 7 10 15 20 25 30 35 40 45];
+% savetimes = [];
 
 %- matfiles ---
 
@@ -189,7 +154,8 @@ save_v_fw = 'no';       % 'yes' or 'no' -- save the v_forward matfile
 
 
 %- movies -----
-make_movie='no';                                   % 'yes' or 'no'
-make_movie_adj='no';                               % 'yes' or 'no'
+
+make_movie='yes';                                   % 'yes' or 'no'
+make_movie_adj='yes';                               % 'yes' or 'no'
 movie_file=['../output/',project_name,'_forward'];        % output file name
 movie_file_adj=['../output/',project_name,'_adjoint'];

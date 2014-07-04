@@ -1,8 +1,10 @@
-% function plot_model(fig_handle,X,Z,mu,lambda,rho)
+function plot_model(X,Z,Params)
 
 % format long
 
-set_figure_properties_maggi;
+mu = Params.mu;
+rho = Params.rho;
+lambda = Params.lambda;
 
 load 'propagation/cm_model.mat';
 
@@ -15,7 +17,7 @@ subplot(1,3,1)
 hold on
 pcolor(X,Z,mu');
 
-difference_mumax_mumin = max(mu(:)) - min(mu(:));
+
 
 %- colour scale
 if all(mu == mu(1))
@@ -30,7 +32,7 @@ else
 end
 caxis([cmin cmax]);
 
-
+% add sources and receivers
         for k=1:length(src_x)
             plot(src_x(k),src_z(k),'kx')
         end
@@ -38,6 +40,7 @@ caxis([cmin cmax]);
         for k=1:length(rec_x)
             plot(rec_x(k),rec_z(k),'ko')
         end
+        
 colormap(cm_model);
 axis image
 shading flat
@@ -113,3 +116,4 @@ ylabel('z [m]');
 colorbar
 hold off;
 
+end function

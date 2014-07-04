@@ -27,8 +27,8 @@ path(path,'propagation/');
 input_parameters;
 
 %- edit some plotting parameters for run_forward
-plot_forward_frames = 'PSV-SH';
-plot_every = 200;
+% plot_forward_frames = 'PSV-SH';
+plot_every = 100;
 savetimes = [];
 
 nt=5*round(nt/5);
@@ -66,7 +66,7 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     %- make and plot source time function ---------------------------------
 
     stf = make_source_time_function(t,stf_type,simulation_mode,f_min,f_max,tauw_0,tauw,tee_0);
-    plot_source_time_function;
+%     plot_source_time_function;
     %%
     % add the same source time function to all the sources.
     stf_all=zeros(3,ns,nt);

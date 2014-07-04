@@ -9,11 +9,12 @@
 % output:       determines output type: 'displacement' or 'velocity'
 % measurement:  'waveform_difference' for L2 waveform difference
 %               'cc_time_shift' for cross-correlation time shift
-% appendix:     the appendix that gets added to each of the source time
+% direction:    the appendix that gets added to each of the source time
 %               function names. This is necessary for example if you want 
 %               to calculate the source time functions for directions x, y,
 %               z. The way it works in the code: 
 %               for x '_1';   for y '_2';   for z '_3'
+% mode:         'manual' or 'auto' (picking the seismogram)
 %
 % When v_0, i.e. the observed velocity seismograms, are set to zero, 
 % the code performs data-independent measurements. 
@@ -33,7 +34,7 @@
 % 
 %==========================================================================
 
-function [adjoint_stf, misfit] = make_adjoint_sources(v,v_0,t,veldis, ...
+function [adjoint_stf, misfit, adstf_nonreversed] = make_adjoint_sources(v,v_0,t,veldis, ...
                                                       measurement, ...
                                                       direction, mode)
 %%

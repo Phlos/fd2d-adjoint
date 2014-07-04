@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='muanom_sq';
+project_name='rho_anomaly_square_testmodel';
 
 %==========================================================================
 % path where seismic sources are located
@@ -15,7 +15,7 @@ adjoint_source_path='../input/sources/adjoint/';
 % set basic simulation parameters
 %==========================================================================
 
-wave_propagation_type='PSV';   % can be 'PSV' or 'SH' or 'both'
+wave_propagation_type='both';   % can be 'PSV' or 'SH' or 'both'
 
 Lx=1.50e5;     % model extension in x-direction [m]
 Lz=1.3e5;     % model extension in z-direction [m]

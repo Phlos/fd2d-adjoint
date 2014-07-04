@@ -6,9 +6,13 @@
 % K: sensitivity kernel with respect to density
 %==========================================================================
 
-function [K] = run_adjoint(u_fw,v_fw,stf,kerneltype) %(vx_forward, vy_forward, vz_forward)
+function [K] = run_adjoint(u_fw,v_fw,stf,kerneltype,varargin) %(vx_forward, vy_forward, vz_forward)
 disp 'Welcome to the ultimate adjoint experience!!'
 disp 'initialising...'
+
+% check varargin (i.e. if parameters are to be taken from input_parameters
+% or from a previous model run)
+[updateParams, updateable] = checkargs(varargin(:));
 
 %==========================================================================
 %% set paths and read input
@@ -34,7 +38,7 @@ orig_src_x = src_x;
 orig_src_z = src_z;
 
 % make figures appear right on the screen
-set_figure_properties_doffer;
+set_figure_properties_maggi;
 
 % extract the u_fw and v_fw fields
 if(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
@@ -60,7 +64,14 @@ end
 
 %% material and domain ----------------------------------------------------
 
-[mu,rho,lambda]=define_material_parameters(nx,nz,model_type);
+if strcmp(updateParams,'no')
+    [mu,rho,lambda]=define_material_parameters(nx,nz,model_type);
+elseif strcmp(updateParams,'yes')
+    disp 'updating parameters...'
+    rho = updateable.rho;
+    mu = updateable.mu;
+    lambda = updateable.lambda;
+end
 
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
@@ -149,3 +160,28 @@ if strcmp(make_movie_adj,'yes')
     close(writerObj);
 end
 
+
+end
+
+
+%% function check args
+function [updateParams, updateable] = checkargs(arg)
+
+narg = length(arg);
+
+if narg == 1;
+    
+    % extract the updateable parameters
+    updateParams = 'yes';
+    updateable = arg{1};
+
+else
+    updateParams = 'no';
+    updateable = 0;
+    disp(['number of input arguments to run_forward: ', num2str(narg)]);
+    return
+    
+end
+
+
+end

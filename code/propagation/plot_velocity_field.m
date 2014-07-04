@@ -86,7 +86,7 @@ elseif(strcmp(wave_propagation_type,'PSV'))
         
         plotting(1).v       = vPSV;
         plotting(1).scale   = prctile(abs(vPSV(:)),99.97);
-        plotting(1).title   = 'X velocity field [m/s]';
+        plotting(1).title   = 'P-SV velocity field [m/s]';
         warning('Plotting:ignoringY', ...
             'Not plotting the SH velocity field as it''s not calculated')
     
@@ -96,7 +96,7 @@ elseif(strcmp(wave_propagation_type,'PSV'))
         
         plotting(1).v       = vPSV;
         plotting(1).scale   = prctile(abs(vPSV(:)),99.97);
-        plotting(1).title   = 'X velocity field [m/s]';
+        plotting(1).title   = 'P-SV velocity field [m/s]';
     
     elseif strcmp(plot_forward_frames,'SH')
         error('You cannot calculate PSV and plot SH wave propagation')
@@ -173,8 +173,10 @@ for i=1:nplots
     axis image
     
     %- colour scale -------------------------------------------------------
+    cmin = -1*plotting(i).scale;
+    cmax = plotting(i).scale;
     
-    caxis([-1*plotting(i).scale plotting(i).scale]);
+    caxis([cmin cmax]);
     % flipud: colormap reverse to blue=down, red=up - it's not tomography..
     colormap(flipud(cm));
     shading interp

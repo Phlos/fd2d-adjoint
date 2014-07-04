@@ -1,13 +1,23 @@
 % travel time kernel calculation routine
 
+% if no v_obs are used this results in data idependent kernels.
+
+
+
 % run forward
 cd ../code/
 [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward;
 
 
+% data-independent:
+v_obs.x = zeros(size(v_rec.x));
+% v_obs.y = zeros(size(v_rec.y));
+v_obs.z = zeros(size(v_rec.z));
+
 cd ../tools/
 % check what the seismograms look like
-v_rec_3 = cat(3, [v_rec.x], [v_rec.y], [v_rec.z]);
+% v_rec_3 = cat(3, [v_rec.x], [v_rec.y], [v_rec.z]);
+v_rec_3 = cat(3, [v_rec.x], [zeros(size(v_rec.x))], [v_rec.z]);
 plot_seismograms(v_rec_3,t,'velocity');
 
 % make adjoint sources

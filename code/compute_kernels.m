@@ -77,6 +77,18 @@ end
 
 %% calculate kernels
 
+% NOTE:
+% all the kernels are calculated with a minus sign, while Andreas' book
+% says only rho should be minus. I think this is correct - because now
+% the kernels are what I expect them to be. I am still (11-4-2014) 
+% utterly confused about this whole minus sign business, but I think 
+% the following is the case:
+% - the adjoint field is calculated backwards in time, which means that
+%   displacements are calculated from velocities in the wrong way.
+% - to counteract this, the kernels which make use of the displacement
+%   fields (mu and lambda) have to be corrected with an extra minus.
+%      --- Nienke Blom, 11-4-2014
+
 % if strcmp(kerneltype,'traveltime')
     
     %% rho -- density               (calculated from velocities)
@@ -92,19 +104,6 @@ end
     end
     
     % kernels
-    
-    % NOTE:
-    % all the kernels are calculated with a minus sign, while Andreas' book
-    % says only rho should be minus. I think this is correct - because now
-    % the kernels are what I expect them to be. I am still (11-4-2014) 
-    % utterly confused about this whole minus sign business, but I think 
-    % the following is the case:
-    % - the adjoint field is calculated backwards in time, which means that
-    %   displacements are calculated from velocities in the wrong way.
-    % - to counteract this, the kernels which make use of the displacement
-    %   fields (mu and lambda) have to be corrected with an extra minus.
-    %      --- Nienke Blom, 11-4-2014
-    
     
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
         K.rho.SH = K.rho.SH - interaction.rho.y*5*dt;   
@@ -152,7 +151,7 @@ end
     
     
     
-    %% lambda -- lamé's parameter	(calculated from divergence of displacement)
+    %% lambda -- lamï¿½'s parameter	(calculated from divergence of displacement)
     
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
         % interaction

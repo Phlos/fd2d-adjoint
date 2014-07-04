@@ -7,7 +7,7 @@ ncols=4;
 colormap(flipud(cm));
 
 temps = nt*dt - (n-plot_every)*dt;
-timestamp=['t [s] = ',num2str(temps)];
+timestamp=['t [s] = ',num2str(temps,'%4.0f')];
 % disp(timestamp);
 
 
@@ -243,7 +243,6 @@ for i=1:nplots
     %- plot field 
     pcolor(X,Z,plotting(i).v_fw');
     hold on
-    plot_adjoint_src_rec;
     axis image
     shading interp
     
@@ -259,11 +258,14 @@ for i=1:nplots
     title(['forward velocity [m/s] (',plotting(i).dir,')']);
     
     % timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
-    text(0.05*Lx,0.92*Lz,timestamp) ;
-    text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
-        'HorizontalAlignment','right')
-    
-%     freezeColors;
+    for bips = 1:5;
+        plot_adjoint_src_rec;
+        text(0.05*Lx,0.92*Lz,timestamp) ;
+        text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
+            'HorizontalAlignment','right')
+    end
+
+    hold off
     
     
     %% plot adjoint field ---------------------------------------------
@@ -291,10 +293,11 @@ for i=1:nplots
     
     %- time stamp & other text
     % timestamp=['t [s] = ',num2str(nt*dt-(n-plot_every)*dt)];
+    for bips = 1:5;
     text(0.05*Lx,0.92*Lz,timestamp) ;
     text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
         'HorizontalAlignment','right')
-    
+    end
     
     
     
@@ -321,9 +324,11 @@ for i=1:nplots
     title(['forw. \cdot adj. velocity (',plotting(i).dir,')']);
     
     %- timestamp and other text
+    for bips = 1:5;
     text(0.05*Lx,0.92*Lz,timestamp) ;
     text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
         'HorizontalAlignment','right')
+    end
     
     %% plot kernel ---------------------------------------------------------
     
@@ -349,10 +354,11 @@ for i=1:nplots
     title([plotting(i).knlname,' kernel']);
     
     % timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
+    for bips = 1:5;
     text(0.05*Lx,0.92*Lz,timestamp) ;
     text(0.95*Lx,0.92*Lz,['max = \pm', num2str(cmax)], ...
         'HorizontalAlignment','right')
-    
+    end
     
     
     
@@ -376,7 +382,7 @@ end
     if any(savetimes == temps)
         filename = [snapshotfile,'_adjoint_t',num2str(temps),'.png'];
         disp(['saving at time ',num2str(temps),' with filename ',filename, '!'])
-        print(gcf,'-dpng','-r1000',filename)
+        print(gcf,'-dpng','-r800',filename)
     end
            
 

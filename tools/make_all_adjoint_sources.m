@@ -1,7 +1,7 @@
 function [adstf, misfit] = make_all_adjoint_sources(v_rec,v_obs,t,measurement,mode)
 
 % path(path,'../input/input_parameters');
-path(path,'../output/wrong_K.mu.SH_calculation/Set_006_inversion-test/')
+%path(path,'../output/wrong_K.mu.SH_calculation/Set_006_inversion-test/')
 % test3_input_parameters_testmodel;
 % t=0:dt:dt*(nt-1);
 
@@ -22,7 +22,7 @@ close(gcf);
 close(gcf);
 
 % adstf_SH = input('Do you want to calculate an SH adjoint? [yes / no] ', 's');
-adstf_SH = 'yes';
+adstf_SH = 'no';
     if (strcmp(adstf_SH,'y') || strcmp(adstf_SH,'yes'))
         [adstf_y, misfit.y]=make_adjoint_sources(v_rec.y,v_obs.y, ...
                             t,'displacement',measurement,'_2',mode);
