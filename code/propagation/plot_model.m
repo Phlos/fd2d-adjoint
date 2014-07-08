@@ -1,8 +1,25 @@
-% function plot_model(fig_handle,X,Z,mu,lambda,rho)
+function fig_mod = plot_model(Model)
+
+% function that plots the model in rho mu lambda parametrisation.
+% NOTE: Currenly this is a rather ugly function and I could make it much
+% nicer by putting the plotting commands within a for loop over rho mu
+% lambda.
+%
+% INPUT:
+% Model:    struct containing .rho .mu .lambda
+%
+% OUTPUT:   
+% - figure with the model plotted. Colour scale are the actual max and min
+%   of the parameter values, not some standard deviation.
 
 % format long
 
+input_parameters;
+[X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 set_figure_properties_maggi;
+mu = Model.mu;
+rho = Model.rho;
+lambda = Model.lambda;
 
 load 'propagation/cm_model.mat';
 
@@ -15,7 +32,7 @@ subplot(1,3,1)
 hold on
 pcolor(X,Z,mu');
 
-difference_mumax_mumin = max(mu(:)) - min(mu(:));
+% difference_mumax_mumin = max(mu(:)) - min(mu(:));
 
 %- colour scale
 if all(mu == mu(1))
@@ -23,9 +40,15 @@ if all(mu == mu(1))
     cmin = mu(1) - 0.01*mu(1);
 %     disp 'bips!!! all mu are the same!'
 else
-    cmax = max(mu(:));
+    % max and min are calculated in this way so that the most common value
+    % (i.e. the background value) is white, and that the extreme coulours
+    % are determined by whichever of max and min is farthest off from the
+    % background colour.
     cmid = mode(mu(:));
-    cmin = 2*cmid - cmax;
+    cmax = cmid + max(abs(mu(:) - cmid));
+    cmin = cmid - max(abs(mu(:) - cmid));
+%     cmax = max(mu(:));
+%     cmin = 2*cmid - cmax;
 %     disp 'the mu are not all the same'
 end
 caxis([cmin cmax]);
@@ -57,9 +80,13 @@ if all(lambda == lambda(1))
     cmax = lambda(1) + 0.01*lambda(1);
     cmin = lambda(1) - 0.01*lambda(1);
 else
-    cmax = max(lambda(:));
+    % max and min are calculated in this way so that the most common value
+    % (i.e. the background value) is white, and that the extreme coulours
+    % are determined by whichever of max and min is farthest off from the
+    % background colour.
     cmid = mode(lambda(:));
-    cmin = 2*cmid - cmax;
+    cmax = cmid + max(abs(lambda(:) - cmid));
+    cmin = cmid - max(abs(lambda(:) - cmid));
 end
 caxis([cmin cmax]);
 
@@ -91,9 +118,13 @@ if all(rho == rho(1))
     cmax = rho(1) + 0.01*rho(1);
     cmin = rho(1) - 0.01*rho(1);
 else
-    cmax = max(rho(:));
+    % max and min are calculated in this way so that the most common value
+    % (i.e. the background value) is white, and that the extreme coulours
+    % are determined by whichever of max and min is farthest off from the
+    % background colour.
     cmid = mode(rho(:));
-    cmin = 2*cmid - cmax;
+    cmax = cmid + max(abs(rho(:) - cmid));
+    cmin = cmid - max(abs(rho(:) - cmid));
 end
 caxis([cmin cmax]);
 
@@ -113,3 +144,4 @@ ylabel('z [m]');
 colorbar
 hold off;
 
+end

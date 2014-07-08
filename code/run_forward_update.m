@@ -28,7 +28,7 @@ input_parameters;
 
 %- edit some plotting parameters for run_forward
 % plot_forward_frames = 'PSV-SH';
-plot_every = 100;
+plot_every = 100000;
 savetimes = [];
 
 nt=5*round(nt/5);
@@ -46,7 +46,10 @@ set_figure_properties_doffer;  % i.e. size of the figures & location on screen
 
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
-plot_model;
+model.rho = rho;
+model.mu = mu;
+model.lambda = lambda;
+fig_mod = plot_model(model);
 
 
 %% source & receiver initialisation

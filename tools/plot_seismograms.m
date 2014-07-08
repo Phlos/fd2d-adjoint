@@ -3,7 +3,7 @@
 % vel:      velocity recordings (dimensions (n_receivers, nt) )
 % t:        time axis
 % veldis:   the mode of the seismograms that we plot: 'displacement' or
-% 'velocity'
+%           'velocity'
 
 function plot_seismograms(vel,t,veldis)
 
@@ -38,7 +38,7 @@ if strcmp(veldis,'displacement')
     vel=u;
     
 elseif (not(strcmp(veldis,'velocity')))
-    error('ERRORR your veldis input variable is wrong. Eejit.');
+    error('Your veldis input variable is wrong. Eejit. ''velocity'' or ''displacement''.');
 end
 
 %- plot seismograms ----------

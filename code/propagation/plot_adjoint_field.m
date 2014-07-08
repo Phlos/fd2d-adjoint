@@ -356,7 +356,7 @@ for i=1:nplots
     % timestamp=['t [s] = ',num2str(nt*dt-(n-5)*dt)];
     for bips = 1:5;
     text(0.05*Lx,0.92*Lz,timestamp) ;
-    text(0.95*Lx,0.92*Lz,['max = \pm', num2str(cmax)], ...
+    text(0.95*Lx,0.92*Lz,['max = \pm', num2str(cmax,'%3.1e')], ...
         'HorizontalAlignment','right')
     end
     

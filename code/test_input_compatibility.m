@@ -18,7 +18,7 @@ if (dt_max < dt)
            ['dt needs to be at most ',num2str(dt_max)] } )
 end
 
-%% dx and dz same size
+%% dx and dz same size -- 1x
 perc_dxdz = abs((dx-dz)/dz);
 
 disp '--'
@@ -45,7 +45,7 @@ max_freq = min(vs(:)) / min_wavelength;
 
 disp(['Your maximum allowed stf frequency is ', num2str(max_freq), ' Hz']);
 
-%% absbound width
+%% absbound width -- 1x
 
 % typical_wavelength = freq where max of frequency specrum is located
 
@@ -64,16 +64,16 @@ if (width < min_wavelength)
     end
 end
 
-if (width > 0.1*min(Lx,Lz))
-    disp('WARNING: absbound more than 10% of domain size. ');
+if (width > 0.15*min(Lx,Lz))
+    disp('WARNING: absbound more than 15% of domain size. ');
     disp(['absbound: ',num2str(width), 'm; Lx: ', num2str(Lx), 'm; Lz: ', num2str(Lz)]);
-    yesorno = input('Do you wish to continue? [yes/no]  ', 's');
-    if ( strcmp(yesorno,'n') || strcmp(yesorno,'no') )
-        error('You chose to terminate')
-%         return;
-    elseif not( strcmp(yesorno,'yes') || strcmp(yesorno,'y') )
-        disp 'you didn''t say yes but we just assume you did anyway.'
-    end
+%     yesorno = input('Do you wish to continue? [yes/no]  ', 's');
+%     if ( strcmp(yesorno,'n') || strcmp(yesorno,'no') )
+%         error('You chose to terminate')
+% %         return;
+%     elseif not( strcmp(yesorno,'yes') || strcmp(yesorno,'y') )
+%         disp 'you didn''t say yes but we just assume you did anyway.'
+%     end
 end
     
 %% signal reaches receiver?

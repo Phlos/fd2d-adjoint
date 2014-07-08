@@ -2,13 +2,17 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='muanom_sq';
+project_name='RhoAnom_gblob_offcentre';
 
 %==========================================================================
-% path where seismic sources are located
+% adjoint properties
 %==========================================================================
 
 adjoint_source_path='../input/sources/adjoint/';
+
+% smoothing properties
+smoothnp = 15;  % size of the smoothing filter
+smoothgwid = 9; % width of the gaussian in the smoothing filter
 
 
 %==========================================================================
@@ -36,7 +40,7 @@ order=4;    % finite-difference order (2 or 4)
 % model type
 %==========================================================================
 
-model_type=11;
+model_type=17;
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -44,9 +48,13 @@ model_type=11;
 % 4=layered with localised density perturbation
 % 5=vertical gradient mu medium
 % 6=vertical gradient mu medium with localised density perturbation
-% 11= homogeneous with values from Tromp et al 2005
-% 12= like 11, but with a positive mu anomaly in the centre
-% 13= like 12, but now it's a density anomaly.
+% 10= homogeneous with values from Tromp et al 2005
+% 11= like 10, but with a positive rectangular mu anomaly in the centre
+% 12= like 11, but now it's a density anomaly.
+% 14= gaussian rho anomaly in the centre.
+% 15= gaussian mu anomaly in the centre.
+% 17= gaussian rho anomaly off-centre.
+% 18= gaussian mu anomaly off-centre.
 % 100= layered: left = high velocity, right = low velocity (any difference with model 3???)
 
 % 'initial'= read initial model for waveform inversion (mu_initial, rho_initial)
@@ -162,9 +170,9 @@ absorb_bottom=1;% absorb waves on the bottom boundary
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-plot_every=100;
+plot_every=10000;
 
-plot_forward_frames='PSV-SH';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
+plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation
 % some test about plotting the frames differently
 % plot_frame.PSV='no';
@@ -191,5 +199,5 @@ save_v_fw = 'no';       % 'yes' or 'no' -- save the v_forward matfile
 %- movies -----
 make_movie='no';                                   % 'yes' or 'no'
 make_movie_adj='no';                               % 'yes' or 'no'
-movie_file=['../output/',project_name,'_forward'];        % output file name
-movie_file_adj=['../output/',project_name,'_adjoint'];
+movie_file=['../output/',project_name,'.forward'];        % output file name
+movie_file_adj=['../output/',project_name,'.adjoint'];

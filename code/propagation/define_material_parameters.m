@@ -76,7 +76,7 @@ elseif (model_type==6)
     
     rho(98:102,123:127)=rho(98:102,123:127)+2000.0;
     
-elseif (model_type==11)
+elseif (model_type==10) % homogeneous like Tromp et al 2005
     
     % Tromp et al, 2005
     rho    = 2600*ones(nx,nz);     % kg/m3
@@ -85,7 +85,7 @@ elseif (model_type==11)
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
-elseif (model_type==12)
+elseif (model_type==11) % tromp05-homogeneous + rect. mu anomaly
     
     % Tromp et al, 2005
     rho    = 2600*ones(nx,nz);     % kg/m3
@@ -94,6 +94,7 @@ elseif (model_type==12)
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
+    % rectangular mu anomaly
     left = round(nx/2-nx/20);
     right = round(nx/2+nx/20);
     top = round(nz/2+nz/20);
@@ -101,7 +102,7 @@ elseif (model_type==12)
     
     mu(left:right,bottom:top) = mu(left:right,bottom:top) + 1e10;
     
-elseif (model_type==13)
+elseif (model_type==12) % tromp05-homogeneous + rect. rho anomaly
     
     % Tromp et al, 2005
     rho    = 2600*ones(nx,nz);     % kg/m3
@@ -110,6 +111,7 @@ elseif (model_type==13)
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
+    % rectangular rho anomaly
     left = round(nx/2-nx/20);
     right = round(nx/2+nx/20);
     top = round(nz/2+nz/20);
@@ -117,7 +119,75 @@ elseif (model_type==13)
     
     rho(left:right,bottom:top) = rho(left:right,bottom:top) + 1e3;
     
-elseif (model_type==100)
+elseif (model_type==14) % gaussian central rho anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    
+    gwid = round(0.05 * max([nx nz]));
+    filt = fspecial('gaussian',[nx nz],gwid);
+    filt2 = filt / max(filt(:));
+    rho = rho + filt2 * 1.0e3;
+    
+elseif (model_type==15) % gaussian central mu anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    
+    gwid = round(0.05 * max([nx nz]));
+    filt = fspecial('gaussian',[nx nz],gwid);
+    filt2 = filt / max(filt(:));
+    mu = mu + filt2 * 1.0e10;
+    
+elseif (model_type==17) % gaussian off-central rho anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    
+    dxz=0.15;
+    
+    gwid = round(0.05 * max([nx nz]));
+    filt = fspecial('gaussian',[floor((1-dxz)*nx) floor((1-dxz)*nz)],gwid);
+    filt2 = filt / max(filt(:));
+%      size_filt2 = size(filt2)
+%      size_filt2_orig = [(1-dxz)*nx (1-dxz)*nz]
+%      size_rhocut = size(rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end))
+%      size_rhocut_orig = [size(rho,1) - dxz*nx+1 size(rho,2)-dxz*nz+1]
+    rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
+    rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e3;
+    
+elseif (model_type==18) % gaussian off-central mu anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    
+    dxz=0.15;
+    
+    gwid = round(0.05 * max([nx nz]));
+    filt = fspecial('gaussian',[floor((1-dxz)*nx) floor((1-dxz)*nz)],gwid);
+    filt2 = filt / max(filt(:));
+%     size_filt2 = size(filt2)
+%     size_rhocut = size(rho(ceil((1-dxz)*nx)+1:end, ceil((1-dxz)*nz)+1:end))
+    mu(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
+    mu(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e10;
+    
+elseif (model_type==100) % layered: left = high velocity, right = low vel.
     
     rho=3000.0*ones(nx,nz);
     mu=ones(nx,nz);

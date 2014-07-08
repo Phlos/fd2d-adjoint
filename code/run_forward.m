@@ -51,7 +51,10 @@ end
 
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
-plot_model;
+model.rho = rho;
+model.mu = mu;
+model.lambda = lambda;
+fig_mod = plot_model(model);
 
 
 %% source & receiver initialisation
@@ -89,13 +92,7 @@ end
 
 test_input_compatibility;
 
-disp 'You need to clear big variables from your workspace - else i''m SLOW.'
-clearok = input('''yes'' to continue, ''no'' to exit script. ','s');
-if (strcmp(clearok,'yes') || strcmp(clearok,'y'))
-%     clearvars u_fw v_fw;
-else
-    error('Stopping script - do something with the variables yourself eh!')
-end
+
 
 %% initialise seismograms ------------------------------------------------- % Change this to save velocity seismograms only!
 % only for forward
@@ -146,24 +143,24 @@ end
 if strcmp(simulation_mode,'forward')
     if(strcmp(wave_propagation_type,'SH'))
         if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-            disp 'v_forward...'
+%             disp 'v_forward...'
             save('../output/v_forward','vy_forward','-v7.3');
-            disp 'u_forward...'
+%             disp 'u_forward...'
             save('../output/u_forward','uy_forward','-v7.3');
         end
     elseif(strcmp(wave_propagation_type,'PSV'))
         if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-            disp 'v_forward...'
+%             disp 'v_forward...'
             save('../output/v_forward','vx_forward','vz_forward', '-v7.3');
-            disp 'u_forward...'
+%             disp 'u_forward...'
             save('../output/u_forward','ux_forward','uz_forward', '-v7.3');
         end
     elseif(strcmp(wave_propagation_type,'both'))
         if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
             if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-                disp 'v_forward...'
+%                 disp 'v_forward...'
                 save('../output/v_forward','vx_forward','vy_forward','vz_forward', '-v7.3');
-                disp 'u_forward...'
+%                 disp 'u_forward...'
                 save('../output/u_forward','ux_forward','uy_forward','uz_forward', '-v7.3');
             end
 
@@ -172,10 +169,10 @@ if strcmp(simulation_mode,'forward')
 end
 
 disp 'saving seismograms...'
-savename = ['../output/',project_name,'_v_rec'];
+savename = ['../output/',project_name,'.v_rec.mat'];
 save(savename, 'v_rec', '-v7.3');
 
-savename = ['../output/',project_name,'_input_parameters.m'];
+savename = ['../output/',project_name,'.input_parameters.m'];
 copyfile('../input/input_parameters.m',savename)
 
 

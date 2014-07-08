@@ -28,14 +28,15 @@ input_parameters;
 filt = fspecial('gaussian', [npoints npoints], gwid);   %  (fspecial is normally part of the image processing toolbox but I adapted
                                                    %  the (probably exactly equivalent) Octave code. fspecial found in tools/)
                                                    % gwid is the width of
-                                                   % the gaussian. (could
-                                                   % make this input too..)
+                                                   % the gaussian.
 
 %-- actual smoothing of the models (in rho mu lambda parametrisation)
+% PROBLEM: if you simply filter the model, you end up with zeros at the
+% edges.
 
 % bips = figure;
 for sname = {'rho' 'mu' 'lambda'}
-    Msmooth.(sname{1}) = conv2(Model.(sname{1}), filt, 'valid');
+    Msmooth.(sname{1}) = conv2(Model.(sname{1}), filt, 'same');
     
 %     % plot the smoothed models?
 %     figure(bips);
@@ -53,6 +54,6 @@ for sname = {'rho' 'mu' 'lambda'}
     
 end
 
-% close(clf);
+% close(bips);
 
 end

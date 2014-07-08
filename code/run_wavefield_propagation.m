@@ -22,10 +22,10 @@ disp 'iterating...'
 
 position_figures;
 
-
+fprintf(1,'Percentage elapsed :       ');
 %%
 for n=1:nt
-    
+    fprintf(1,'\b\b\b\b\b\b%6.0f',n/nt*100);
     
     
     %- compute divergence of current stress tensor ------------------------
@@ -220,3 +220,4 @@ for n=1:nt
     end
     
 end
+disp ' ';

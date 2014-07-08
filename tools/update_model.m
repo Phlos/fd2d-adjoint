@@ -30,6 +30,9 @@ end
 
 function Params = checkargs(args)
 
+input_parameters;
+[X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
+
 narg = length(args);
 
 
@@ -53,15 +56,19 @@ elseif narg == 3;
     K_rel = args{1};
     step = args{2};
     Params_previous = args{3};
+    
+    K_sm = smooth_kernels(K_rel, smoothnp, smoothgwid);
  
     % calculate model update
-    Params_sharp.rho = Params_previous.rho .* (1 - step * K_rel.rho.total);
-    Params_sharp.mu = Params_previous.mu .* (1 - step * K_rel.mu.total);
-    Params_sharp.lambda = Params_previous.lambda .* (1 - step * K_rel.lambda.total);
+    Params.rho = Params_previous.rho .* (1 - step * K_sm.rho.total);
+    Params.mu = Params_previous.mu .* (1 - step * K_sm.mu.total);
+    Params.lambda = Params_previous.lambda .* (1 - step * K_sm.lambda.total);
     
-    % smooth the updated model!
-    Params = smooth_model(Params_sharp, 11, 5);
-    
+    % smooth the updated model! --> can't do that because then the model
+    % edges fade to zero...
+%     Params = smooth_model(Params_sharp, 11, 5);
+
+   
 % otherwise error
 else
     

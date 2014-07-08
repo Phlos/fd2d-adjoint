@@ -7,7 +7,7 @@
 %==========================================================================
 
 function [K] = run_adjoint(u_fw,v_fw,stf,kerneltype,varargin) %(vx_forward, vy_forward, vz_forward)
-disp 'Welcome to the ultimate adjoint experience!!'
+% disp 'Welcome to the ultimate adjoint experience!!'
 disp 'initialising...'
 
 % check varargin (i.e. if parameters are to be taken from input_parameters
@@ -30,7 +30,7 @@ input_parameters;
 nt=5*round(nt/5);   % to make sure nt is a multiple of 5 -- needed because
                     % run_forward saves the forward field every 5 timesteps
                     % only, and thus we need to compare.
-disp 'bips'
+
 % adaptations to input parameters:
 % (needed to get run_adjoint to work like it should)
 simulation_mode='adjoint';                                                 
@@ -75,7 +75,10 @@ end
 
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
-plot_model; % hoeft niet in adjoint? is tenslotte 't zelfde model
+model.rho = rho;
+model.mu = mu;
+model.lambda = lambda;
+fig_mod = plot_model(model); % hoeft niet in adjoint? is tenslotte 't zelfde model
 
 
 %% read adjoint sources ---------------------------------------------------
@@ -87,19 +90,6 @@ disp 'inserting adjoint sources...'
 
 src_x = rec_x;
 src_z = rec_z;
-% fid=fopen('../input/sources/adjoint/source_locations','r');
-% src_x=zeros(1);
-% src_z=zeros(1);
-% 
-% k=1;
-% while (feof(fid)==0)
-%     src_x(k)=fscanf(fid,'%g',1);
-%     src_z(k)=fscanf(fid,'%g',1);
-%     fgetl(fid);
-%     k=k+1;
-% end
-% 
-% fclose(fid);
 
 
 %- compute indices for adjoint source locations -----------------------
@@ -146,7 +136,7 @@ run_wavefield_propagation;
 %==========================================================================
 
 disp 'storing kernels...'
-kernelsavename = ['../output/',project_name,'_kernels'];
+kernelsavename = ['../output/',project_name,'.kernels.mat'];
 save(kernelsavename,'K','-v7.3');
 
 
@@ -160,6 +150,10 @@ if strcmp(make_movie_adj,'yes')
     close(writerObj);
 end
 
+
+close(fig_adjoint_stf);
+close(fig_adjoint);
+close(fig_mod);
 
 end
 

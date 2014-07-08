@@ -1,10 +1,5 @@
 function [adstf, misfit] = make_all_adjoint_sources(v_rec,v_obs,t,measurement,mode)
 
-% path(path,'../input/input_parameters');
-%path(path,'../output/wrong_K.mu.SH_calculation/Set_006_inversion-test/')
-% test3_input_parameters_testmodel;
-% t=0:dt:dt*(nt-1);
-
 % v_rec         recorded velocity field at all receivers
 % v_obs         observed velocity field at all receivers
 % t             time axis
@@ -37,6 +32,14 @@ adstf_SH = 'no';
     adstf(1,:,:) = adstf_x;
     adstf(2,:,:) = adstf_y;
     adstf(3,:,:) = adstf_z;
+    
+
+    % calculate the total misfit
+    comp = fieldnames(misfit);
+    misfit.total = 0;
+    for component = comp'
+        misfit.total = misfit.total + misfit.(component{1});
+    end
     
 else
     error('I did not understand the adjoint measurement you want to make.')
