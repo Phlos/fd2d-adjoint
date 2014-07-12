@@ -22,11 +22,12 @@ disp 'iterating...'
 
 position_figures;
 
-fprintf(1,'Percentage elapsed :       ');
+fprintf(1,'Percentage completed :       ');
 %%
 for n=1:nt
-    fprintf(1,'\b\b\b\b\b\b%6.0f',n/nt*100);
-    
+    if (mod(n,floor(nt/100)) == 0)
+        fprintf(1,'\b\b\b\b\b\b%6.0f',n/nt*100);
+    end
     
     %- compute divergence of current stress tensor ------------------------
     %  forward -- unit of force: [kg m^-2 s^-2] = [N] 

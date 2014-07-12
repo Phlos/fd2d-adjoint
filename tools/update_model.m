@@ -46,6 +46,15 @@ if narg == 0;
     Params.mu = mu;
     Params.lambda = lambda;
     
+% if input is a number and a model number at that:    
+elseif narg == 1;
+    modelnr = args{1};
+    
+    [Params.mu,Params.rho,Params.lambda] = ...
+                              define_material_parameters(nx,nz,modelnr);
+%     Params.rho = rho;
+%     Params.mu = mu;
+%     Params.lambda = lambda;
     
 % otherwise, update model using step length
 elseif narg == 3;

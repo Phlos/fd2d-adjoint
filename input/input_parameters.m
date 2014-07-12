@@ -5,7 +5,7 @@
 project_name='RhoAnom_gblob_offcentre';
 
 %==========================================================================
-% adjoint properties
+% inversion properties
 %==========================================================================
 
 adjoint_source_path='../input/sources/adjoint/';
@@ -13,6 +13,9 @@ adjoint_source_path='../input/sources/adjoint/';
 % smoothing properties
 smoothnp = 15;  % size of the smoothing filter
 smoothgwid = 9; % width of the gaussian in the smoothing filter
+
+% hard constraints
+axrot = 'x';     % 'x' or 'z' at the moment.
 
 
 %==========================================================================
@@ -40,7 +43,7 @@ order=4;    % finite-difference order (2 or 4)
 % model type
 %==========================================================================
 
-model_type=17;
+model_type=10;
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation

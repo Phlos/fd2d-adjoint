@@ -1,13 +1,13 @@
 % travel time kernel calculation routine
 
 % number of iterations
-niter = 10;
+niter = 6;
 
 % initial step length;
 stepInit = 3.5e14;
 
 % obtain project name
-project_name = get_input_info;
+[project_name, axrot] = get_input_info;
 
 
 
@@ -20,10 +20,8 @@ project_name = get_input_info;
 
 
 % MAKE SURE V_OBS IS PRESENT!!! AND SAVED!!!
-% cd ../code/
-% [v_obs,~,~,~,~,~]=run_forward;
-% % filename = ['../output/v_obs.mat'];
-% % save(filename, 'v_obs', '-v7.3');
+% [vbops, propsbops] = prepare_obs(NUMBER);
+
 
 
 
@@ -36,6 +34,8 @@ project_name = get_input_info;
 
 % save initial rho mu lambda as iter 1 Params values:
 Model(1) = update_model();
+
+
 % % fig_mod = plot_model(Model(1));
 % % figname = ['../output/iter',num2str(1),'.model.png'];
 % % print(fig_mod,'-dpng','-r400',figname);
@@ -51,8 +51,8 @@ Model(1) = update_model();
 % % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
 % % plot_seismograms(v_obs_3,t,'velocity');
 
-for i = 1:niter;
-    
+for i = 3:niter;
+    if i > 3
     cd ../code;
     
     disp  ' ';
@@ -144,18 +144,21 @@ for i = 1:niter;
     end
 
     
-    % apply hard constraints
-    % -> no negative velocities
-    % -> mass of the Earth and/or its moment of inertia
-
-    
     disp ' ';
     disp(['iter ',num2str(i),': updating model']);
     %     if i>1
     Model(i+1) = update_model(K_rel(i),step(i),Model(i));
     %     end
     
-    
+    end
+    % apply hard constraints
+    % -> no negative velocities
+    % -> mass of the Earth and/or its moment of inertia
+    [Model(i+1).rho, fig_rhoupdate,~,~] = ...
+                   apply_hard_constraints(props_obs, Model(i+1).rho,axrot);
+    figname = ['../output/iter',num2str(i),'.hard-constraints-rhoupdate.png'];
+    print(fig_rhoupdate,'-dpng','-r400',figname);
+    close(fig_rhoupdate);
     % OUTPUT:
     
     % save kernels per iter
@@ -242,7 +245,7 @@ save(savename, 'misfit', '-v7.3');
 
 disp 'saving all current variables...'
 clearvars('fig_misfit', 'figname', 'fig_seisdif', 'fig_mod', ...
-          'filenm_old', 'filenm_new');
+          'filenm_old', 'filenm_new', 'fig_knl');
 savename = ['../output/',project_name,'.all-vars.mat'];
 save(savename);
 
