@@ -186,6 +186,34 @@ elseif (model_type==18) % gaussian off-central mu anomaly
 %     size_rhocut = size(rho(ceil((1-dxz)*nx)+1:end, ceil((1-dxz)*nz)+1:end))
     mu(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
     mu(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e10;
+
+elseif (model_type==21) % gaussian off-central rho_v anomaly
+%% VP-VS-RHO parametrisation
+
+    % Tromp et al, 2005, rho-mu-lambda
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+        % rho-vs-vp
+        vp    = sqrt((lambda + 2*mu) ./ rho);
+        vs    = sqrt(mu ./ rho);
+        rho2 = rho;
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    
+    % adding the gaussian rho_v anomaly
+    dxz=0.15;
+    gwid = round(0.05 * max([nx nz]));
+    filt = fspecial('gaussian',[floor((1-dxz)*nx) floor((1-dxz)*nz)],gwid);
+    filt2 = filt / max(filt(:));
+    rho2(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
+    rho2(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e3;
+
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+    
     
 elseif (model_type==100) % layered: left = high velocity, right = low vel.
     

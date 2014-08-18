@@ -2,13 +2,16 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='RhoAnom_gblob_offcentre';
+project_name='ParamVpVsRho_RhoAnom.hc';
 
 %==========================================================================
 % inversion properties
 %==========================================================================
 
 adjoint_source_path='../input/sources/adjoint/';
+
+% apply hard constraints?
+apply_hc = 'yes';   % 'yes' or 'no'
 
 % smoothing properties
 smoothnp = 15;  % size of the smoothing filter
@@ -35,7 +38,7 @@ nz=390;     % grid points in z-direction
 % dt=0.33;     % time step [s] fine for SH in a grid   dx=dz=3.34e3 m
 % dt=0.1;      % time step [s] fine for P-SV in a grid dx=dz=3.34e3 m
 dt=0.01;      % time step [s]
-nt=2700;      % number of iterations
+nt=3500;      % number of iterations
 
 order=4;    % finite-difference order (2 or 4)
 
@@ -163,17 +166,17 @@ end
 
 width=25000.0;     % width of the boundary layer in m
 
-absorb_left=1;  % absorb waves on the left boundary
-absorb_right=1; % absorb waves on the right boundary
-absorb_top=1;   % absorb waves on the top boundary
-absorb_bottom=1;% absorb waves on the bottom boundary
+absorb_left=0;  % absorb waves on the left boundary
+absorb_right=0; % absorb waves on the right boundary
+absorb_top=0;   % absorb waves on the top boundary
+absorb_bottom=0;% absorb waves on the bottom boundary
 
 %==========================================================================
 % plotting
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-plot_every=10000;
+plot_every=100000;
 
 plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation

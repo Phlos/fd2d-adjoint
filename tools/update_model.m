@@ -2,6 +2,10 @@
 
 function [Params] = update_model(varargin)
 
+path(path,'../input')
+path(path,'../code')
+path(path,'../code/propagation')
+
 % function that calculates the updated model from the (relative!!) kernel,
 % the step length and the previous model, or from original input params.
 %
@@ -42,9 +46,9 @@ if narg == 0;
     % initialise original parameters
     input_parameters;
     [mu,rho,lambda]=define_material_parameters(nx,nz,model_type);
-    Params.rho = rho;
     Params.mu = mu;
     Params.lambda = lambda;
+    Params.rho = rho;
     
 % if input is a number and a model number at that:    
 elseif narg == 1;
@@ -69,13 +73,11 @@ elseif narg == 3;
     K_sm = smooth_kernels(K_rel, smoothnp, smoothgwid);
  
     % calculate model update
-    Params.rho = Params_previous.rho .* (1 - step * K_sm.rho.total);
     Params.mu = Params_previous.mu .* (1 - step * K_sm.mu.total);
     Params.lambda = Params_previous.lambda .* (1 - step * K_sm.lambda.total);
+    Params.rho = Params_previous.rho .* (1 - step * K_sm.rho.total);
     
-    % smooth the updated model! --> can't do that because then the model
-    % edges fade to zero...
-%     Params = smooth_model(Params_sharp, 11, 5);
+    % smooth the updated model? --> can't do that because then the model
 
    
 % otherwise error

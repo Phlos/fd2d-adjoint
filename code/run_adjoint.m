@@ -38,7 +38,7 @@ orig_src_x = src_x;
 orig_src_z = src_z;
 
 % make figures appear right on the screen
-set_figure_properties_maggi;
+set_figure_properties_doffer;
 
 % extract the u_fw and v_fw fields
 if(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))

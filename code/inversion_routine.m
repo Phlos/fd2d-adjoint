@@ -1,13 +1,18 @@
 % travel time kernel calculation routine
 
+% preparation
+path(path,'../tools');
+path(path,'../input');
+path(path,'./propagation');
+
 % number of iterations
-niter = 6;
+niter = 12;
 
 % initial step length;
 stepInit = 3.5e14;
 
 % obtain project name
-[project_name, axrot] = get_input_info;
+[project_name, axrot, apply_hc] = get_input_info;
 
 
 
@@ -20,7 +25,7 @@ stepInit = 3.5e14;
 
 
 % MAKE SURE V_OBS IS PRESENT!!! AND SAVED!!!
-% [vbops, propsbops] = prepare_obs(NUMBER);
+% [v_obs, t_obs, props_obs] = prepare_obs(modelnr);
 
 
 
@@ -32,7 +37,7 @@ stepInit = 3.5e14;
 
 
 
-% save initial rho mu lambda as iter 1 Params values:
+% save initial rho mu lambda (from input_parameters) as iter 1 Params values:
 Model(1) = update_model();
 
 
@@ -51,8 +56,8 @@ Model(1) = update_model();
 % % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
 % % plot_seismograms(v_obs_3,t,'velocity');
 
-for i = 3:niter;
-    if i > 3
+for i = 7:niter;
+%     if i > 3
     cd ../code;
     
     disp  ' ';
@@ -150,15 +155,18 @@ for i = 3:niter;
     Model(i+1) = update_model(K_rel(i),step(i),Model(i));
     %     end
     
-    end
+%     end
     % apply hard constraints
-    % -> no negative velocities
-    % -> mass of the Earth and/or its moment of inertia
-    [Model(i+1).rho, fig_rhoupdate,~,~] = ...
-                   apply_hard_constraints(props_obs, Model(i+1).rho,axrot);
-    figname = ['../output/iter',num2str(i),'.hard-constraints-rhoupdate.png'];
-    print(fig_rhoupdate,'-dpng','-r400',figname);
-    close(fig_rhoupdate);
+    if(strcmp(apply_hc,'yes'))
+        % -> no negative velocities
+        % -> mass of the Earth and/or its moment of inertia
+        [Model(i+1).rho, fig_rhoupdate,~,~] = ...
+            apply_hard_constraints(props_obs, Model(i+1).rho,axrot);
+        figname = ['../output/iter',num2str(i),'.hard-constraints-rhoupdate.png'];
+        print(fig_rhoupdate,'-dpng','-r400',figname);
+        close(fig_rhoupdate);
+    end
+    
     % OUTPUT:
     
     % save kernels per iter
@@ -202,6 +210,10 @@ close(clf);
 clearvars('u_fw');
 clearvars('v_fw');
 
+% save v_rec per iter
+filenm_old = ['../output/', project_name, '.v_rec.mat'];
+filenm_new = ['../output/iter', num2str(niter+1),'.v_rec.mat'];
+movefile(filenm_old, filenm_new);
 
 
 % MISFIT:
