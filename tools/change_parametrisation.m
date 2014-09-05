@@ -6,28 +6,47 @@ function outfields = change_parametrisation(inparam, outparam, infields)
 % parametrisation.
 % For now, only rhovsvp <--> rhomulambda works, but I can easily expand.
 %
+% INPUT:
+% infields:     infields.param1, infields.param2, infields.param3
+%
+% OUTPUT:
+% outfields:    outfields.param1, outfields.param2, outfields.param3
+%
 % -- Nienke Blom, 18-8-2014
 
-switch inparam
-    case 'rhomulambda'
-        switch outparam
-            case 'rhovsvp'
-                outfields.vs = abs(sqrt(infields.mu ./ infields.rho));
-                outfields.vp = abs(sqrt((infields.lambda + 2*infields.mu) ...
-                               ./ infields.rho));
-                outfields.rho = infields.rho;
-            otherwise
-                warning('Unexpected output parametrisation.');
-        end
+switch outparam
     case 'rhovsvp'
-        switch outparam
-            case 'rhomulambda'
-                outfields.mu  = abs(infields.vs .^2 .* infields.rho);
-                outfields.lambda = abs(infields.rho2 .* ...
-                                   ( infields.vp.^2 - 2* infields.vs.^2));
-                outfields.rho = infields.rho;
-            otherwise
-                warning('Unexpected output parametrisation.');
+        if isfield(infields, 'vs') && isfield(infields, 'vp')
+            warning('your infields already has the parametrisation you want');
+            outfields = infields;
+        else
+            switch inparam
+                case 'rhomulambda'
+                    outfields.vs = abs(sqrt(infields.mu ./ infields.rho));
+                    outfields.vp = abs(sqrt((infields.lambda + 2*infields.mu) ...
+                        ./ infields.rho));
+                    outfields.rho = infields.rho;
+                otherwise
+                    warning('Unexpected output parametrisation.');
+            end
+        end
+    case 'rhomulambda'
+        
+        if isfield(infields, 'mu') && isfield(infields, 'lambda')
+            warning('your infields already has the parametrisation you want');
+            outfields = infields;
+            
+        else
+        
+            switch inparam
+                case 'rhovsvp'
+                    outfields.mu  = abs(infields.vs .^2 .* infields.rho);
+                    outfields.lambda = abs(infields.rho .* ...
+                        ( infields.vp.^2 - 2* infields.vs.^2));
+                    outfields.rho = infields.rho;
+                otherwise
+                    warning('Unexpected output parametrisation.');
+            end
         end
     otherwise
         warning('Unexpected input parametrisation.');

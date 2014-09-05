@@ -1,6 +1,6 @@
 % plot relative kernels rho mu kappa
 
-function plot_kernels_rho_vs_vp_relative(K_rel)
+function fig_knl = plot_kernels_rho_vs_vp_relative(K_rel)
 
 %- initialise input -------------------------------------------------------
 path(path,'../code');

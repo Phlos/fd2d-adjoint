@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='ParamVpVsRho_RhoAnom.hc';
+project_name='ParamRhoVsVp_RhoAnom.hc_rhovsvp';
 
 %==========================================================================
 % inversion properties
@@ -12,6 +12,9 @@ adjoint_source_path='../input/sources/adjoint/';
 
 % apply hard constraints?
 apply_hc = 'yes';   % 'yes' or 'no'
+
+% inversion parametrisation
+parametrisation = 'rhovsvp';    % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 
 % smoothing properties
 smoothnp = 15;  % size of the smoothing filter

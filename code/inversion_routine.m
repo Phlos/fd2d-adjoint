@@ -1,4 +1,3 @@
-% travel time kernel calculation routine
 
 % preparation
 path(path,'../tools');
@@ -6,13 +5,13 @@ path(path,'../input');
 path(path,'./propagation');
 
 % number of iterations
-niter = 12;
+niter = 7;
 
 % initial step length;
 stepInit = 3.5e14;
 
 % obtain project name
-[project_name, axrot, apply_hc] = get_input_info;
+ [project_name, axrot, apply_hc, parametrisation] = get_input_info;
 
 
 
@@ -56,8 +55,8 @@ Model(1) = update_model();
 % % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
 % % plot_seismograms(v_obs_3,t,'velocity');
 
-for i = 7:niter;
-%     if i > 3
+for i = 3:niter;
+%  if i > 1
     cd ../code;
     
     disp  ' ';
@@ -70,11 +69,22 @@ for i = 7:niter;
     disp ' ';
     
     % plot model
-    fig_mod = plot_model(Model(i));
-    figname = ['../output/iter',num2str(i),'.model.png'];
-    print(fig_mod,'-dpng','-r400',figname);
-    close(fig_mod);
 
+
+    switch parametrisation
+        case 'rhomulambda'
+            fig_mod = plot_model(Model(i));
+            figname = ['../output/iter',num2str(i),'.model.rhomulambda.png'];
+            print(fig_mod,'-dpng','-r400',figname);
+            close(fig_mod);
+        case 'rhovsvp'
+            fig_mod = plot_model(Model(i),'rhovsvp');
+            figname = ['../output/iter',num2str(i),'.model.rhovsvp.png'];
+            print(fig_mod,'-dpng','-r400',figname);
+            close(fig_mod);
+        otherwise
+            error('unrecognised parametrisation for model plot');
+    end
     
     % run forward wave propagation 
     disp ' ';
@@ -93,7 +103,6 @@ for i = 7:niter;
     
     % plot seismogram difference
     fig_seisdif = plot_seismogram_difference(v_obs,v_iter(i),t);
-%     figname = ['../output/iter',num2str(i),'.seisdif-', num2str(misfit_iter(i).total, '%3.2e'), '.png'];
     figname = ['../output/iter',num2str(i),'.seisdif.png'];
     print(fig_seisdif,'-dpng','-r400',figname);
     close(fig_seisdif);
@@ -118,17 +127,21 @@ for i = 7:niter;
     disp ' ';
     disp(['iter ',num2str(i),': plotting kernels']);
     cd ../tools/
-    [K_abs(i), K_rel(i)] = calculate_other_kernels(K(i));
-    fig_knl = plot_kernels_rho_mu_lambda_relative(K_rel(i));
-    figname = ['../output/iter',num2str(i),'.kernels.relative.rho-mu-lambda.png'];
-    print(fig_knl,'-dpng','-r400',figname);
+    [K_abs(i), K_rel(i)] = calculate_other_kernels(K(i), Model(i));
+    switch parametrisation
+        case 'rhomulambda'
+            fig_knl = plot_kernels_rho_mu_lambda_relative(K_rel(i));
+            figname = ['../output/iter',num2str(i),'.kernels.relative.rho-mu-lambda.png'];
+            print(fig_knl,'-dpng','-r400',figname);
     close(fig_knl);
-    
-%     disp 'kernels rho vs vp relative'
-%     plot_kernels_rho_vs_vp_relative(K_rel(i));
-% %     figname = ['../output/kernels-relative_rho-vs-vp_iter-',num2str(i),'.png'];
-%     print(gcf,'-dpng','-r400',figname);
-%     close(gcf);
+        case 'rhovsvp'
+            fig_knl = plot_kernels_rho_vs_vp_relative(K_rel(i));
+            figname = ['../output/iter',num2str(i),'.kernels.relative.rho-vs-vp.png'];
+            print(fig_knl,'-dpng','-r400',figname);
+            close(fig_knl);
+        otherwise
+            error('unrecognised parametrisation for kernel plot');
+    end
 %     
 %     disp 'kernels rho mu kappa relative'
 %     plot_kernels_rho_mu_kappa_relative(K_rel(i));
@@ -136,7 +149,7 @@ for i = 7:niter;
 %     print(gcf,'-dpng','-r400',figname);
 %     close(gcf);
 
-    
+%  end    
     % calculate the step length and model update
     disp ' ';
     disp(['iter ',num2str(i),': calculating step length']);
@@ -155,13 +168,24 @@ for i = 7:niter;
     Model(i+1) = update_model(K_rel(i),step(i),Model(i));
     %     end
     
-%     end
+% end
+
     % apply hard constraints
     if(strcmp(apply_hc,'yes'))
         % -> no negative velocities
         % -> mass of the Earth and/or its moment of inertia
-        [Model(i+1).rho, fig_rhoupdate,~,~] = ...
-            apply_hard_constraints(props_obs, Model(i+1).rho,axrot);
+        switch parametrisation
+            case 'rhomulambda'
+                [Model(i+1).rho, fig_rhoupdate,~,~] = ...
+                    apply_hard_constraints(props_obs, Model(i+1).rho,axrot);
+            case 'rhovsvp'
+                Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model(i+1));
+                [Model_rhovsvp.rho, fig_rhoupdate,~,~] = ...
+                    apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
+                Model(i+1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
+            otherwise
+                error('the parametrisation of the inversion was not recognised')
+        end
         figname = ['../output/iter',num2str(i),'.hard-constraints-rhoupdate.png'];
         print(fig_rhoupdate,'-dpng','-r400',figname);
         close(fig_rhoupdate);

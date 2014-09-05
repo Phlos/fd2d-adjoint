@@ -21,9 +21,6 @@ function fig_mod = plot_model(varargin)
 input_parameters;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 set_figure_properties_maggi;
-% mu = Model.mu;
-% rho = Model.rho;
-% lambda = Model.lambda;
 
 load 'propagation/cm_model.mat';
 
@@ -37,7 +34,11 @@ for params = fieldnames(Model)';
 
     param = Model.(params{1});
 
-    subplot(1,3,j)
+    g = subplot(2,3,j);
+    
+    p = get(g,'position');
+%     p(4) = p(4)*1.50;  % Add 10 percent to height
+    set(g, 'position', p);
     
     hold on
     pcolor(X,Z,param');
@@ -46,7 +47,8 @@ for params = fieldnames(Model)';
     
     %- colour scale
     if (middle == 1234567890)
-        if all(param == param(1))
+        
+        if all(abs(param-mode(param(:))) <= 1e-14*mode(param(1)))
             cmax = param(1) + 0.01*param(1);
             cmin = param(1) - 0.01*param(1);
             %     disp 'bips!!! all param are the same!'
@@ -65,21 +67,19 @@ for params = fieldnames(Model)';
             %     cmin = 2*cmid - cmax;
             %     disp 'the param are not all the same'
         end
+        
     else
-            % max and min are calculated in this way so that the most common value
-            % (i.e. the background value) is white, and that the extreme coulours
-            % are determined by whichever of max and min is farthest off from the
-            % background colour.
-            %     cmid = mode(param(:))
-%             [bincounts, centre] = hist(param(:),100);
-%             [~,ix]=max(bincounts);
-            cmid = middle;
-            cmax = cmid + max(abs(param(:) - cmid));
-            cmin = cmid - max(abs(param(:) - cmid));
-            %     cmax = max(param(:));
-            %     cmin = 2*cmid - cmax;
-            %     disp 'the param are not all the same'
+        
+        % max and min are calculated in this way so that the most common value
+        % (i.e. the background value) is white, and that the extreme coulours
+        % are determined by whichever of max and min is farthest off from the
+        % background colour.
+        cmid = middle;
+        cmax = cmid + max(abs(param(:) - cmid));
+        cmin = cmid - max(abs(param(:) - cmid));
+        
     end
+    
     caxis([cmin cmax]);
     
     
@@ -107,6 +107,12 @@ for params = fieldnames(Model)';
     ylabel('z [m]');
     colorbar
     hold off;
+    
+%     subplot(4,3,6+j)
+%     
+%      hist(Model.(params{1})(:),100)
+%      h = findobj(gca,'Type','patch');
+%      set(h,'FaceColor',[.9 .9 .9],'EdgeColor',[.9 .9 .9])
     
     j = j+1;
 end

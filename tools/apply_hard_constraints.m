@@ -77,8 +77,9 @@ propsN = calculate_model_properties(outrho,axrot);
 
            
 %== OUTPUT ================================================================
-fprintf('Real, test mass  : %10.3e, %10.3e\n', propsR.M, propsT.M );
-fprintf('Real, test MoI   : %10.3e, %10.3e\n\n', propsR.I, propsT.I );
+fprintf('Real, test mass  : %12.5e, %12.5e\n', propsR.M, propsT.M );
+fprintf('Real, test MoI   : %12.5e, %12.5e\n', propsR.I, propsT.I );
+fprintf('Real, test ratio : %12.5f, %12.5f\n\n', propsR.Ifactor, propsT.Ifactor );
 
 fprintf('M diff  : %6.1e,   relative: %7.2e\n', Mdif, Mdifrel );
 fprintf('I diff  : %6.1e,   relative: %7.2e\n\n', Idif, Idifrel );
@@ -90,12 +91,12 @@ fprintf('I const       : %10.1e\n',drho.Iconst);
 fprintf('I var max, min: %10.1e %10.1e \n\n', ...
                        max(drho.Ivar(:)), min(drho.Ivar(:)) );
 
-fprintf('Max, min density update: %.1f, %.1f kg/m^3\n\n', ...
+fprintf('Max, min density update: %.2f, %.2f kg/m^3\n\n', ...
       max(max(outrho - inrho)), min(min(outrho - inrho)) );
 
 
-fprintf('Real, new mass   : %10.3e, %10.3e\n', propsR.M, propsN.M );
-fprintf('Real, new MoI    : %10.3e, %10.3e\n\n', propsR.I, propsN.I );
+fprintf('Real, new mass   : %12.5e, %12.5e\n', propsR.M, propsN.M );
+fprintf('Real, new MoI    : %12.5e, %12.5e\n\n', propsR.I, propsN.I );
 
 %- test whether the output density model gives us the real M and I
 if((propsN.M ~= propsR.M) || (propsN.I ~= propsR.I))
