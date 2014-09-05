@@ -143,24 +143,18 @@ end
 if strcmp(simulation_mode,'forward')
     if(strcmp(wave_propagation_type,'SH'))
         if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-%             disp 'v_forward...'
             save('../output/v_forward','vy_forward','-v7.3');
-%             disp 'u_forward...'
             save('../output/u_forward','uy_forward','-v7.3');
         end
     elseif(strcmp(wave_propagation_type,'PSV'))
         if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-%             disp 'v_forward...'
             save('../output/v_forward','vx_forward','vz_forward', '-v7.3');
-%             disp 'u_forward...'
             save('../output/u_forward','ux_forward','uz_forward', '-v7.3');
         end
     elseif(strcmp(wave_propagation_type,'both'))
         if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
             if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-%                 disp 'v_forward...'
                 save('../output/v_forward','vx_forward','vy_forward','vz_forward', '-v7.3');
-%                 disp 'u_forward...'
                 save('../output/u_forward','ux_forward','uy_forward','uz_forward', '-v7.3');
             end
 
