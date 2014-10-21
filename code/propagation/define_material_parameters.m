@@ -156,15 +156,21 @@ elseif (model_type==17) % gaussian off-central rho anomaly
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
-    dxz=0.15;
+    dxz=0.15; % determines the location of the filter centre wrt the centre 
+             % of the plot as a fraction of the total distance
+             % centre-border
     
-    gwid = round(0.05 * max([nx nz]));
+    gwid = round(0.05 * max([nx nz])); % standard deviation of gaussian:
+                                       % size of the gaussian blur of the 
+                                       % rho anomaly, fraction of the total
+                                       % domain size
     filt = fspecial('gaussian',[floor((1-dxz)*nx) floor((1-dxz)*nz)],gwid);
-    filt2 = filt / max(filt(:));
-%      size_filt2 = size(filt2)
+    filt2 = filt / max(filt(:)); % normalised filter (max value is 1)
+     size_filt2 = size(filt2)
 %      size_filt2_orig = [(1-dxz)*nx (1-dxz)*nz]
 %      size_rhocut = size(rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end))
 %      size_rhocut_orig = [size(rho,1) - dxz*nx+1 size(rho,2)-dxz*nz+1]
+ceil(dxz*nx)+1
     rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
     rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e3;
     

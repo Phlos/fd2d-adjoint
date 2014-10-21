@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='ParamRhoVsVp_RhoAnom.hc_rhovsvp';
+project_name='ParamRhoVsVp_RhoAnomOtherplace.hc_rhovsvp';
 
 %==========================================================================
 % inversion properties
@@ -43,7 +43,7 @@ nz=390;     % grid points in z-direction
 dt=0.01;      % time step [s]
 nt=3500;      % number of iterations
 
-order=4;    % finite-difference order (2 or 4)
+order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
 %==========================================================================
 % model type
@@ -161,6 +161,16 @@ end
 %- a large number of receivers in a closed rectangular configuration
 %rec_x=[50.0  50.0  50.0  50.0  50.0   50.0    70.0  90.0 110.0 130.0   70.0  90.0 110.0 130.0  150.0 150.0 150.0 150.0 150.0  150.0];
 %rec_z=[70.0  90.0 110.0 130.0 150.0  170.0    70.0  70.0  70.0  70.0  170.0 170.0 170.0 170.0   70.0  90.0 110.0 130.0 150.0  170.0];
+
+
+%==========================================================================
+% gravity measurement positions
+%==========================================================================
+
+%- a line of receivers above the domain
+rec_g.x= (0: 1: 15) * 10^4;
+rec_g.z=ones(size(rec_g.x)) * (Lz + 100);
+
 
 
 %==========================================================================
