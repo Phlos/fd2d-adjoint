@@ -99,7 +99,7 @@ fprintf('Real, new mass   : %12.5e, %12.5e\n', propsR.M, propsN.M );
 fprintf('Real, new MoI    : %12.5e, %12.5e\n\n', propsR.I, propsN.I );
 
 %- test whether the output density model gives us the real M and I
-if((propsN.M ~= propsR.M) || (propsN.I ~= propsR.I))
+if((propsN.M - propsR.M > 3e-5) || (propsN.I - propsR.I > 3e-5))
     disp('ERRORR the updated mass and MoI are NOT the real mass and MoI!!');
     fprintf('Relative difference in mass, MoI: %10.2e, %10.2e \n\n', ...
               (propsR.M-propsN.M)/propsR.M, (propsR.I-propsN.I)/propsR.I );
@@ -111,7 +111,9 @@ load 'propagation/cm_model.mat';
 colormap(cm_model);
 
 subplot(2,2,1);
-h = pcolor(r.^2);
+h = pcolor(X,Zet,(r.^2)');
+shading interp
+axis image;
 set(h, 'EdgeColor', 'none');
 caxis([-max(max(abs(r.^2))) max(max(abs(r.^2))) ]);
 colorbar;
@@ -119,7 +121,9 @@ title('r^2');
 
 subplot(2,2,2);
 field = drho.Mvar + drho.Mconst*ones(size(inrho)) ;
-i = pcolor(field);
+i = pcolor(X,Zet,field');
+shading interp
+axis image;
 set(i, 'EdgeColor', 'none');
 cmax=abs(max(field(:)));
 caxis([-cmax cmax]);
@@ -127,14 +131,18 @@ colorbar;
 title('total M update');
 
 subplot(2,2,3)
-j = pcolor(drho.Ivar + drho.Iconst*ones(size(inrho)) );
+j = pcolor(X, Zet, (drho.Ivar + drho.Iconst*ones(size(inrho)) )' );
+shading interp
+axis image;
 set(j, 'EdgeColor', 'none');
 caxis([-max(max(abs(drho.Ivar))) max(max(abs(drho.Ivar))) ]);
 colorbar;
 title('total I update');
 
 subplot(2,2,4);
-k = pcolor(drho.total);
+k = pcolor(X, Zet, (drho.total)' );
+shading interp
+axis image;
 set(k, 'EdgeColor', 'none');
 caxis([-max(max(abs(drho.total))) max(max(abs(drho.total))) ]);
 colorbar

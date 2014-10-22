@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='ParamRhoVsVp_RhoAnomOtherplace.hc_rhovsvp';
+project_name='ParamRhoVsVp_RhoAnomNontipping.hc_rhovsvp';
 
 %==========================================================================
 % inversion properties

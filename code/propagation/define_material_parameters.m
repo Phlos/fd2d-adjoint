@@ -156,23 +156,27 @@ elseif (model_type==17) % gaussian off-central rho anomaly
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
-    dxz=0.15; % determines the location of the filter centre wrt the centre 
-             % of the plot as a fraction of the total distance
-             % centre-border
+    % location of the centre of the anomaly
+    anom.dxperc=0.40; % anomaly x distance from the lower left corner
+                  % as a fraction of the X length
+    anom.dzperc=0.42; % same for z distance
+    % height & width of the anomaly
+    anom.dx = round(anom.dxperc*nx);
+    anom.dz  = round(anom.dzperc*nz);
     
+    % make anomaly
     gwid = round(0.05 * max([nx nz])); % standard deviation of gaussian:
                                        % size of the gaussian blur of the 
                                        % rho anomaly, fraction of the total
                                        % domain size
-    filt = fspecial('gaussian',[floor((1-dxz)*nx) floor((1-dxz)*nz)],gwid);
-    filt2 = filt / max(filt(:)); % normalised filter (max value is 1)
-     size_filt2 = size(filt2)
-%      size_filt2_orig = [(1-dxz)*nx (1-dxz)*nz]
-%      size_rhocut = size(rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end))
-%      size_rhocut_orig = [size(rho,1) - dxz*nx+1 size(rho,2)-dxz*nz+1]
-ceil(dxz*nx)+1
-    rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
-    rho(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e3;
+    filt.width = 8*gwid; % 8*gwid is enough to taper out visibly
+    filt.height = filt.width; % don't see why it should ever be different..
+    filt.f = fspecial('gaussian',[filt.width filt.height],gwid); 
+    filt.fnorm = filt.f / max(filt.f(:)); % normalised filter (max value is 1)
+    
+    % add the anomaly to the density field at (anom.dx, anom.dz)
+    rho = add_crop_matrix(rho, filt.fnorm*10^3, anom.dx, anom.dz);
+    
     
 elseif (model_type==18) % gaussian off-central mu anomaly
     
@@ -207,13 +211,34 @@ elseif (model_type==21) % gaussian off-central rho_v anomaly
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
-    % adding the gaussian rho_v anomaly
-    dxz=0.15;
-    gwid = round(0.05 * max([nx nz]));
-    filt = fspecial('gaussian',[floor((1-dxz)*nx) floor((1-dxz)*nz)],gwid);
-    filt2 = filt / max(filt(:));
-    rho2(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
-    rho2(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e3;
+%     % adding the gaussian rho_v anomaly
+%     dxz=0.15;
+%     gwid = round(0.05 * max([nx nz]));
+%     filt = fspecial('gaussian',[floor((1-dxz)*nx) floor((1-dxz)*nz)],gwid);
+%     filt2 = filt / max(filt(:));
+%     rho2(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
+%     rho2(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e3;
+
+    % location of the centre of the anomaly
+    anom.dxperc=0.40; % anomaly x distance from the lower left corner
+                  % as a fraction of the X length
+    anom.dzperc=0.42; % same for z distance
+    % height & width of the anomaly
+    anom.dx = round(anom.dxperc*nx);
+    anom.dz  = round(anom.dzperc*nz);
+
+    % make anomaly
+    gwid = round(0.05 * max([nx nz])); % standard deviation of gaussian:
+                                       % size of the gaussian blur of the 
+                                       % rho anomaly, fraction of the total
+                                       % domain size
+    filt.width = 8*gwid; % 8*gwid is enough to taper out visibly
+    filt.height = filt.width; % don't see why it should ever be different..
+    filt.f = fspecial('gaussian',[filt.width filt.height],gwid); 
+    filt.fnorm = filt.f / max(filt.f(:)); % normalised filter (max value is 1)
+    
+    % add the anomaly to the density field at (anom.dx, anom.dz)
+    rho2 = add_crop_matrix(rho2, filt.fnorm*10^3, anom.dx, anom.dz);
 
     % recalculating to rho-mu-lambda
     rho     = rho2;

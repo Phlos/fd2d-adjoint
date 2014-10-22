@@ -55,7 +55,7 @@ Model(1) = update_model();
 % % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
 % % plot_seismograms(v_obs_3,t,'velocity');
 
-for i = 3:niter;
+for i = 1:niter;
 %  if i > 1
     cd ../code;
     
