@@ -29,7 +29,7 @@ sort=0;
 
 if strcmp(veldis,'displacement')
     nt=length(t);
-    u=zeros(length(rec_x),nt);
+    u=zeros(size(vel.x,2),nt);
     
     u = cumsum(vel,2)*dt;
     

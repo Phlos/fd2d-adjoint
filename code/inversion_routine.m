@@ -11,7 +11,7 @@ niter = 7;
 stepInit = 3.5e14;
 
 % obtain project name
- [project_name, axrot, apply_hc, parametrisation] = get_input_info;
+ [project_name, axrot, apply_hc, parametrisation, rec_g, X, Z] = get_input_info;
 
 
 
@@ -55,7 +55,7 @@ Model(1) = update_model();
 % % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
 % % plot_seismograms(v_obs_3,t,'velocity');
 
-for i = 1:niter;
+for i = 2:niter;
 %  if i > 1
     cd ../code;
     
@@ -85,6 +85,23 @@ for i = 1:niter;
         otherwise
             error('unrecognised parametrisation for model plot');
     end
+    
+    % compare gravity fields:
+    % gravity field of real model
+    [g(i), fig_grav] = calculate_gravity_field(Model(i).rho, rec_g);
+    figname = ['../output/iter',num2str(i),'.gravity_recordings.png'];
+    titel; = ['gravity field of ', num2str(i), 'th model'];
+    mtit(fig_grav, titel);
+    print(fig_grav, '-dpng', '-r400', figname);
+    close(fig_grav);
+    % comparison to real model:
+    fig_grav_comp = plot_gravity_quivers(rec_g, g(i), g_obs, X, Z, Model(i).rho);
+    figname = ['../output/iter',num2str(i),'.gravity_difference.png'];
+    titel = ['Difference between gravity field of the iter ', num2str(i), ' model and that of the real model'];
+    mtit(fig_grav_comp, titel);
+    print(fig_grav_comp, '-dpng', '-r400', figname);
+    close(fig_grav_comp);
+    
     
     % run forward wave propagation 
     disp ' ';
@@ -191,6 +208,8 @@ for i = 1:niter;
         close(fig_rhoupdate);
     end
     
+
+    
     % OUTPUT:
     
     % save kernels per iter
@@ -218,8 +237,8 @@ disp 'FINISHING UP WITH THE LAST MODEL...'
 disp '======================================';
 
 % PLOT MODEL
-fig_mod = plot_model(Model(niter+1));
-figname = ['../output/iter',num2str(niter+1),'.model.png'];
+fig_mod = plot_model(Model(niter+1), parametrisation);
+figname = ['../output/iter',num2str(niter+1),'.model.',parametrisation,'.png'];
 print(fig_mod,'-dpng','-r400',figname);
 close(fig_mod);
 

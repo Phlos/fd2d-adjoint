@@ -1,6 +1,9 @@
 % plot gravity field nicely
-function fig_grav = plot_gravity_quivers(rec_g, g, g_homog, X, Z, Model)
-
+function fig_grav = plot_gravity_quivers(rec_g, g, g_homog, X, Z, rho)
+%
+% function to plot gravity quivers of the difference between g and g_homog
+%
+% fig_grav = plot_gravity_quivers(rec_g, g, g_homog, X, Z, rho)
 
 fig_grav = figure;
 clf;
@@ -10,7 +13,7 @@ plot(rec_g.x, rec_g.z, 'ko');
 hold on;
 
 % then plot image
-pcolor(X,Z,Model.rho');
+pcolor(X,Z,rho');
 shading interp;
 axis image;
 

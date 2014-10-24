@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='ParamRhoVsVp_RhoAnomNontipping.hc_rhovsvp';
+project_name='ParamRhoVsVp.RhoAnom_5g_rand';
 
 %==========================================================================
 % inversion properties
@@ -167,8 +167,8 @@ end
 % gravity measurement positions
 %==========================================================================
 
-%- a line of receivers above the domain
-rec_g.x= (0: 1: 15) * 10^4;
+%- a line of gravity receivers above the domain
+rec_g.x= (0: 1: 15) * (Lx/15);
 rec_g.z=ones(size(rec_g.x)) * (Lz + 100);
 
 
