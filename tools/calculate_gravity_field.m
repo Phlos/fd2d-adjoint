@@ -6,9 +6,9 @@ function [g, fig_grav] = calculate_gravity_field(rho, rec_grav)
 %
 % INPUT
 %
-% - body information: height width dx dz density (as a function of x, z,
-%   indices) --> comes from input_parameters
-% - receiver information: rec_g_x, rec_g_z for all receivers.
+% - receiver information: rec_grav.x,.z for all receivers.
+% - body information: density (as a function of x, z) [height width dx dz 
+%   all derived from input_parameters
 %
 % OUTPUT
 % - gravity vector at each receiver
@@ -40,15 +40,12 @@ for i = 1:nrec
     r{i}.x = rec_grav.x(i) - X';
     r{i}.z = rec_grav.z(i) - Z';
     
-    
     % calculate length or the vectors r for each point
-    r_len{i} = sqrt(r{i}.x.^2 + r{i}.z.^2);
+    r{i}.length = sqrt(r{i}.x.^2 + r{i}.z.^2);
     
     % calculate dg{i}.x,z: gravity increment for each block of model for each receiver
-%     disp 'calculating dg x'
-    dg{i}.x = - dm ./ r_len{i}.^3 .* r{i}.x * G;
-%     disp 'calculating dg z'
-    dg{i}.z = - dm ./ r_len{i}.^3 .* r{i}.z * G;
+    dg{i}.x = - dm ./ r{i}.length .^3 .* r{i}.x * G;
+    dg{i}.z = - dm ./ r{i}.length .^3 .* r{i}.z * G;
 
     % calculate g(i): gravity for each receiver
 %     g{i}.x = sum(dg{i}.x(:));
@@ -63,7 +60,7 @@ end
 disp(['maximum gravity accelleration: ', num2str(max(g.mag)), ' m/s^2'])
 
 % create dummy gravity field to be able to plot the gravity field 
-% (this function now has static input but really I should change the
+% (the plot function now has static input but really I should change the
 % function plot_gravity_quivers so that you can either plot one field,
 % or the difference between two (or even multiple fields, maybe?)
 dum.x = zeros(size(g.x));

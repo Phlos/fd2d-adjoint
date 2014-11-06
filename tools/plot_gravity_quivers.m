@@ -1,9 +1,9 @@
 % plot gravity field nicely
-function fig_grav = plot_gravity_quivers(rec_g, g, g_homog, X, Z, rho)
+function fig_grav = plot_gravity_quivers(rec_g, g1, g2, X, Z, rho)
 %
 % function to plot gravity quivers of the difference between g and g_homog
 %
-% fig_grav = plot_gravity_quivers(rec_g, g, g_homog, X, Z, rho)
+% fig_grav = plot_gravity_quivers(rec_g, g1, g2, X, Z, rho)
 
 fig_grav = figure;
 clf;
@@ -20,13 +20,13 @@ axis image;
 % arrow plots ('quiver') with gravity info
 % h1 = quiver(rec_g.x,rec_g.z,g.x, g.z, 0,'color','g'); % the '0' turns off auto-scaling
 % h2 = quiver(rec_g.x,rec_g.z,g_homog.x, g_homog.z, 0,'color','r');
-difference.x = (g.x - g_homog.x);
-difference.z = (g.z - g_homog.z);
+difference.x = (g1.x - g2.x);
+difference.z = (g1.z - g2.z);
 % h3 = quiver(rec_g.x,rec_g.z, difference.x, difference.z, 0,'color','g');
 h3 = quivers(rec_g.x,rec_g.z,difference.x, difference.z, 0.5, 3, 'm/s^2','g');
 
 % scaling
-maxi.values = max([g.x(:);g.z(:)]);
+maxi.values = max([g1.x(:);g1.z(:)]);
 maxi.domain = max([X(:); Z(:)]);
 maxi.toti   = maxi.domain / maxi.values;
 qscale = 10*maxi.toti ; % scaling factor for all vectors

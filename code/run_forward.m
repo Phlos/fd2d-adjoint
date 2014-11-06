@@ -90,7 +90,7 @@ end
 
 %% check values
 
-test_input_compatibility;
+%test_input_compatibility;
 
 
 

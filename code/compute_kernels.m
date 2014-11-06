@@ -21,6 +21,10 @@
 % sqrt( mu/rho ), so no sensitivity in the y component of seismograms!
 %
 % -- Nienke Blom, 13 March 2014
+%
+% Trying to make it a function (27 Oct 2014), where Kernel should be the
+% total kernels only, and K the PSV / SH sub-kernels.
+% function [Kernel, K] compute_kernels(vx, vy, vz, v_forward, ...)
 %==========================================================================
 
 

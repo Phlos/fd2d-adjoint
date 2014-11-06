@@ -3,12 +3,15 @@
 path(path,'../tools');
 path(path,'../input');
 path(path,'./propagation');
+path(path,'../quivers');
+path(path,'../mtit');
 
 % number of iterations
-niter = 7;
+niter = 1;
 
 % initial step length;
-stepInit = 3.5e14;
+% stepInit = 3.5e14;    % good for circular configuration
+stepInit = 5e15;        % good for circular src and rec @ top of domain
 
 % obtain project name
  [project_name, axrot, apply_hc, parametrisation, rec_g, X, Z] = get_input_info;
@@ -55,8 +58,8 @@ Model(1) = update_model();
 % % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
 % % plot_seismograms(v_obs_3,t,'velocity');
 
-for i = 2:niter;
-%  if i > 1
+for i = 1:niter;
+ if i > 1
     cd ../code;
     
     disp  ' ';
@@ -68,9 +71,8 @@ for i = 2:niter;
     disp '======================================';
     disp ' ';
     
+    %% MODEL
     % plot model
-
-
     switch parametrisation
         case 'rhomulambda'
             fig_mod = plot_model(Model(i));
@@ -86,11 +88,14 @@ for i = 2:niter;
             error('unrecognised parametrisation for model plot');
     end
     
+    
+    %% GRAVITY
+    
     % compare gravity fields:
-    % gravity field of real model
+    % gravity field of current model
     [g(i), fig_grav] = calculate_gravity_field(Model(i).rho, rec_g);
     figname = ['../output/iter',num2str(i),'.gravity_recordings.png'];
-    titel; = ['gravity field of ', num2str(i), 'th model'];
+    titel = ['gravity field of ', num2str(i), 'th model'];
     mtit(fig_grav, titel);
     print(fig_grav, '-dpng', '-r400', figname);
     close(fig_grav);
@@ -102,7 +107,29 @@ for i = 2:niter;
     print(fig_grav_comp, '-dpng', '-r400', figname);
     close(fig_grav_comp);
     
+    disp ' ';
+    disp(['iter ',num2str(i),': calculating gravity kernel']);
+    if i == 1
+        [Kg, misfit_g(i), fig_Kg] = compute_kernels_gravity(g(i),g_obs,rec_g,'yes'); % 'no' is for plotting gravity kernel update
+    else
+        [Kg, misfit_g(i), fig_Kg] = compute_kernels_gravity(g(i),g_obs,rec_g,'no'); % 'no' is for plotting gravity kernel update
+    end
+
+    sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
+    div_by_gobs = misfit_g(i) / sumgobs;
+    disp(['GRAVITY MISFIT FOR ITER ',num2str(i),': ', ...
+          num2str(misfit_g(i),'%3.2e')])
+    disp(['   percentually ',num2str(i),': ', ...
+          num2str(div_by_gobs,'%3.2e')])
+    disp ' ';
     
+    figname = ['../output/iter',num2str(i),'.kernel_grav.rho.png'];
+    titel = ['Gravity kernel for iter ',num2str(i)];
+    mtit(fig_Kg,titel)
+    print(fig_Kg,'-dpng','-r400',figname);
+    close(fig_Kg);
+    
+    %% SEISMIC
     % run forward wave propagation 
     disp ' ';
     disp(['iter ',num2str(i),': calculating forward wave propagation']);
@@ -124,61 +151,100 @@ for i = 2:niter;
     print(fig_seisdif,'-dpng','-r400',figname);
     close(fig_seisdif);
     
+    sumvobs = sum(v_obs.x(:) .^2) + sum(v_obs.z(:) .^2);
+    div_by_vobs = misfit_iter(i).total / sumvobs;
     disp ' ';
     disp(['MISFIT FOR ITER ',num2str(i),': ', ...
           num2str(misfit_iter(i).total,'%3.2e')])
+    disp(['   percentually ',num2str(i),': ', ...
+          num2str(div_by_vobs,'%3.2e')])
     disp ' ';
+% end
     
-    % run adjoint
+    
+    % run adjoint to obtain seismic kernels
     disp ' ';
     disp(['iter ',num2str(i),': calculating adjoint wave propagation']);
     cd ../code/
     K(i) = run_adjoint(u_fw,v_fw,adstf,'waveform_difference',Model(i));
+    disp 'storing kernels...'
+%     kernelsavename = ['../output/',project_name,'.kernels.mat'];
+    kernelsavename = ['../output/iter', num2str(i),'.kernels.mat'];
+    save(kernelsavename,'K','-v7.3');
     
     % empty the big variables so that the computer doesn't slow down.
     clearvars('u_fw');
     clearvars('v_fw');
-
+% end
     
     % plot the kernels
     disp ' ';
     disp(['iter ',num2str(i),': plotting kernels']);
     cd ../tools/
-    [K_abs(i), K_rel(i)] = calculate_other_kernels(K(i), Model(i));
+    [K_abs(i), K_reltemp] = calculate_other_kernels(K(i), Model(i));
     switch parametrisation
         case 'rhomulambda'
-            fig_knl = plot_kernels_rho_mu_lambda_relative(K_rel(i));
+            fig_knl = plot_kernels_rho_mu_lambda_relative(K_reltemp);
             figname = ['../output/iter',num2str(i),'.kernels.relative.rho-mu-lambda.png'];
             print(fig_knl,'-dpng','-r400',figname);
-    close(fig_knl);
+            close(fig_knl);
         case 'rhovsvp'
-            fig_knl = plot_kernels_rho_vs_vp_relative(K_rel(i));
+            fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
             figname = ['../output/iter',num2str(i),'.kernels.relative.rho-vs-vp.png'];
             print(fig_knl,'-dpng','-r400',figname);
             close(fig_knl);
         otherwise
             error('unrecognised parametrisation for kernel plot');
     end
-%     
-%     disp 'kernels rho mu kappa relative'
-%     plot_kernels_rho_mu_kappa_relative(K_rel(i));
-% %     figname = ['../output/kernels-relative_rho-mu-kappa_iter-',num2str(i),'.png'];
-%     print(gcf,'-dpng','-r400',figname);
-%     close(gcf);
+    
+    
+ end
 
-%  end    
+
+    %% COMBINE KERNELS & UPDATE MODEL
+    
+    % determine weight of relative kernels
+    w_Kseis = 1;
+    w_Kg = 70;
+% end    
+    verhouding(i) = prctile(abs(K_abs(i).rho.total(:)),98) / prctile(abs(Kg(:)),98);
+    disp(['the ratio of seis and grav kernels: ',num2str(verhouding(i))]);
+    disp(['the ratio of grav and seis weights: ',num2str(w_Kg/w_Kseis)]);
+    
+    % combine seismic and gravity kernels
+    disp ' ';
+    disp(['iter ',num2str(i),': combining gravity and seismic kernels']);
+    Ktest = change_parametrisation_kernels('rhomulambda','rhovsvp',K_abs(i),Model(i));
+    Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg;
+    Ktest1 = change_parametrisation_kernels('rhovsvp','rhomulambda', Ktest,Model(i));
+    K_abs(i).rho.total    = Ktest1.rho.total;
+    K_abs(i).mu.total     = Ktest1.mu.total;
+    K_abs(i).lambda.total = Ktest1.lambda.total;
+    [K_abs(i), K_rel(i)] = calculate_other_kernels(K_abs(i), Model(i));
+    
+    Model_test = update_model(Model(i),stepInit,K_rel(i));
+    plot_model(Model_test);
+    
+%     clearvars('Ktest', 'Ktest1');
+    
     % calculate the step length and model update
     disp ' ';
     disp(['iter ',num2str(i),': calculating step length']);
     if i==1;
-        [step(i)] = calculate_step_length(stepInit,i,misfit_iter(i), ...
+        % basis for new step is initial step length
+        [step(i), fig_lnsrch] = calculate_step_length(stepInit,i,misfit_iter(i), ...
                                 Model(i),K_rel(i),v_obs);
     elseif i>1;
         % basis for new step length is previous one.
-        [step(i)] = calculate_step_length(step(i-1),i,misfit_iter(i), Model(i),K_rel(i),v_obs);
+        [step(i), fig_lnsrch] = calculate_step_length(step(i-1),i,misfit_iter(i), ...
+                                Model(i),K_rel(i),v_obs);
     end
-
     
+    % save linesearch figure
+    figname = ['../output/iter',num2str(i),'.step-linesearch.png'];
+    print(fig_lnsrch,'-dpng','-r400',figname);
+    close(fig_lnsrch);
+
     disp ' ';
     disp(['iter ',num2str(i),': updating model']);
     %     if i>1
@@ -187,6 +253,7 @@ for i = 2:niter;
     
 % end
 
+    %% HARD CONSTRAINTS
     % apply hard constraints
     if(strcmp(apply_hc,'yes'))
         % -> no negative velocities
@@ -210,22 +277,22 @@ for i = 2:niter;
     
 
     
-    % OUTPUT:
+    %% OUTPUT:
     
-    % save kernels per iter
-    filenm_old = ['../output/', project_name, '.kernels.mat'];
-    filenm_new = ['../output/iter', num2str(i),'.kernels.mat'];
-    movefile(filenm_old, filenm_new);
+%     % save kernels per iter
+%     filenm_old = ['../output/', project_name, '.kernels.mat'];
+%     filenm_new = ['../output/iter', num2str(i),'.kernels.mat'];
+%     movefile(filenm_old, filenm_new);
 
     % save v_rec per iter
     filenm_old = ['../output/', project_name, '.v_rec.mat'];
     filenm_new = ['../output/iter', num2str(i),'.v_rec.mat'];
     movefile(filenm_old, filenm_new);
     
-    % rename linesearch step figure
-    filenm_old = '../output/iter.step-linesearch.png';
-    filenm_new = ['../output/iter', num2str(i), '.step-linesearch.png'];
-    movefile(filenm_old, filenm_new);
+%     % rename linesearch step figure
+%     filenm_old = '../output/iter.step-linesearch.png';
+%     filenm_new = ['../output/iter', num2str(i), '.step-linesearch.png'];
+%     movefile(filenm_old, filenm_new);
     
 end
 

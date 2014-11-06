@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='ParamRhoVsVp.RhoAnom_5g_rand';
+project_name='ParamRhoVsVp.RhoAnom_5g_rand.rectop.grav_scale_fixed70.corrected';
 
 %==========================================================================
 % inversion properties
@@ -17,8 +17,9 @@ apply_hc = 'yes';   % 'yes' or 'no'
 parametrisation = 'rhovsvp';    % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 
 % smoothing properties
-smoothnp = 15;  % size of the smoothing filter
-smoothgwid = 9; % width of the gaussian in the smoothing filter
+% smoothnp = 15;  % size of the smoothing filter
+smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
+                % used to be 9 w/ conv2 
 
 % hard constraints
 axrot = 'x';     % 'x' or 'z' at the moment.
@@ -125,20 +126,26 @@ end
 % receiver positions
 %==========================================================================
 
+%- a line of receivers just below the top boundary
+nrec = 8;
+rec_x= (1: 1: nrec) * (Lx/(nrec+1));
+dz = Lz/(nz-1);
+rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)
 
-centre=[Lx/2 Lz/2];
-numrec=6;
-circlesize = 0.25*min(Lx,Lz);
-
-rec_x=zeros(1,numrec);
-rec_z=zeros(1,numrec);
-
-n=1;
-for phi=-pi+dphi/2 : dphi : pi-dphi/2 ;
-    rec_x(n)=centre(1) + circlesize*cos(phi);
-    rec_z(n)=centre(2) + circlesize*sin(phi);
-    n=n+1;
-end
+% %- a circle of receivers with the centre at centre
+% centre=[Lx/2 Lz/2];
+% numrec=6;
+% circlesize = 0.25*min(Lx,Lz);
+% 
+% rec_x=zeros(1,numrec);
+% rec_z=zeros(1,numrec);
+% 
+% n=1;
+% for phi=-pi+dphi/2 : dphi : pi-dphi/2 ;
+%     rec_x(n)=centre(1) + circlesize*cos(phi);
+%     rec_z(n)=centre(2) + circlesize*sin(phi);
+%     n=n+1;
+% end
 
 % a set of receivers in 1/3 circle around the source (hardcoded distances!)
 % rec_x=zeros(1,6);
@@ -168,8 +175,10 @@ end
 %==========================================================================
 
 %- a line of gravity receivers above the domain
-rec_g.x= (0: 1: 15) * (Lx/15);
-rec_g.z=ones(size(rec_g.x)) * (Lz + 100);
+rec_height = 200; % m
+nrec_g = 50;
+rec_g.x= (0: 1: nrec_g) * (Lx/nrec_g);
+rec_g.z=ones(size(rec_g.x)) * (Lz + rec_height);
 
 
 
@@ -189,7 +198,8 @@ absorb_bottom=0;% absorb waves on the bottom boundary
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-plot_every=100000;
+plot_every=100000; % value larger than nt, so that no plotting takes place
+% plot_every = 100;
 
 plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation

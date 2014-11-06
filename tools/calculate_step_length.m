@@ -1,6 +1,6 @@
 % calculate the step length
 
-function [step] = calculate_step_length(teststep, niter, ...
+function [step, fig_linesearch ] = calculate_step_length(teststep, niter, ...
                                       currentMisfit, Params_prev, K_rel, ...
                                       v_obs)
 %== 1. Preparation ===========================================================
@@ -149,15 +149,10 @@ disp(['Step length found: ',num2str(step,'%3.2e'), ...
 % disp '======================================';
 disp ' ';
 
-% this is not necessary: the negative gradient direction is ensured in
-% update_model already
-% step = -step;
 
 
-% save figure
-figname = '../output/iter.step-linesearch.png';
-print(fig_linesearch,'-dpng','-r400',figname);
-close(fig_linesearch);
+
+
 
 close(fig_mod_prev);
 

@@ -108,3 +108,5 @@ pos_rtk = [1152         520        1519         968];
 %         verti_scn_width - 80,...    % width
 %         verti_scn_height*1/3];             % height
 
+pos_gravknl_buildup =  [1123         589        1039         916];
+

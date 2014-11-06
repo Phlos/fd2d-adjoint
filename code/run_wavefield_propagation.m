@@ -25,6 +25,7 @@ position_figures;
 fprintf(1,'Percentage completed :       ');
 %%
 for n=1:nt
+    % little trick to change the 'Percentage completed' inline
     if (mod(n,floor(nt/100)) == 0)
         fprintf(1,'\b\b\b\b\b\b%6.0f',n/nt*100);
     end
@@ -211,6 +212,7 @@ for n=1:nt
                         
             % calculate kernels
             compute_kernels;
+%             [K, K_parts] = compute_kernels(vx, vy, vz, vx_forward, nhwgj;iosbvwr);
             
             % plot adjoint fields (i.e. adjoint field + the above)
             if (mod(n,plot_every)==0)

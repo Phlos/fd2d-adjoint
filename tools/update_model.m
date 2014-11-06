@@ -1,18 +1,15 @@
 
 
-function [Params] = update_model(varargin)
-
-path(path,'../input')
-path(path,'../code')
-path(path,'../code/propagation')
+function [Model] = update_model(varargin)
 
 % function that calculates the updated model from the (relative!!) kernel,
 % the step length and the previous model, or from original input params.
+% Update is carried out in rho-mu-lambda parametrisation!
 %
-% case I:   [Params] = update_model();
+% case I:   [Model] = update_model();
 %           the func will determine the original parameters from the file
 %           input_parameters
-% case II:  [Params] = update_model(K_rel, step, Params_previous);
+% case II:  [Model] = update_model(K_rel, step, Model_previous);
 %           the function will calculate a new, smoothed model based on step
 %           length, (relative!) kernel and previous model
 %
@@ -20,19 +17,23 @@ path(path,'../code/propagation')
 % - K_rel:  relative kernel (struct) -- needs K_rel.{parameter}.total at
 %           the very least
 % - step:   step length
-% - Params_previous: the previous model parameter values. Struct with
-%   Params_previous.rho, Params_previous.mu and Parama_previous.lambda.
+% - Model_previous: the previous model parameter values. Struct with
+%   Model_previous.rho, Model_previous.mu and Model_previous.lambda.
 %
 % OUTPUT:
-% - the new, smoothed updated model. Struct with Params.mu, Params.rho,
-%   Params.lambda
+% - the new, smoothed updated model. Struct with Model.mu, Model.rho,
+%   Model.lambda
 %
 
-    Params = checkargs(varargin(:));
+path(path,'../input')
+path(path,'../code')
+path(path,'../code/propagation')
+
+    Model = checkargs(varargin(:));
 
 end
 
-function Params = checkargs(args)
+function Model = checkargs(args)
 
 input_parameters;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
@@ -45,20 +46,20 @@ if narg == 0;
     
     % initialise original parameters
     input_parameters;
-    [mu,rho,lambda]=define_material_parameters(nx,nz,model_type);
-    Params.mu = mu;
-    Params.lambda = lambda;
-    Params.rho = rho;
+    [Model.mu,Model.rho,Model.lambda]=define_material_parameters(nx,nz,model_type);
+%     Model.mu = mu;
+%     Model.lambda = lambda;
+%     Model.rho = rho;
     
 % if input is a number and a model number at that:    
 elseif narg == 1;
     modelnr = args{1};
     
-    [Params.mu,Params.rho,Params.lambda] = ...
+    [Model.mu,Model.rho,Model.lambda] = ...
                               define_material_parameters(nx,nz,modelnr);
-%     Params.rho = rho;
-%     Params.mu = mu;
-%     Params.lambda = lambda;
+%     Model.rho = rho;
+%     Model.mu = mu;
+%     Model.lambda = lambda;
     
 % otherwise, update model using step length
 elseif narg == 3;
@@ -68,14 +69,17 @@ elseif narg == 3;
     % read input arguments
     K_rel = args{1};
     step = args{2};
-    Params_previous = args{3};
+    Model_previous = args{3};
     
-    K_sm = smooth_kernels(K_rel, smoothnp, smoothgwid);
+%     K_sm = smooth_kernels(K_rel, smoothnp, smoothgwid);
+    K_sm.rho =      filter_kernels(K_rel.rho.total,smoothgwid);
+    K_sm.mu =       filter_kernels(K_rel.mu.total,smoothgwid);
+    K_sm.lambda =   filter_kernels(K_rel.lambda.total,smoothgwid);
  
     % calculate model update
-    Params.mu = Params_previous.mu .* (1 - step * K_sm.mu.total);
-    Params.lambda = Params_previous.lambda .* (1 - step * K_sm.lambda.total);
-    Params.rho = Params_previous.rho .* (1 - step * K_sm.rho.total);
+    Model.mu =     Model_previous.mu .* (1 - step * K_sm.mu);
+    Model.lambda = Model_previous.lambda .* (1 - step * K_sm.lambda);
+    Model.rho =    Model_previous.rho .* (1 - step * K_sm.rho);
     
     % smooth the updated model? --> can't do that because then the model
 

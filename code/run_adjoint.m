@@ -135,9 +135,9 @@ run_wavefield_propagation;
 %% store output
 %==========================================================================
 
-disp 'storing kernels...'
-kernelsavename = ['../output/',project_name,'.kernels.mat'];
-save(kernelsavename,'K','-v7.3');
+% disp 'storing kernels...'
+% kernelsavename = ['../output/',project_name,'.kernels.mat'];
+% save(kernelsavename,'K','-v7.3');
 
 
 if strcmp(make_movie_adj,'yes')
