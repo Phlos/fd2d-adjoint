@@ -6,6 +6,7 @@ function [Model] = update_model(varargin)
 % the step length and the previous model, or from original input params.
 % Update is carried out in rho-mu-lambda parametrisation!
 %
+% SYNTAX:
 % case I:   [Model] = update_model();
 %           the func will determine the original parameters from the file
 %           input_parameters
