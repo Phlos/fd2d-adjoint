@@ -4,6 +4,7 @@ function Kout = change_parametrisation_kernels(inparam, outparam, Kin, model1)
 % elastic domain. Given an input parametrisation with three fields (e.g. 
 % rho mu lambda), it calculates the corresponding values of the fields in 
 % the output parametrisation.
+% NOTE: only 'total' subkernels are converted!
 % 
 % NOTE: For now, only rhovsvp <--> rhomulambda works, but I can easily expand.
 %

@@ -1,7 +1,7 @@
 % plot gravity field nicely
 function fig_grav = plot_gravity_quivers(rec_g, g1, g2, X, Z, rho)
 %
-% function to plot gravity quivers of the difference between g and g_homog
+% function to plot gravity quivers of the difference g1 - g2
 %
 % fig_grav = plot_gravity_quivers(rec_g, g1, g2, X, Z, rho)
 
@@ -25,7 +25,7 @@ difference.z = (g1.z - g2.z);
 % h3 = quiver(rec_g.x,rec_g.z, difference.x, difference.z, 0,'color','g');
 h3 = quivers(rec_g.x,rec_g.z,difference.x, difference.z, 0.5, 3, 'm/s^2','g');
 
-% scaling
+% scaling of quivers
 maxi.values = max([g1.x(:);g1.z(:)]);
 maxi.domain = max([X(:); Z(:)]);
 maxi.toti   = maxi.domain / maxi.values;
