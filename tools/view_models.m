@@ -14,7 +14,7 @@ function fig_mod = view_models(modeltype)
 path(path,'../code')
 
 input_parameters;
-set_figure_properties_doffer;
+set_figure_properties_bothmachines;
 
 [model.mu,model.rho,model.lambda]=define_material_parameters(nx,nz,modeltype);               
 

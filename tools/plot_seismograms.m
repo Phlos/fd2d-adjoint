@@ -15,7 +15,7 @@ function plot_seismograms(vel,t,veldis)
 
 path(path,'../code');
 path(path,'../code/propagation');
-set_figure_properties_doffer;
+set_figure_properties_bothmachines;
 spacing=1.5;
 sort=0;
 

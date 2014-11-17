@@ -72,6 +72,10 @@ elseif narg == 3;
     step = args{2};
     Model_previous = args{3};
     
+%     which K_rel
+%     K_rel
+    whos K_rel.rho.total
+    
 %     K_sm = smooth_kernels(K_rel, smoothnp, smoothgwid);
     K_sm.rho =      filter_kernels(K_rel.rho.total,smoothgwid);
     K_sm.mu =       filter_kernels(K_rel.mu.total,smoothgwid);

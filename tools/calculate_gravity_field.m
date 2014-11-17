@@ -23,7 +23,7 @@ path(path,'../code');
 path(path,'../code/propagation');
 
 % gravitational constant
-% 6.67384 × 10-11 m3 kg-1 s-2
+% 6.67384 * 10-11 m3 kg-1 s-2
 G = 6.67384e-11;
 
 input_parameters;
@@ -57,7 +57,7 @@ for i = 1:nrec
     
 end
 
-disp(['maximum gravity accelleration: ', num2str(max(g.mag)), ' m/s^2'])
+% disp(['maximum gravity accelleration: ', num2str(max(g.mag)), ' m/s^2'])
 
 % create dummy gravity field to be able to plot the gravity field 
 % (the plot function now has static input but really I should change the

@@ -22,20 +22,29 @@ function K_rel = calculate_relative_kernels(K, varargin)
 Model = checkargs(varargin(:));
 
 fn_params = fieldnames(K);
-whos('fn_params')
+% whos('fn_params')
 
 for i = 1:length(fn_params)
-    disp ' ';
-    disp(['PARAMETER NR. ',num2str(i), ': ',fn_params{i} ]);
+%     disp ' ';
+%     disp(['PARAMETER NR. ',num2str(i), ': ',fn_params{i} ]);
     
     fn_comps = fieldnames(K.(fn_params{i}));
     for j = 1:length(fn_comps)
-        disp(['component nr. ',num2str(j), ': ',fn_comps{j} ]);
+%         disp(['component nr. ',num2str(j), ': ',fn_comps{j} ]);
+        
+%         bips.(fn_params{i}).(fn_comps{j}) = [i, j];
         
         % calculate the relative kernel
         K_rel.(fn_params{i}).(fn_comps{j}) = K.(fn_params{i}).(fn_comps{j}) .* Model.(fn_params{i});
+%         which K_rel.(fn_params{i}).(fn_comps{j})
     end
 end
+
+% disp 'in calculate_relative_kernels: '
+% K_rel
+% max(K_rel.rho.total(:))
+% K_rel.mu
+% K_rel.lambda
 
 end
 

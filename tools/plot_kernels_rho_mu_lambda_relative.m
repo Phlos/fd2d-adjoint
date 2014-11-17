@@ -6,7 +6,7 @@ function fig_knl = plot_kernels_rho_mu_lambda_relative(K_rel)
 path(path,'../code');
 path(path,'../input');
 input_parameters;
-set_figure_properties_doffer;
+set_figure_properties_bothmachines;
 
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 [mu,rho,lambda]=define_material_parameters(nx,nz,11);

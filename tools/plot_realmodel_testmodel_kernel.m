@@ -21,7 +21,7 @@ cm = cm_model;
 
 input_parameters;
 [X,Z,~,~]=define_computational_domain(Lx,Lz,nx,nz);
-set_figure_properties_doffer;
+set_figure_properties_bothmachines;
 
 
 fig_rtk = figure;

@@ -59,7 +59,7 @@ Model(1) = update_model();
 % % plot_seismograms(v_obs_3,t,'velocity');
 
 for i = 1:niter;
-    if i > 1
+     if i > 1
     cd ../code;
     
     disp  ' ';
@@ -167,11 +167,11 @@ for i = 1:niter;
     disp(['   percentually ',num2str(i),': ', ...
           num2str(div_by_vobs,'%3.2e')])
     disp ' ';
-%     end
+
     
     % kernels only to be calculated when a next iteration will take place.
     if(i < niter)
-%         if (i>1)
+%  if (i>1)
         % run adjoint to obtain seismic kernels
         disp ' ';
         disp(['iter ',num2str(i),': calculating adjoint wave propagation']);
@@ -185,8 +185,8 @@ for i = 1:niter;
         % empty the big variables so that the computer doesn't slow down.
         clearvars('u_fw');
         clearvars('v_fw');
-%         end
-disp 'hellooooo'
+%  end
+%  disp 'hellooooo'
         % plot the kernels
         disp ' ';
         disp(['iter ',num2str(i),': plotting kernels']);
@@ -212,12 +212,15 @@ disp 'hellooooo'
         end
     end
     
-    
-  end
+
+ disp 'hellooooo'    
+ end
 
 
     %% COMBINE KERNELS & UPDATE MODEL
     
+    % only update the model if we're going to a next model
+    if (i<niter)
     % determine weight of relative kernels
     w_Kseis = 1;
     w_Kg = 70;
@@ -239,8 +242,11 @@ disp 'hellooooo'
 %     [K_abs(i), K_rel(i)] = calculate_other_kernels(K_abs(i), Model(i));
     
     disp 'testing model update with the new model'
-    Model_test = update_model(Model(i),stepInit,K_rel(i));
+    Model_test = update_model(K_rel(i),stepInit,Model(i));
     plot_model(Model_test);
+    
+    disp 'pausing 10 s... '
+    pause(10);
     
 %     clearvars('Ktest', 'Ktest1');
     
@@ -292,7 +298,7 @@ disp 'hellooooo'
         close(fig_rhoupdate);
     end
     
-
+    end
     
     %% OUTPUT:
     

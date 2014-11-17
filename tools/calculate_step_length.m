@@ -10,7 +10,7 @@ function [step, fig_linesearch ] = calculate_step_length(teststep, niter, ...
 path(path,'../code');
 path(path,'../input');
 input_parameters;
-set_figure_properties_doffer;
+set_figure_properties_bothmachines;
 
 %- plot starting model
 fig_mod_prev = plot_model(Params_prev);
