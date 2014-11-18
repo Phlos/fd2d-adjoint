@@ -168,3 +168,11 @@ if strcmp(HostName,'D-13-L-2')
 elseif strcmp(HostName,'doffer.geo.uu.nl')
     pos_gravknl_buildup =  [1123         589        1039         916];
 end
+
+
+% position for the misfit evolution plot
+if strcmp(HostName,'D-13-L-2')
+    pos_misfit =  [679 128 808 1049];
+elseif strcmp(HostName,'doffer.geo.uu.nl')
+    pos_misfit =  [679 128 808 1049];
+end

@@ -30,6 +30,7 @@ for i = 1:length(fn_params)
         count = count+1;
     end
 end
+
 scale = prctile(abs(kernels_together(:)),99.0);
 
 fig_knl = figure;
@@ -46,8 +47,16 @@ for i = 1:length(fn_params)
         subplot(3,ceil(nrec/3),(i-1)*3 + j)
         whichkernel = [fn_params{i}, ' ', fn_comps{j}];
         kernel = K.(fn_params{i}).(fn_comps{j});
-        plot_kernel(X,Z,kernel,whichkernel,'fixed',scale,stf_PSV);
+        
+        % getting potential +Inf and -Inf out of the system
+        minnoninf = min(isfinite(kernel(:)) .* kernel(:) );
+        maxnoninf = max(isfinite(kernel(:)) .* kernel(:) );
+        kernel(kernel==-Inf) = minnoninf;
+        kernel(kernel==Inf) = maxnoninf;
+    
         scale = prctile(abs(kernel(:)),99);
+        plot_kernel(X,Z,kernel,whichkernel,'fixed',scale,stf_PSV);
+%         scale = prctile(abs(kernel(:)),99)
     end
 end
 

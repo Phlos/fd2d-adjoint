@@ -47,7 +47,8 @@ hold on;
 caxis([-scale scale]);
 
 text(0.95*max(X(:)),0.92*max(Z(:)),['max = \pm', num2str(scale,'%3.1e')], ... 
-                      'HorizontalAlignment','right')
+                      'HorizontalAlignment','right', ...
+                      'Color',[0.5 0.5 0.5])
 
 hold off;
 

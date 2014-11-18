@@ -54,10 +54,10 @@ switch outparam
                     Kin.lambda.total  = Kin.lambda.total ./ model1.lambda;
                 end
                 
-                fig_knlin = plot_kernels(Kin);
-                titel = ['input kernel in rhomulambda'];
-                mtit(fig_knlin, titel);
-                pause(15)
+%                 fig_knlin = plot_kernels(Kin);
+%                 titel = ['input kernel in rhomulambda'];
+%                 mtit(fig_knlin, titel);
+%                 pause(1)
                 
                 Kout.rho2.total = Kin.rho.total ...
                     + model.vs.^2 .* Kin.mu.total ...
@@ -66,10 +66,10 @@ switch outparam
                 Kout.vs2.total  = 2*model.rho .* model.vs .* Kin.mu.total ...
                     - 4*model.rho .* model.vs .* Kin.lambda.total;
                 Kout.vp2.total  = 2*model.rho .* model.vp .* Kin.lambda.total;
-                fig_knlout = plot_kernels(Kout);
-                titel = ['output kernel in rhovsvp'];
-                mtit(fig_knlout, titel);
-                pause(15)
+%                 fig_knlout = plot_kernels(Kout);
+%                 titel = ['output kernel in rhovsvp'];
+%                 mtit(fig_knlout, titel);
+%                 pause(15)
             otherwise
                 warning('Unexpected output parametrisation.');
         end
@@ -99,9 +99,9 @@ switch outparam
                     Kin.vp2.total  = Kin.vp2.total .* model.vp;
                 end
                 
-                fig_knlin = plot_kernels(Kin);
-                titel = ['input kernel in rhovsvp'];
-                mtit(fig_knlin, titel);
+%                 fig_knlin = plot_kernels(Kin);
+%                 titel = ['input kernel in rhovsvp'];
+%                 mtit(fig_knlin, titel);
 %                 pause(15);
                 Kout.rho.total = Kin.rho2.total ...
                                  - 0.5 * model.vs ./ model.rho .* Kin.vs2.total ...
@@ -109,9 +109,9 @@ switch outparam
                 Kout.mu.total = 0.5 ./ (model.rho .* model.vs) .* Kin.vs2.total ...
                                 + 1 ./ (model.rho .* model.vp) .* Kin.vp2.total;
                 Kout.lambda.total = 0.5 ./ (model.rho .* model.vp) .* Kin.vp2.total;
-                fig_knlout = plot_kernels(Kout);
-                titel = ['output kernel in rhomulambda'];
-                mtit(fig_knlout, titel);
+%                 fig_knlout = plot_kernels(Kout);
+%                 titel = ['output kernel in rhomulambda'];
+%                 mtit(fig_knlout, titel);
 %                 pause(15);
                 
             otherwise
@@ -136,11 +136,11 @@ function absrel = checkargs(args)
 narg = length(args);
 
 if narg == 0
-    disp 'no absrel, we assume absolute kernels'
+%     disp 'no absrel, we assume absolute kernels'
     absrel = 'abs';
 elseif narg == 1
     absrel = args{1};
-    disp(['given the provided input, we''re using ',absrel,' kernels'])
+    disp(['chn_par_knl: given the provided input, we''re using ',absrel,' kernels'])
 else
     disp 'unsupported number of input argumetns to change_parametrisation_kernels';
 end

@@ -22,10 +22,10 @@ switch outparam
         else
             switch inparam
                 case 'rhomulambda'
+                    outfields.rho = infields.rho;
                     outfields.vs = abs(sqrt(infields.mu ./ infields.rho));
                     outfields.vp = abs(sqrt((infields.lambda + 2*infields.mu) ...
                         ./ infields.rho));
-                    outfields.rho = infields.rho;
                 otherwise
                     warning('Unexpected output parametrisation.');
             end
@@ -40,10 +40,10 @@ switch outparam
         
             switch inparam
                 case 'rhovsvp'
+                    outfields.rho = infields.rho;
                     outfields.mu  = abs(infields.vs .^2 .* infields.rho);
                     outfields.lambda = abs(infields.rho .* ...
                         ( infields.vp.^2 - 2* infields.vs.^2));
-                    outfields.rho = infields.rho;
                 otherwise
                     warning('Unexpected output parametrisation.');
             end

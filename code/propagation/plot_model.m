@@ -6,12 +6,21 @@ function fig_mod = plot_model(varargin)
 % nicer by putting the plotting commands within a for loop over rho mu
 % lambda.
 %
+% - fig_mod = plot_model(Model);
+% - fig_mod = plot_model(Model, outparam);
+% - fig_mod = plot_model(Model, middle);
+% - fig_mod = plot_model(Model, middle, outparam);
+%
 % INPUT:
 % Model:    struct containing .rho .mu .lambda
+% outparam: string, 'rhomulambda', 'rhovsvp' (future: 'rhomukappa'?)
+%           parametrisation of output plot (also parametrisation of middle)
+% middle:   1x3 array w/ colour scale centre values for [param1, param2, param3]; 
 %
 % OUTPUT:   
-% - figure with the model plotted. Colour scale are the actual max and min
-%   of the parameter values, not some standard deviation.
+% - figure with the model plotted. Colour scale are defined by middle (if 
+%   given) -- otherwise, it is the actual max and min of the parameter 
+%   values, not some standard deviation.
 
 % format long
 
@@ -46,7 +55,7 @@ for params = fieldnames(Model)';
     % difference_mumax_mumin = max(mu(:)) - min(mu(:));
     
     %- colour scale
-    if (middle == 1234567890)
+    if (isnan(middle(j)))
         
         if all(abs(param-mode(param(:))) <= 1e-14*mode(param(1)))
             cmax = param(1) + 0.01*param(1);
@@ -74,7 +83,7 @@ for params = fieldnames(Model)';
         % (i.e. the background value) is white, and that the extreme coulours
         % are determined by whichever of max and min is farthest off from the
         % background colour.
-        cmid = middle;
+        cmid = middle(j);
         cmax = cmid + max(abs(param(:) - cmid));
         cmin = cmid - max(abs(param(:) - cmid));
         
@@ -126,36 +135,44 @@ function [Model, middle, outparam] = checkargs(arg)
 
 narg = length(arg);
 
-Model = arg{1};
+
 
 switch narg
-    case 3
-%         disp '3 arguments'
-        middle = arg{2};
-        outparam = arg{3};
-        Model = change_parametrisation('rhomulambda','rhovsvp',Model);
+    
+    case 1
+        % disp '1 argument'
+        Model = arg{1};
+        middle = [NaN NaN NaN];
+        
     case 2
-%          disp '2 arguments'
+        % disp '2 arguments'
+        Model = arg{1};
 
         if ischar(arg{2})
             
             outparam = arg{2};
-            Model = change_parametrisation('rhomulambda','rhovsvp',Model);
+            Model = change_parametrisation('rhomulambda',outparam,Model);
             
-            middle = 1234567890;
+            middle = [NaN NaN NaN];
             
         elseif isnumeric(arg{2})
             middle = arg{2};
-            teststruct.mu = 1;
-            teststruct.lambda = 2;
-            teststruct.rho = 3;
-            Model = orderfields(Model, teststruct);
+%             teststruct.mu = 1;
+%             teststruct.lambda = 2;
+%             teststruct.rho = 3;
+%             Model = orderfields(Model, teststruct);
+        else
+            error('the var type of input argument {2} was not recognised')
         end
         
+    case 3
+        % disp '3 arguments'
+        Model = arg{1};
+        middle = arg{2};
+        outparam = arg{3};
+        Model = change_parametrisation('rhomulambda',outparam,Model);
+        
 
-    case 1
-%         disp '1 argument'
-        middle = 1234567890;
     otherwise
         error('wrong number of variable arguments')
 end

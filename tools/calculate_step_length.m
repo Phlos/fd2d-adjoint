@@ -1,7 +1,7 @@
 % calculate the step length
 
 function [step, fig_linesearch ] = calculate_step_length(teststep, niter, ...
-                                      currentMisfit, Params_prev, K_rel, ...
+                                      currentMisfit, Model_prev, K_abs, ...
                                       v_obs)
 %== 1. Preparation ===========================================================
 
@@ -13,7 +13,7 @@ input_parameters;
 set_figure_properties_bothmachines;
 
 %- plot starting model
-fig_mod_prev = plot_model(Params_prev);
+fig_mod_prev = plot_model(Model_prev);
 
 
 %- determine the number of steps we'll try and divide teststep by that nr
@@ -59,14 +59,14 @@ for ntry = 2:nsteps
 
 
     %- calculate updated model using steptry
-    Params_try = update_model(K_rel, steptry, Params_prev);
+    Model_try = update_model(K_abs, steptry, Model_prev, parametrisation);
     
-    max_mu = max(Params_try.mu(:));
-    max_rh = max(Params_try.rho(:));
-    max_la = max(Params_try.lambda(:));
-    min_mu = min(Params_try.mu(:));
-    min_rh = min(Params_try.rho(:));
-    min_la = min(Params_try.lambda(:));
+    max_mu = max(Model_try.mu(:));
+    max_rh = max(Model_try.rho(:));
+    max_la = max(Model_try.lambda(:));
+    min_mu = min(Model_try.mu(:));
+    min_rh = min(Model_try.rho(:));
+    min_la = min(Model_try.lambda(:));
     
     disp(['Maxima -- mu: ',num2str(max_mu,'%3.2e'), '   rho: ', num2str(max_rh), ...
           '   lambda: ', num2str(max_la,'%3.2e')]);
@@ -76,9 +76,9 @@ for ntry = 2:nsteps
     
     
     %- for each step, run forward update
-    [v_try,t,~,~,~,~] = run_forward_update(Params_try.rho, ...
-                                           Params_try.mu, ...
-                                           Params_try.lambda);
+    [v_try,t,~,~,~,~] = run_forward_update(Model_try.rho, ...
+                                           Model_try.mu, ...
+                                           Model_try.lambda);
     close(gcf);
     close(gcf);
     

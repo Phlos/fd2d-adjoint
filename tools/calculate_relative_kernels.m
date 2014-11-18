@@ -85,8 +85,13 @@ elseif narg == 1;
                           
     % if input is a struct it is the struct with a model in it
     elseif isstruct(args{1})
-        disp 'we detected a structure array'
+%         disp 'we detected a structure array'
         Model = args{1};
+        if isfield(Model, 'rho') && isfield(Model, 'vs') && isfield(Model, 'vp')
+            Model.rho2 = Model.rho;
+            Model.vs2 = Model.vs;
+            Model.vp2 = Model.vp;
+        end
     else
         banaan = args{1};
         which('banaan')
