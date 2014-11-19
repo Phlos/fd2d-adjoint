@@ -4,6 +4,14 @@ input_parameters;
 
 Model_real = update_model(modelnr);
 
+% % setting plot_model background values for all models based on Tromp 2005
+% trompmodels = [10:39];
+% if any(modelnr==trompmodels)
+%     disp 'real model based on Tromp'
+%     middle_real.rml = [2600 2.66e10    2.42e10];
+%     middle_real.rvv = [2600 3198.55736 5797.87759];
+% end
+
 % plotting the real model
 fig_mod_real = plot_model(Model_real, 'rhovsvp');
 mtit(fig_mod_real, 'real model - rho-vs-vp parametrisation');

@@ -16,6 +16,7 @@ hold on;
 pcolor(X,Z,rho');
 shading interp;
 axis image;
+colorbar;
 
 % arrow plots ('quiver') with gravity info
 % h1 = quiver(rec_g.x,rec_g.z,g.x, g.z, 0,'color','g'); % the '0' turns off auto-scaling

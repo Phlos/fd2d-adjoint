@@ -78,7 +78,7 @@ end
 model.rho = rho;
 model.mu = mu;
 model.lambda = lambda;
-fig_mod = plot_model(model); % hoeft niet in adjoint? is tenslotte 't zelfde model
+fig_mod = plot_model(model, parametrisation); % hoeft niet in adjoint? is tenslotte 't zelfde model
 
 
 %% read adjoint sources ---------------------------------------------------

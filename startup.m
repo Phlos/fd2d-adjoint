@@ -1,3 +1,5 @@
+disp 'executing startup fd2d-adjoint/startup.m'
+
 
 %- default figure position (doffer: on matlab monitor)
 % set(0,'defaultfigureposition',[40 60 560 400])

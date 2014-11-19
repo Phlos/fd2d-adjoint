@@ -52,6 +52,14 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
 model_type=10;
 
+% % set the background values for plot_model for all models based on Tromp
+% trompmodels = [10:39];
+% if any(model_type==trompmodels)
+%     disp 'real model based on Tromp'
+%     middle.rml = [2600 2.66e10    2.42e10];
+%     middle.rvv = [2600 3198.55736 5797.87759];
+% end
+
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
 % 3=layered medium

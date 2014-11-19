@@ -84,12 +84,12 @@ fprintf('Real, test ratio : %12.5f, %12.5f\n\n', propsR.Ifactor, propsT.Ifactor 
 fprintf('M diff  : %6.1e,   relative: %7.2e\n', Mdif, Mdifrel );
 fprintf('I diff  : %6.1e,   relative: %7.2e\n\n', Idif, Idifrel );
 
-fprintf('M const       : %10.1e\n', drho.Mconst );
-fprintf('M var max, min: %10.1e %10.1e \n', ...
-                       max(drho.Mvar(:)), min(drho.Mvar(:)) );
-fprintf('I const       : %10.1e\n',drho.Iconst);
-fprintf('I var max, min: %10.1e %10.1e \n\n', ...
-                       max(drho.Ivar(:)), min(drho.Ivar(:)) );
+% fprintf('M const       : %10.1e\n', drho.Mconst );
+% fprintf('M var max, min: %10.1e %10.1e \n', ...
+%                        max(drho.Mvar(:)), min(drho.Mvar(:)) );
+% fprintf('I const       : %10.1e\n',drho.Iconst);
+% fprintf('I var max, min: %10.1e %10.1e \n\n', ...
+%                        max(drho.Ivar(:)), min(drho.Ivar(:)) );
 
 fprintf('Max, min density update: %.2f, %.2f kg/m^3\n\n', ...
       max(max(outrho - inrho)), min(min(outrho - inrho)) );
@@ -98,11 +98,13 @@ fprintf('Max, min density update: %.2f, %.2f kg/m^3\n\n', ...
 fprintf('Real, new mass   : %12.5e, %12.5e\n', propsR.M, propsN.M );
 fprintf('Real, new MoI    : %12.5e, %12.5e\n\n', propsR.I, propsN.I );
 
+masdifrel = (propsN.M - propsR.M) / propsR.M;
+moidifrel = (propsN.I - propsR.I) / propsR.I;
 %- test whether the output density model gives us the real M and I
-if((propsN.M - propsR.M > 3e-5) || (propsN.I - propsR.I > 3e-5))
+if( (masdifrel > 3e-5) || (moidifrel > 3e-5)  )
     disp('ERRORR the updated mass and MoI are NOT the real mass and MoI!!');
     fprintf('Relative difference in mass, MoI: %10.2e, %10.2e \n\n', ...
-              (propsR.M-propsN.M)/propsR.M, (propsR.I-propsN.I)/propsR.I );
+              masdifrel, moidifrel );
 
 end
 

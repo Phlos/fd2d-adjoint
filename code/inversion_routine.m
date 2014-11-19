@@ -9,7 +9,7 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-niter = 4;
+niter = 40;
 
 % initial step length;
 % stepInit = 3.5e14;    % good for circular configuration
@@ -29,8 +29,7 @@ stepInit = 5e15;        % good for circular src and rec @ top of domain
 
 
 % MAKE SURE V_OBS IS PRESENT!!! AND SAVED!!!
-% [v_obs, t_obs, props_obs] = prepare_obs(modelnr);
-
+ %[Model_real, v_obs, t_obs, props_obs, g_obs] = prepare_obs(modelnr)
 
 
 
@@ -44,6 +43,10 @@ stepInit = 5e15;        % good for circular src and rec @ top of domain
 % save initial rho mu lambda (from input_parameters) as iter 1 Params values:
 Model(1) = update_model();
 
+% % set the background values for plot_model to mode of the initial model
+middle.rho    = mode(Model(1).rho(:));
+middle.mu     = mode(Model(1).mu(:));
+middle.lambda = mode(Model(1).lambda(:));
 
 % % fig_mod = plot_model(Model(1));
 % % figname = ['../output/iter',num2str(1),'.model.png'];
@@ -60,8 +63,8 @@ Model(1) = update_model();
 % % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
 % % plot_seismograms(v_obs_3,t,'velocity');
 
-for i = 2:niter;
-%     if i > 1
+for i = 15:niter;
+     if i > 15
         cd ../code;
         
         disp  ' ';
@@ -74,21 +77,14 @@ for i = 2:niter;
         disp ' ';
         
         %% MODEL
+        
         % plot model
-        switch parametrisation
-            case 'rhomulambda'
-                fig_mod = plot_model(Model(i));
-                figname = ['../output/iter',num2str(i),'.model.rhomulambda.png'];
-                print(fig_mod,'-dpng','-r400',figname);
-                close(fig_mod);
-            case 'rhovsvp'
-                fig_mod = plot_model(Model(i),'rhovsvp');
-                figname = ['../output/iter',num2str(i),'.model.rhovsvp.png'];
-                print(fig_mod,'-dpng','-r400',figname);
-                close(fig_mod);
-            otherwise
-                error('unrecognised parametrisation for model plot');
-        end
+        fig_mod = plot_model(Model(i),middle,parametrisation);
+        figname = ['../output/iter',num2str(i),'.model.',parametrisation,'.png'];
+        print(fig_mod,'-dpng','-r400',figname);
+        close(fig_mod);
+        clearvars('fig_mod');
+        
         
         
         %% GRAVITY
@@ -108,6 +104,7 @@ for i = 2:niter;
         mtit(fig_grav_comp, titel);
         print(fig_grav_comp, '-dpng', '-r400', figname);
         close(fig_grav_comp);
+        clearvars('fig_mod');
         
         %- calculate gravity misfit:
         [g_src, misfit_g(i)] = make_gravity_sources(g(i), g_obs);
@@ -126,9 +123,9 @@ for i = 2:niter;
             disp ' ';
             disp(['iter ',num2str(i),': calculating gravity kernel']);
             if i == 1
-                [Kg, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
+                [Kg{i}, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
             else
-                [Kg, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
+                [Kg{i}, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
             end
             
             %  plot gravity kernel
@@ -137,6 +134,7 @@ for i = 2:niter;
             mtit(fig_Kg,titel)
             print(fig_Kg,'-dpng','-r400',figname);
             close(fig_Kg);
+            clearvars fig_Kg;
         end
         
         %% SEISMIC
@@ -222,7 +220,7 @@ for i = 2:niter;
                     error('unrecognised parametrisation for kernel plot');
             end
         end
-        
+        clearvars K_reltemp fig_knl;
         
 %     disp 'hellooooo'
 %     end
@@ -233,11 +231,12 @@ for i = 2:niter;
     % only update the model if we're going to a next model
     if (i<niter)
 %   if i>1
+
         % determine weight of relative kernels
         w_Kseis = 1;
         w_Kg = 70;
-        % end
-        verhouding(i) = prctile(abs(Kseis(i).rho.total(:)),98) / prctile(abs(Kg(:)),98);
+        
+        verhouding(i) = prctile(abs(Kseis(i).rho.total(:)),98) / prctile(abs(Kg{i}(:)),98);
         disp(['the ratio of seis and grav kernels: ',num2str(verhouding(i))]);
         disp(['the ratio of grav and seis weights: ',num2str(w_Kg/w_Kseis)]);
         
@@ -245,21 +244,12 @@ for i = 2:niter;
         disp ' ';
         disp(['iter ',num2str(i),': combining gravity and seismic kernels']);
         Ktest = change_parametrisation_kernels('rhomulambda','rhovsvp',Kseis(i),Model(i));
-        Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg;
+        Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg{i};
         Ktest1 = change_parametrisation_kernels('rhovsvp','rhomulambda', Ktest,Model(i));
-        K_abs(i).rho.total    = Ktest1.rho.total;
-        K_abs(i).mu.total     = Ktest1.mu.total;
-        K_abs(i).lambda.total = Ktest1.lambda.total;
-        %     K_rel(i) = calculate_relative_kernels(K_abs(i), Model(i));
-        
-        disp 'testing model update with the new model'
-        Model_test = update_model(K_abs(i),stepInit,Model(i),parametrisation);
-        plot_model(Model_test, parametrisation);
-        
-        disp 'pausing 10 s... '
-        pause(10);
-        
-        %     clearvars('Ktest', 'Ktest1');
+        K_total(i).rho.total    = Ktest1.rho.total;
+        K_total(i).mu.total     = Ktest1.mu.total;
+        K_total(i).lambda.total = Ktest1.lambda.total;
+        clearvars('Ktest', 'Ktest1');
         
         % calculate the step length and model update
         disp ' ';
@@ -267,11 +257,11 @@ for i = 2:niter;
         if i==1;
             % basis for new step is initial step length
             [step(i), fig_lnsrch] = calculate_step_length(stepInit,i,misfit_seis(i), ...
-                Model(i),K_abs(i),v_obs);
+                Model(i),K_total(i),v_obs);
         elseif i>1;
             % basis for new step length is previous one.
             [step(i), fig_lnsrch] = calculate_step_length(step(i-1),i,misfit_seis(i), ...
-                Model(i),K_abs(i),v_obs);
+                Model(i),K_total(i),v_obs);
         end
         
         % save linesearch figure
@@ -282,7 +272,7 @@ for i = 2:niter;
         disp ' ';
         disp(['iter ',num2str(i),': updating model']);
         %     if i>1
-        Model(i+1) = update_model(K_abs(i),step(i),Model(i),parametrisation);
+        Model(i+1) = update_model(K_total(i),step(i),Model(i),parametrisation);
         %     end
         
         % end
@@ -309,6 +299,11 @@ for i = 2:niter;
             close(fig_rhoupdate);
         end
         
+        %% calculating model norm
+        modeldifnorm(i) =   norm( (Model(i+1).rho(:) - Model(i).rho(:)) ./ Model(i).rho(:) ) ...
+                          + norm( (Model(i+1).mu(:)  - Model(i).mu(:))  ./ Model(i).mu(:) ) ...
+                          + norm( (Model(i+1).lambda(:) - Model(i).lambda(:)) ./ Model(i).lambda(:) );
+        
     end
     
     %% OUTPUT:
@@ -327,6 +322,12 @@ for i = 2:niter;
     %     filenm_old = '../output/iter.step-linesearch.png';
     %     filenm_new = ['../output/iter', num2str(i), '.step-linesearch.png'];
     %     movefile(filenm_old, filenm_new);
+end   
+    % plot misfit evolution
+    fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit,modeldifnorm);
+    figname = '../output/misfit-evolution.png';
+    print(fig_misfit,'-dpng','-r400',figname);
+    close(fig_misfit);
     
 end
 
@@ -384,18 +385,19 @@ disp '======================================';
 %% WRAP-UP: misfit evolution & saving all variables to file
 
 % plot misfit evolution
-fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit);
+fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit, modeldifnorm);
 figname = '../output/misfit-evolution.png';
 print(fig_misfit,'-dpng','-r400',figname);
 close(fig_misfit);
+clearvars fig_misfit
 
 disp 'saving misfit evolution...'
 savename = ['../output/',project_name,'.misfit-evolution.mat'];
 save(savename, 'misfit', '-v7.3');
 
 disp 'saving all current variables...'
-clearvars('fig_misfit', 'figname', 'fig_seisdif', 'fig_mod', ...
-    'filenm_old', 'filenm_new', 'fig_knl');
+clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
+    'filenm_old', 'filenm_new', 'fig_knl', 'u_fw', 'v_fw');
 savename = ['../output/',project_name,'.all-vars.mat'];
 save(savename);
 

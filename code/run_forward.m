@@ -54,7 +54,7 @@ end
 model.rho = rho;
 model.mu = mu;
 model.lambda = lambda;
-fig_mod = plot_model(model);
+fig_mod = plot_model(model, parametrisation);
 
 
 %% source & receiver initialisation

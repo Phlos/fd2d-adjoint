@@ -22,9 +22,12 @@ switch outparam
 end
 
 
-% plotting the model with the '0' meaning that the white of the plot is
+% plotting the model with middle = 0 meaning that the white of the plot is
 % the value zero.
-fig_mod = plot_model(Model_diff,0,varargin{:});
+middle.rho    = 0;
+middle.mu     = 0;
+middle.lambda = 0;
+fig_mod = plot_model(Model_diff,middle,varargin{:});
 
 
 end

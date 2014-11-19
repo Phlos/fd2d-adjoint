@@ -55,7 +55,7 @@ for params = fieldnames(Model)';
     % difference_mumax_mumin = max(mu(:)) - min(mu(:));
     
     %- colour scale
-    if (isnan(middle(j)))
+    if (isnan( middle.(params{1}) ))
         
         if all(abs(param-mode(param(:))) <= 1e-14*mode(param(1)))
             cmax = param(1) + 0.01*param(1);
@@ -66,26 +66,35 @@ for params = fieldnames(Model)';
             % (i.e. the background value) is white, and that the extreme coulours
             % are determined by whichever of max and min is farthest off from the
             % background colour.
+            % this is done not with mode but with hist, because after
+            % update, the values all vary just a bit.
             %     cmid = mode(param(:))
             [bincounts, centre] = hist(param(:),100);
             [~,ix]=max(bincounts);
             cmid = centre(ix);
             cmax = cmid + max(abs(param(:) - cmid));
             cmin = cmid - max(abs(param(:) - cmid));
-            %     cmax = max(param(:));
-            %     cmin = 2*cmid - cmax;
-            %     disp 'the param are not all the same'
+
         end
         
     else
         
-        % max and min are calculated in this way so that the most common value
-        % (i.e. the background value) is white, and that the extreme coulours
-        % are determined by whichever of max and min is farthest off from the
-        % background colour.
-        cmid = middle(j);
-        cmax = cmid + max(abs(param(:) - cmid));
-        cmin = cmid - max(abs(param(:) - cmid));
+        if all(abs(param-mode(param(:))) <= 1e-14*mode(param(1)))
+            cmax = param(1) + 0.01*param(1);
+            cmin = param(1) - 0.01*param(1);
+            %     disp 'bips!!! all param are the same!'
+        else
+            
+            % max and min are calculated in this way so that the the 
+            % background value) is white, and that the extreme coulours are
+            % determined by whichever of max and min is farthest off from 
+            % the background colour.
+            
+            cmid = middle.(params{1});
+            cmax = cmid + max(abs(param(:) - cmid));
+            cmin = cmid - max(abs(param(:) - cmid));
+            
+        end
         
     end
     
@@ -142,7 +151,10 @@ switch narg
     case 1
         % disp '1 argument'
         Model = arg{1};
-        middle = [NaN NaN NaN];
+%         middle = [NaN NaN NaN];
+        middle.rho = NaN;
+        middle.mu = NaN;
+        middle.lambda = NaN;
         
     case 2
         % disp '2 arguments'
@@ -153,24 +165,26 @@ switch narg
             outparam = arg{2};
             Model = change_parametrisation('rhomulambda',outparam,Model);
             
-            middle = [NaN NaN NaN];
+            % middle = [NaN NaN NaN];
+            middle1.rho = NaN;
+            middle1.mu = NaN;
+            middle1.lambda = NaN;
+            middle = change_parametrisation('rhomulambda',outparam,middle1);
             
-        elseif isnumeric(arg{2})
+        elseif isstruct(arg{2})
             middle = arg{2};
-%             teststruct.mu = 1;
-%             teststruct.lambda = 2;
-%             teststruct.rho = 3;
-%             Model = orderfields(Model, teststruct);
         else
+            disp 'allowed var types for input argument {2}: char, struct'
             error('the var type of input argument {2} was not recognised')
         end
         
     case 3
         % disp '3 arguments'
         Model = arg{1};
-        middle = arg{2};
+        middle1 = arg{2};
         outparam = arg{3};
         Model = change_parametrisation('rhomulambda',outparam,Model);
+        middle = change_parametrisation('rhomulambda',outparam,middle1);
         
 
     otherwise
