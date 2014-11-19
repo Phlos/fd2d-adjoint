@@ -2,7 +2,7 @@
 
 function [step, fig_linesearch ] = calculate_step_length(teststep, niter, ...
                                       currentMisfit, Model_prev, K_abs, ...
-                                      v_obs)
+                                      v_obs, g_obs)
 %== 1. Preparation ===========================================================
 
 % paths etc.
@@ -18,7 +18,7 @@ fig_mod_prev = plot_model(Model_prev);
 
 %- determine the number of steps we'll try and divide teststep by that nr
 if (niter == 1)
-    nsteps = 5;
+    nsteps = 3;
 elseif (niter > 1)
     nsteps = 3;
 else
@@ -31,8 +31,8 @@ disp(['number of step lengths we will investigate: ',num2str(nsteps), ...
 
 
 %- set up array in which the misfits will be stored
-misfitArray = zeros(1,nsteps);
-misfitArray(1) = currentMisfit.total;
+misfitArray.total = zeros(1,nsteps);
+misfitArray.total(1) = currentMisfit;
 
 
 
@@ -72,13 +72,22 @@ for ntry = 2:nsteps
           '   lambda: ', num2str(max_la,'%3.2e')]);
     disp(['Minima -- mu: ',num2str(min_mu,'%3.2e'), '   rho: ', num2str(min_rh), ...
           '   lambda: ', num2str(min_la,'%3.2e')]);
-    
-    
+%     dada
+      
+    %% gravity
+      
+      [g_try, fig_grav] = calculate_gravity_field(Model_try.rho, rec_g);
+      close(fig_grav);
+      
+      %- calculate gravity misfit:
+      [~, misfit_g] = make_gravity_sources(g_try, g_obs);
+      misfitArray.grav(ntry) = misfit_g.total;
+      
+    %% seismic
     
     %- for each step, run forward update
-    [v_try,t,~,~,~,~] = run_forward_update(Model_try.rho, ...
-                                           Model_try.mu, ...
-                                           Model_try.lambda);
+    [v_try,t,~,~,~,~] = run_forward(Model_try);
+    close(gcf);
     close(gcf);
     close(gcf);
     
@@ -87,17 +96,18 @@ for ntry = 2:nsteps
     
     %- for each step, save the misfit to the misfit array
     if strcmp(wave_propagation_type,'both')
-        misfitArray(ntry) = misfit.x + misfit.y + misfit.z;
+        misfitArray.seis(ntry) = misfit.x + misfit.y + misfit.z;
     elseif strcmp(wave_propagation_type,'PSV')
-        misfitArray(ntry) = misfit.x + misfit.z;
+        misfitArray.seis(ntry) = misfit.x + misfit.z;
     elseif strcmp(wave_propagation_type,'SH')
-        misfitArray(ntry) = misfit.y;
+        misfitArray.seis(ntry) = misfit.y;
     end
     
+    misfitArray.total(ntry) = misfitArray.seis(ntry) + misfitArray.grav(ntry);
 
     disp(['Step ',num2str(ntry), ...
           ': step length ', num2str(steptry,'%3.1e'), ...
-          ' and misfit ', num2str(misfitArray(ntry))]);
+          ' and misfit ', num2str(misfitArray.total(ntry))]);
 
 
 end
@@ -115,7 +125,7 @@ end
 %== 4. Calculate the real step length =====================================
 
 %- fit quadratic
-p = polyfit(steplnArray,misfitArray,2);
+p = polyfit(steplnArray,misfitArray.total,2);
 %- determine minimum of quadratic --> step length
 step = -p(2)/(2*p(1));
 
@@ -124,7 +134,7 @@ fig_linesearch = figure;
 hold on;
 
 % plot misfits
-plot(steplnArray,misfitArray,'b');
+plot(steplnArray,misfitArray.total,'b');
 
 % plot fitting polynomial
 iks = 0: teststep/(10*(nsteps-1)) : 2*teststep;

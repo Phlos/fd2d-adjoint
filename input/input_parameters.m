@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='ParamRhoVsVp.RhoAnom_5g_rand.rectop.grav_scale_fixed70.corrected';
+project_name='ParamRhoVsVp.RhoAnom_5g_rand.rectop.grav_scale_fixed70.corrected_evenmore';
 
 %==========================================================================
 % inversion properties

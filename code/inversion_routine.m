@@ -9,7 +9,7 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-niter = 40;
+niter = 15;
 
 % initial step length;
 % stepInit = 3.5e14;    % good for circular configuration
@@ -63,8 +63,8 @@ middle.lambda = mode(Model(1).lambda(:));
 % % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
 % % plot_seismograms(v_obs_3,t,'velocity');
 
-for i = 15:niter;
-     if i > 15
+for i = 1:niter;
+     if i > 1
         cd ../code;
         
         disp  ' ';
@@ -187,9 +187,9 @@ for i = 15:niter;
             cd ../code/
             Kseis(i) = run_adjoint(u_fw,v_fw,adstf,'waveform_difference',Model(i));
             % storing kernels is not really necessary when allvars are saved at the end
-            disp 'storing kernels...'
-            kernelsavename = ['../output/iter', num2str(i),'.kernels.mat'];
-            save(kernelsavename,'Kseis', 'Kg','-v7.3');
+%             disp 'storing kernels...'
+%             kernelsavename = ['../output/iter', num2str(i),'.kernels.mat'];
+%             save(kernelsavename,'Kseis', 'Kg','-v7.3');
             
             % empty the big variables so that the computer doesn't slow down.
             clearvars('u_fw');
@@ -200,8 +200,7 @@ for i = 15:niter;
             disp ' ';
             disp(['iter ',num2str(i),': plotting kernels']);
             cd ../tools/
-            %     [K_abs(i), K_reltemp] = calculate_other_kernels(K(i), Model(i));
-            %         K_rel = calculate_relative_kernels(Kseis(i), Model(i));
+            
             switch parametrisation
                 case 'rhomulambda'
                     [~, K_reltemp] = calculate_other_kernels(Kseis(i), Model(i));
@@ -222,15 +221,15 @@ for i = 15:niter;
         end
         clearvars K_reltemp fig_knl;
         
-%     disp 'hellooooo'
-%     end
+    disp 'hellooooo'
+    end
     
     
     %% COMBINE KERNELS & UPDATE MODEL
     
     % only update the model if we're going to a next model
     if (i<niter)
-%   if i>1
+   if i>1
 
         % determine weight of relative kernels
         w_Kseis = 1;
@@ -250,32 +249,31 @@ for i = 15:niter;
         K_total(i).mu.total     = Ktest1.mu.total;
         K_total(i).lambda.total = Ktest1.lambda.total;
         clearvars('Ktest', 'Ktest1');
-        
+    end      
         % calculate the step length and model update
         disp ' ';
         disp(['iter ',num2str(i),': calculating step length']);
         if i==1;
             % basis for new step is initial step length
-            [step(i), fig_lnsrch] = calculate_step_length(stepInit,i,misfit_seis(i), ...
-                Model(i),K_total(i),v_obs);
+            [step(i), fig_lnsrch] = calculate_step_length(stepInit,i, ...
+                misfit(i), Model(i),K_total(i),v_obs, g_obs);
         elseif i>1;
             % basis for new step length is previous one.
-            [step(i), fig_lnsrch] = calculate_step_length(step(i-1),i,misfit_seis(i), ...
-                Model(i),K_total(i),v_obs);
-        end
-        
+            [step(i), fig_lnsrch] = calculate_step_length(step(i-1),i, ...
+                misfit(i), Model(i),K_total(i),v_obs, g_obs);
+        end        
         % save linesearch figure
         figname = ['../output/iter',num2str(i),'.step-linesearch.png'];
         print(fig_lnsrch,'-dpng','-r400',figname);
         close(fig_lnsrch);
-%   end      
+        clearvars fig_lnsrc;
+
+        % actual model update
         disp ' ';
         disp(['iter ',num2str(i),': updating model']);
-        %     if i>1
         Model(i+1) = update_model(K_total(i),step(i),Model(i),parametrisation);
-        %     end
+
         
-        % end
         
         %% HARD CONSTRAINTS
         % apply hard constraints
@@ -297,6 +295,7 @@ for i = 15:niter;
             figname = ['../output/iter',num2str(i),'.hard-constraints-rhoupdate.png'];
             print(fig_rhoupdate,'-dpng','-r400',figname);
             close(fig_rhoupdate);
+            clearvars fig_rhoupdate
         end
         
         %% calculating model norm
@@ -313,21 +312,21 @@ for i = 15:niter;
     %     filenm_new = ['../output/iter', num2str(i),'.kernels.mat'];
     %     movefile(filenm_old, filenm_new);
     
-    % save v_rec per iter
-%     filenm_old = ['../output/', project_name, '.v_rec.mat'];
-%     filenm_new = ['../output/iter', num2str(i),'.v_rec.mat'];
-%     movefile(filenm_old, filenm_new);
-    
-    %     % rename linesearch step figure
-    %     filenm_old = '../output/iter.step-linesearch.png';
-    %     filenm_new = ['../output/iter', num2str(i), '.step-linesearch.png'];
-    %     movefile(filenm_old, filenm_new);
-end   
+
+% end   
     % plot misfit evolution
     fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit,modeldifnorm);
     figname = '../output/misfit-evolution.png';
     print(fig_misfit,'-dpng','-r400',figname);
     close(fig_misfit);
+    clearvars fig_misfit
+    
+    % saving current variables to file (crash safeguard)
+    disp 'saving all current variables...'
+    clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
+        'filenm_old', 'filenm_new', 'fig_knl', 'u_fw', 'v_fw');
+    savename = ['../output/',project_name,'.all-vars.mat'];
+    save(savename);
     
 end
 
@@ -335,7 +334,7 @@ disp ' ';
 disp ' ';
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '======================================';
-disp 'FINISHING UP WITH THE LAST MODEL...'
+disp '|         ...FINISHING UP...         |';
 disp '======================================';
 
 % % PLOT MODEL
