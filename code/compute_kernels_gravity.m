@@ -6,7 +6,7 @@ function [Kg, fig_Kg] = compute_kernels_gravity(g_src, rec_grav, varargin)
 %- PREPARATION
 
 %- varargin
-plotornot = checkargs(varargin(:)); % plots figures by default
+[normfac, plotornot] = checkargs(varargin(:)); % plots figures by default
 
 %- prepare necessary information
 path(path,'../input');
@@ -21,7 +21,7 @@ input_parameters;
 
 
 % gravitational constant
-% 6.67384 × 10-11 m3 kg-1 s-2
+% 6.67384 ï¿½ 10-11 m3 kg-1 s-2
 G = 6.67384e-11;
 
 nrec = size(rec_grav.x,2);
@@ -49,8 +49,8 @@ for i = 1:nrec % loop over recorders
     r{i}.length = sqrt(r{i}.x.^2 + r{i}.z.^2);
     
     % gravity kernel per component per receiver
-    Kg_rec{i}.x = -G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
-    Kg_rec{i}.z = -G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
+    Kg_rec{i}.x = -1 * normfac * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
+    Kg_rec{i}.z = -1 * normfac * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
     
     % gravity kernel per receiver
     Kg_rec{i}.total = Kg_rec{i}.x + Kg_rec{i}.z;
@@ -163,17 +163,28 @@ caxis([-scale scale]);
 
 end
 
-function plotornot = checkargs(arg)
+function [normalise, plotornot] = checkargs(arg)
 
 % size(arg)
 narg = size(arg,1);
 
-if narg == 1
-    plotornot = arg{1};
+if (narg == 2 && isnumeric(arg{1}) && ischar(arg{2}))
+    normalise = arg{1};
+    plotornot = arg{2};
+elseif narg == 1
+    if isstring(arg{1})
+        plotornot = arg{1};
+        normalise = 1.0;
+    elseif isnumeric(arg{1})
+        normalise = arg{1};
+        plotornot = 'yes';
+    end
+        
 elseif narg == 0
     plotornot = 'yes';
+    normalise = 1.0;
 else
-    error('we don''t know whether you want to plot the g kernel or not')
+    error('input to compute_kernels_gravity was not understood.')
 end
 
 end

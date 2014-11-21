@@ -1,8 +1,8 @@
 % calculate the step length
 
 function [step, fig_linesearch ] = calculate_step_length(teststep, niter, ...
-                                      currentMisfit, Model_prev, K_abs, ...
-                                      v_obs, g_obs)
+                                      currentMisfit, misfit_seis, misfit_grav, ...
+                                      Model_prev, K_abs, v_obs, g_obs)
 %== 1. Preparation ===========================================================
 
 % paths etc.
@@ -80,8 +80,10 @@ for ntry = 2:nsteps
       close(fig_grav);
       
       %- calculate gravity misfit:
-      [~, misfit_g] = make_gravity_sources(g_try, g_obs);
-      misfitArray.grav(ntry) = misfit_g.total;
+      scaling_g = misfit_grav(1).total;
+      [~, misf_g_test] = make_gravity_sources(g_try, g_obs, scaling_g);
+      
+      misfitArray.grav(ntry) = misf_g_test.normd;
       
     %% seismic
     
@@ -92,19 +94,29 @@ for ntry = 2:nsteps
     close(gcf);
     
     %- for each step, calculate the misfit using make_adstf --> adapt mk adstf!
-    [~, misfit] = make_all_adjoint_sources(v_try,v_obs,t,'waveform_difference','auto');
+    scaling_s = misfit_seis(1).total;
+    [~, misf_s_test] = make_all_adjoint_sources(v_try,v_obs,t, ...
+        'waveform_difference','auto', scaling_s);
+    misfitArray.seis(ntry) = misf_s_test.normd;
     
-    %- for each step, save the misfit to the misfit array
-    if strcmp(wave_propagation_type,'both')
-        misfitArray.seis(ntry) = misfit.x + misfit.y + misfit.z;
-    elseif strcmp(wave_propagation_type,'PSV')
-        misfitArray.seis(ntry) = misfit.x + misfit.z;
-    elseif strcmp(wave_propagation_type,'SH')
-        misfitArray.seis(ntry) = misfit.y;
-    end
-    
+    % don't need to do this as misfit_s already has total misfit!!
+%     %- for each step, save the misfit to the misfit array
+%     if strcmp(wave_propagation_type,'both')
+%         misfitArray.seis(ntry) = misfit_s.x + misfit_s.y + misfit_s.z;
+%     elseif strcmp(wave_propagation_type,'PSV')
+%         misfitArray.seis(ntry) = misfit_s.x + misfit_s.z;
+%     elseif strcmp(wave_propagation_type,'SH')
+%         misfitArray.seis(ntry) = misfit_s.y;
+%     end
+
+
     misfitArray.total(ntry) = misfitArray.seis(ntry) + misfitArray.grav(ntry);
 
+    
+    disp(['gravity misfit:  ', ...
+        num2str(misfitArray.seis(ntry),'%3.2e')])
+    disp(['seismic misfit:  ', ...
+        num2str(misfitArray.grav(ntry),'%3.2e')])
     disp(['Step ',num2str(ntry), ...
           ': step length ', num2str(steptry,'%3.1e'), ...
           ' and misfit ', num2str(misfitArray.total(ntry))]);

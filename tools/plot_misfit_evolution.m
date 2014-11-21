@@ -6,8 +6,8 @@ set_figure_properties_bothmachines;
 
 
 for i=1:length(misfit_seis)
-    misf_seis(i) = misfit_seis(i).total;
-    misf_grav(i) = misfit_g(i).total;
+    misf_seis(i) = misfit_seis(i).normd;
+    misf_grav(i) = misfit_g(i).normd;
 end
 
 % set figure position

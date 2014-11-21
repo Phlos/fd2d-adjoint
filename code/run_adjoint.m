@@ -12,7 +12,7 @@ disp 'initialising...'
 
 % check varargin (i.e. if parameters are to be taken from input_parameters
 % or from a previous model run)
-[updateParams, updateable] = checkargs(varargin(:));
+[updateParams, updateable, normfac] = checkargs(varargin(:));
 
 %==========================================================================
 %% set paths and read input
@@ -130,6 +130,19 @@ end
 % wavefield propagation is executed backwards in time for the adjoint case
 run_wavefield_propagation;
 
+%% normalise the kernels
+
+disp(['normalising the seismic kernels by normfac = ', num2str(normfac)]);
+% disp(num2str(normfac));
+params = fieldnames(K);
+for m = 1:length(params)
+%     disp(['i ', num2str(m),' PARAM: ', params{m}])
+    comps = fieldnames(K.(params{m}));
+    for l = 1:length(comps);
+%         disp(['j ', num2str(l),'   comp: ', comps{l}])
+        K.(params{m}).(comps{l}) = normfac * K.(params{m}).(comps{l});
+    end
+end
 
 %==========================================================================
 %% store output
@@ -159,21 +172,41 @@ end
 
 
 %% function check args
-function [updateParams, updateable] = checkargs(arg)
+function [updateModel, Model, normfac] = checkargs(arg)
 
 narg = length(arg);
 
-if narg == 1;
-    
-    % extract the updateable parameters
-    updateParams = 'yes';
-    updateable = arg{1};
+if narg == 2
+    if (isstruct(arg{1}) && isnumeric(arg{2}))
+        updateModel = 'yes';
+        Model = arg{1};
+        normfac = arg{2};
+    else
+        error('input to run_adjoint not understood');
+    end
 
-else
-    updateParams = 'no';
-    updateable = 0;
-    disp(['number of input arguments to run_forward: ', num2str(narg)]);
+elseif narg == 1 
+    if isstruct(arg{1});
+        
+        % extract the updateable parameters
+        updateModel = 'yes';
+        Model = arg{1};
+        normfac = 1;
+    elseif isnumeric(arg{1})
+        updateModel = 'no';
+        Model = 0;
+        normfac = arg{1};
+    end
+
+elseif narg == 0;
+    updateModel = 'no';
+    Model = 0;
+    normfac = 1;
+    disp(['number of input arguments to run_adjoint: ', num2str(narg)]);
     return
+    
+else
+    error('more than two optional input to run_adjoint???')
     
 end
 

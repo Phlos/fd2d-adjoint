@@ -2,7 +2,7 @@
 % set some figure information so that plotting is not so cumbersome
 %==========================================================================
 
-
+path(path,'../externaltools');
 %% preparation
 HostName = gethostname;
 

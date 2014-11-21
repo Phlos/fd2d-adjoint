@@ -184,6 +184,7 @@ K.rho.total = K.rho.PSV + K.rho.SH;
 K.mu.total = K.mu.PSV + K.mu.SH;
 K.lambda.total = K.lambda.PSV;
 
+
 % else
 %     error('Sorry, you have to specify you want travel time kernels')
 %     

@@ -53,7 +53,7 @@ delete(['../input/sources/adjoint/src*',direction])
 input_parameters;
 nrec = size(v,1);
 
-fid_loc=fopen([adjoint_source_path 'source_locations'],'w');
+% fid_loc=fopen([adjoint_source_path 'source_locations'],'w');
 
 nt=length(t);
 % length(v(1,:))
@@ -186,16 +186,16 @@ for n=1:nrec
     
     %- write adjoint source locations to file -----------------------------
     
-    fprintf(fid_loc,'%g %g\n',rec_x(n),rec_z(n));
+%     fprintf(fid_loc,'%g %g\n',rec_x(n),rec_z(n));
     
-    %- write source time functions ----------------------------------------
-    %  WITH time reversal!!!!!
-    fn=[adjoint_source_path 'src_' num2str(n) direction];
-    fid_src=fopen(fn,'w');
-    for k=1:nt
-        fprintf(fid_src,'%g\n',adstf_nonreversed(nt-k+1));
-    end
-    fclose(fid_src);
+%     %- write source time functions ----------------------------------------
+%     %  WITH time reversal!!!!!
+%     fn=[adjoint_source_path 'src_' num2str(n) direction];
+%     fid_src=fopen(fn,'w');
+%     for k=1:nt
+%         fprintf(fid_src,'%g\n',adstf_nonreversed(nt-k+1));
+%     end
+%     fclose(fid_src);
     
     
     
@@ -212,4 +212,6 @@ save(filename,'adjoint_stf','-v7.3')
 %- clean up ---------------------------------------------------------------
 %==========================================================================
 
-fclose(fid_loc);
+% fclose(fid_loc);
+
+end

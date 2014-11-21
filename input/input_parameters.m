@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='ParamRhoVsVp.RhoAnom_5g_rand.rectop.grav_scale_fixed70.corrected_evenmore';
+project_name='ParamRhoVsVp.model41.rectop.srcrand';
 
 %==========================================================================
 % inversion properties
@@ -14,7 +14,10 @@ adjoint_source_path='../input/sources/adjoint/';
 apply_hc = 'yes';   % 'yes' or 'no'
 
 % inversion parametrisation
-parametrisation = 'rhovsvp';    % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
+parametrisation = 'rhovsvp';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
+
+% normalise misfits:
+normalise_misfits = 'byfirstmisfit'; % normalises both the s and g misfits by their first value, so that they're same magnitudes
 
 % smoothing properties
 % smoothnp = 15;  % size of the smoothing filter
@@ -92,7 +95,7 @@ tee_0   = 2.5;        % source start time, seconds
 f_min=0.2;          % minimum frequency [Hz]
 f_max=1.00;         % maximum frequency [Hz]
 
-stf_PSV = [1 0];    % [x z]
+stf_PSV = [1 1];    % [x z]
                     % direction of the source-time-function in P-SV wave 
                     % propagation. The final stf will be normalised with
                     % such that its original amplitude is preserved.
@@ -112,20 +115,27 @@ simulation_mode='forward';
 % source positions
 %==========================================================================
 
-centre=[Lx/2 Lz/2];
-numrec=8;
-circlesize = 0.25*min(Lx,Lz);
-dphi = 2*pi/(numrec);
+%- 'random' source positions, 8x
+% src_x = Lx *      [0.1576 0.9575 0.9649 0.9706 0.9572 0.4854 0.8003 0.1419];
+src_x = Lx *   [ 0.2769    0.0462    0.0971    0.8235    0.6948    0.3171    0.9502    0.0344];
+% src_z = Lz * (1 - [0.4218 0.9157 0.7922 0.6557 0.0357 0.9595 0.8491 0.9340]);
+src_z = Lz * (1-[0.4387    0.3816    0.7655    0.7952    0.1869    0.8981    0.4456    0.6463]);
 
-src_x=zeros(1,numrec);
-src_z=zeros(1,numrec);
-
-n=1;
-for phi = -pi : dphi : pi-dphi ;
-    src_x(n)=centre(1) + circlesize*cos(phi);
-    src_z(n)=centre(2) + circlesize*sin(phi);
-    n=n+1;
-end
+% %- circle around the middle of the domain
+% centre=[Lx/2 Lz/2];
+% numrec=8;
+% circlesize = 0.25*min(Lx,Lz);
+% dphi = 2*pi/(numrec);
+% 
+% src_x=zeros(1,numrec);
+% src_z=zeros(1,numrec);
+% 
+% n=1;
+% for phi = -pi : dphi : pi-dphi ;
+%     src_x(n)=centre(1) + circlesize*cos(phi);
+%     src_z(n)=centre(2) + circlesize*sin(phi);
+%     n=n+1;
+% end
 
 % src_x=[0.6e5];
 % src_z=[0.7e5];
@@ -135,7 +145,7 @@ end
 %==========================================================================
 
 %- a line of receivers just below the top boundary
-nrec = 8;
+nrec = 16;
 rec_x= (1: 1: nrec) * (Lx/(nrec+1));
 dz = Lz/(nz-1);
 rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)

@@ -1,4 +1,4 @@
-function [project_name, axrot, apply_hc, parametrisation, rec_g, X, Z] = get_input_info
+function [project_name, axrot, apply_hc, parametrisation, rec_g, X, Z, normalise_misfits] = get_input_info
 
 % function that gives the project name from the file input_parameters.m
 
