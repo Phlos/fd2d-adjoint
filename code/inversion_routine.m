@@ -51,20 +51,6 @@ middle.rho    = mode(Model(1).rho(:));
 middle.mu     = mode(Model(1).mu(:));
 middle.lambda = mode(Model(1).lambda(:));
 
-% % fig_mod = plot_model(Model(1));
-% % figname = ['../output/iter',num2str(1),'.model.png'];
-% % print(fig_mod,'-dpng','-r400',figname);
-
-% % run forward in test model -- 1st iteration
-% % disp 'calculating iter 1 forward'
-% % [v_iter(1),t,u_fw,v_fw,~,~]=run_forward;
-%
-% % % check what the seismograms look like
-% % cd ../tools/
-% % v_rec_3 = cat(3, [v_iter(1).x], [v_iter(1).y], [v_iter(1).z]);
-% % plot_seismograms(v_rec_3,t,'velocity');
-% % v_obs_3 = cat(3, [v_obs.x], [v_obs.y], [v_obs.z]);
-% % plot_seismograms(v_obs_3,t,'velocity');
 
 for i = 2:niter;
  if i > 2
@@ -133,11 +119,7 @@ for i = 2:niter;
         end
         disp ' ';
         
-%         if strcmp(normalise_misfits, 'byfirstmisfit')
-%             misfit_g(i).normd = misfit_g(i).total / misfit_g(1).total;
-%         else
-%             misfit_g(i).normd = misfit_g(i).total;
-%         end
+
         
 
         
@@ -169,20 +151,7 @@ for i = 2:niter;
                 v_iter(i),v_obs,t,'waveform_difference','auto', norm_misf_s);
         clearvars norm_misf
         
-%         if i==1
-%             [adstf, misfit_seis(i)] = make_all_adjoint_sources( ...
-%                 v_iter(i),v_obs,t,'waveform_difference','auto', NaN);
-%         else
-%             [adstf, misfit_seis(i)] = make_all_adjoint_sources( ...
-%                 v_iter(i),v_obs,t,'waveform_difference','auto', misfit_seis(1).total);
-%         end
-        
-%         if strcmp(normalise_misfits, 'byfirstmisfit')
-%             misfit_seis(i).normd = misfit_seis(i).total / misfit_seis(1).total;
-%         else
-%             misfit_seis(i).normd = misfit_seis(i).total;
-%         end
-        
+       
         % plot seismogram difference
         fig_seisdif = plot_seismogram_difference(v_obs,v_iter(i),t);
         figname = ['../output/iter',num2str(i),'.seisdif.png'];
@@ -248,50 +217,6 @@ for i = 2:niter;
 %  end
         %% GRAVITY KERNEL
         
-%         % compare gravity fields:
-%         % gravity field of current model
-%         [g(i), fig_grav] = calculate_gravity_field(Model(i).rho, rec_g);
-%         figname = ['../output/iter',num2str(i),'.gravity_recordings.png'];
-%         titel = ['gravity field of ', num2str(i), 'th model'];
-%         mtit(fig_grav, titel);
-%         print(fig_grav, '-dpng', '-r400', figname);
-%         close(fig_grav);
-%         % comparison to real model:
-%         fig_grav_comp = plot_gravity_quivers(rec_g, g(i), g_obs, X, Z, Model(i).rho);
-%         figname = ['../output/iter',num2str(i),'.gravity_difference.png'];
-%         titel = ['Difference between gravity field of the iter ', num2str(i), ' model and that of the real model'];
-%         mtit(fig_grav_comp, titel);
-%         print(fig_grav_comp, '-dpng', '-r400', figname);
-%         close(fig_grav_comp);
-%         clearvars('fig_mod');
-%         
-%         %- calculate gravity misfit:
-%         % normalise the total misfit by first misfit (if already calc'd)
-%         if ( strcmp(normalise_misfits, 'byfirstmisfit')  && i==1)
-%             norm_misf = NaN;
-%         elseif (strcmp(normalise_misfits, 'byfirstmisfit') && i>1)
-%             norm_misf = misfit_g(1).total;
-%         else
-%             norm_misf = 1;
-%         end
-%         [g_src, misfit_g(i)] = make_gravity_sources(g(i), g_obs, norm_misf);
-%         clearvars norm_misf;
-%         
-%         if strcmp(normalise_misfits, 'byfirstmisfit')
-%             misfit_g(i).normd = misfit_g(i).total / misfit_g(1).total;
-%         else
-%             misfit_g(i).normd = misfit_g(i).total;
-%         end
-%         
-%         % some output
-%         sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
-%         div_by_gobs = misfit_g(i).total / sumgobs;
-%         disp(['GRAVITY MISFIT FOR ITER ',num2str(i),': ', ...
-%             num2str(misfit_g(i).total,'%3.2e')])
-%         disp(['   percentually ',num2str(i),': ', ...
-%             num2str(div_by_gobs,'%3.2e')])
-%         disp ' ';
-        
         % kernels only to be calculated when a next iteration will take place.
         if(i < niter)
             %- calculate gravity kernels
@@ -346,8 +271,8 @@ for i = 2:niter;
             % empty the big variables so that the computer doesn't slow down.
             clearvars('u_fw');
             clearvars('v_fw');
-            %  end
-            %  disp 'hellooooo'
+%  end
+%  disp 'hellooooo'
             % plot the kernels
             disp ' ';
             disp(['iter ',num2str(i),': plotting kernels']);
@@ -457,23 +382,14 @@ for i = 2:niter;
             clearvars fig_rhoupdate
         end
         
-        %% calculating model norm
-        modeldifnorm(i) =   norm( (Model(i+1).rho(:) - Model(i).rho(:)) ./ Model(i).rho(:) ) ...
-                          + norm( (Model(i+1).mu(:)  - Model(i).mu(:))  ./ Model(i).mu(:) ) ...
-                          + norm( (Model(i+1).lambda(:) - Model(i).lambda(:)) ./ Model(i).lambda(:) );
+%         %% calculating model norm
+%         modeldifnorm(i) =   norm( (Model(i+1).rho(:) - Model(i).rho(:)) ./ Model(i).rho(:) ) ...
+%                           + norm( (Model(i+1).mu(:)  - Model(i).mu(:))  ./ Model(i).mu(:) ) ...
+%                           + norm( (Model(i+1).lambda(:) - Model(i).lambda(:)) ./ Model(i).lambda(:) );
         
     end
     
     %% OUTPUT:
-    
-    %     % save kernels per iter
-    %     filenm_old = ['../output/', project_name, '.kernels.mat'];
-    %     filenm_new = ['../output/iter', num2str(i),'.kernels.mat'];
-    %     movefile(filenm_old, filenm_new);
-    
-
-% end   
-
     
     % saving current variables to file (crash safeguard)
     disp 'saving all current variables...'
@@ -538,13 +454,13 @@ disp '======================================';
 
 %% WRAP-UP: misfit evolution & saving all variables to file
 
-% plot misfit evolution
-fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit, modeldifnorm);
-figname = '../output/misfit-evolution.png';
-mtit(fig_misfit, project_name);
-print(fig_misfit,'-dpng','-r400',figname);
-close(fig_misfit);
-clearvars fig_misfit
+% % plot misfit evolution
+% fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit, modeldifnorm);
+% figname = '../output/misfit-evolution.png';
+% mtit(fig_misfit, project_name);
+% print(fig_misfit,'-dpng','-r400',figname);
+% close(fig_misfit);
+% clearvars fig_misfit
 
 disp 'saving misfit evolution...'
 savename = ['../output/',project_name,'.misfit-evolution.mat'];
