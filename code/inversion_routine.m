@@ -52,8 +52,8 @@ middle.mu     = mode(Model(1).mu(:));
 middle.lambda = mode(Model(1).lambda(:));
 
 
-for i = 2:niter;
- if i > 2
+for i = 1:niter;
+%  if i > 2
         cd ../code;
         
         disp  ' ';
@@ -158,7 +158,7 @@ for i = 2:niter;
         print(fig_seisdif,'-dpng','-r400',figname);
         close(fig_seisdif);
         
- end
+%  end
         %% total misfit
         
         disp ' ';
