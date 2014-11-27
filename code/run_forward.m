@@ -30,7 +30,7 @@ input_parameters;
 
 nt=5*round(nt/5);
 
-set_figure_properties_doffer;  % i.e. size of the figures & location on screen
+set_figure_properties_bothmachines;  % i.e. size of the figures & location on screen
 
 
 

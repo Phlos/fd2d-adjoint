@@ -5,6 +5,9 @@ function [step, fig_linesearch ] = calculate_step_length(teststep, niter, ...
                                       Model_prev, K_abs, v_obs, g_obs)
 %== 1. Preparation ===========================================================
 
+% obtain useful parameters from input_parameters
+[~, ~, ~, use_grav, ~, ~, ~, ~, ~, ~] = get_input_info;
+
 % paths etc.
 
 path(path,'../code');
@@ -75,7 +78,8 @@ for ntry = 2:nsteps
 %     dada
       
     %% gravity
-      
+    
+    if strcmp('use_grav','yes')
       [g_try, fig_grav] = calculate_gravity_field(Model_try.rho, rec_g);
       close(fig_grav);
       
@@ -84,7 +88,8 @@ for ntry = 2:nsteps
       [~, misf_g_test] = make_gravity_sources(g_try, g_obs, scaling_g);
       
       misfitArray.grav(ntry) = misf_g_test.normd;
-      
+    end
+    
     %% seismic
     
     %- for each step, run forward update
@@ -109,14 +114,18 @@ for ntry = 2:nsteps
 %         misfitArray.seis(ntry) = misfit_s.y;
 %     end
 
-
-    misfitArray.total(ntry) = misfitArray.seis(ntry) + misfitArray.grav(ntry);
-
+    if strcmp('use_grav','yes')
+        misfitArray.total(ntry) = misfitArray.seis(ntry) + misfitArray.grav(ntry);
+    else
+        misfitArray.total(ntry) =  misfitArray.seis(ntry);
+    end
     
-    disp(['gravity misfit:  ', ...
-        num2str(misfitArray.seis(ntry),'%3.2e')])
     disp(['seismic misfit:  ', ...
-        num2str(misfitArray.grav(ntry),'%3.2e')])
+        num2str(misfitArray.seis(ntry),'%3.2e')])
+    if strcmp('use_grav','yes')
+        disp(['gravity misfit:  ', ...
+            num2str(misfitArray.grav(ntry),'%3.2e')])
+    end
     disp(['Step ',num2str(ntry), ...
           ': step length ', num2str(steptry,'%3.1e'), ...
           ' and misfit ', num2str(misfitArray.total(ntry))]);

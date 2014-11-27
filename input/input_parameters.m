@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='ParamRhoVsVp.model41.rectop.srcrand';
+project_name='Showcase-AGU.test04-onlyseis.inv-rvv.seis-nograv-nohc';
 
 %==========================================================================
 % inversion properties
@@ -11,13 +11,22 @@ project_name='ParamRhoVsVp.model41.rectop.srcrand';
 adjoint_source_path='../input/sources/adjoint/';
 
 % apply hard constraints?
-apply_hc = 'yes';   % 'yes' or 'no'
+apply_hc = 'no';   % 'yes' or 'no'
+
+% use gravity?
+use_grav = 'no'; % 'yes' or 'no'
 
 % inversion parametrisation
 parametrisation = 'rhovsvp';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % normalises both the s and g misfits by their first value, so that they're same magnitudes
+
+% initial step length;
+% stepInit = 3.5e14;    % good for circular configuration
+% stepInit = 5e15;        % good for circular src and rec @ top of domain
+stepInit = 1e-1;        % kernels normalised by 1st misfit size. (20-11-2014)
+% stepInit = 1e-8;        % normalised misfit, TINY rho anomaly (model 101) (24-11-2014)
 
 % smoothing properties
 % smoothnp = 15;  % size of the smoothing filter
@@ -55,14 +64,6 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
 model_type=10;
 
-% % set the background values for plot_model for all models based on Tromp
-% trompmodels = [10:39];
-% if any(model_type==trompmodels)
-%     disp 'real model based on Tromp'
-%     middle.rml = [2600 2.66e10    2.42e10];
-%     middle.rvv = [2600 3198.55736 5797.87759];
-% end
-
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
 % 3=layered medium
@@ -79,6 +80,16 @@ model_type=10;
 % 100= layered: left = high velocity, right = low velocity (any difference with model 3???)
 
 % 'initial'= read initial model for waveform inversion (mu_initial, rho_initial)
+
+
+% % set the background values for plot_model for all models based on Tromp
+% trompmodels = [10:39];
+% if any(model_type==trompmodels)
+%     disp 'real model based on Tromp'
+%     middle.rml = [2600 2.66e10    2.42e10];
+%     middle.rvv = [2600 3198.55736 5797.87759];
+% end
+
 
 %==========================================================================
 % source-time function
@@ -115,11 +126,16 @@ simulation_mode='forward';
 % source positions
 %==========================================================================
 
-%- 'random' source positions, 8x
-% src_x = Lx *      [0.1576 0.9575 0.9649 0.9706 0.9572 0.4854 0.8003 0.1419];
-src_x = Lx *   [ 0.2769    0.0462    0.0971    0.8235    0.6948    0.3171    0.9502    0.0344];
-% src_z = Lz * (1 - [0.4218 0.9157 0.7922 0.6557 0.0357 0.9595 0.8491 0.9340]);
-src_z = Lz * (1-[0.4387    0.3816    0.7655    0.7952    0.1869    0.8981    0.4456    0.6463]);
+%- line of sources at the bottom of the domain -- use with absbound bottom?
+nsrc = 8;
+% nsrc = 1;
+src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
+dz = 1/16 * Lz;
+src_z=ones(size(src_x)) * (0 + 2*dz); % -2*dz necessary as a result of b.c.)
+
+% %- 'random' source positions, 8x
+% src_x = Lx *   [ 0.2769    0.0462    0.0971    0.8235    0.6948    0.3171    0.9502    0.0344];
+% src_z = Lz * (1-[0.4387    0.3816    0.7655    0.7952    0.1869    0.8981    0.4456    0.6463]);
 
 % %- circle around the middle of the domain
 % centre=[Lx/2 Lz/2];
@@ -146,6 +162,7 @@ src_z = Lz * (1-[0.4387    0.3816    0.7655    0.7952    0.1869    0.8981    0.4
 
 %- a line of receivers just below the top boundary
 nrec = 16;
+% nrec = 1;
 rec_x= (1: 1: nrec) * (Lx/(nrec+1));
 dz = Lz/(nz-1);
 rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)

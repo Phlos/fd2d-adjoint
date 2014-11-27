@@ -6,6 +6,16 @@ path(path,'../externaltools');
 %% preparation
 HostName = gethostname;
 
+% % testing the host we're in
+% if strcmp(HostName,'D-13-L-2')
+%     disp 'according to our best knowledge, hangin'' out on Maggi'
+% elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
+%     disp 'according to our best knowledge, hangin'' out on Doffer'
+% else
+%     warning('Houston, we may have a problem... hostname not recognised');
+% end
+
+
 % colour scale
 load cm_velocity;       % load the color map we want to use
 
@@ -21,7 +31,7 @@ if strcmp(HostName,'D-13-L-2')
     scnsize = scnsize - [ 0,0,ubuntubar,0];
     scn_width = scnsize(3);
     scn_height = scnsize(4);
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     verti_scn = [scnsize(1) ...
                  scnsize(2) ...
                  (scnsize(3) - scnsize(4) - 1) ...
@@ -53,11 +63,12 @@ if strcmp(HostName,'D-13-L-2')
             scn_height * (2/3),...      % bottom
             scn_width*2/3 - edge,...    % width
             scn_height/3];              % height
-elseif strcmp(HostName,'doffer.geo.uu.nl')
-pos_mod = [edge,...                     % left
-        verti_scn_height * (4/5),...    % bottom
-        verti_scn_width - edge,...      % width
-        verti_scn_height/5];            % height
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
+% pos_mod = [edge,...                     % left
+%         verti_scn_height * (4/5),...    % bottom
+%         verti_scn_width - edge,...      % width
+%         verti_scn_height/5];            % height
+pos_mod = [1082        1134         983         376];
 end
 
 % position for the source time function plot
@@ -66,7 +77,7 @@ if strcmp(HostName,'D-13-L-2')
         pos_mod(2),...
         scn_width*1/3 - edge,...
         pos_mod(4)];
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
 pos_stf = [edge,...
         verti_scn_height * 3/5,...
         verti_scn_width - edge,...
@@ -83,7 +94,7 @@ pos_vel_nplots3 = [edge,...
         scn_height*1/3-25,...
         2/3*scn_width,...
         1/3*scn_height];
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
 pos_vel = [edge,...
         verti_scn_height * 2/5,...
         2/3 * verti_scn_width - edge,...
@@ -110,7 +121,7 @@ pos_adj_3 = [edge,...
         edge,...
         6/6*scn_width,...
         3/4*scn_height];
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
 pos_adj_1 = [verti_scn_width + edge + 20,...  % left
              480 + verti_scn_height * 1/5,...     % bottom
              hori_scn_width - 20 - 80,...     % width
@@ -130,7 +141,7 @@ end
 % position for the seismogram plots
 if strcmp(HostName,'D-13-L-2')
     pos_seis = [99    17   562   501];
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
 pos_seis = [60,...                      % left
         80,...                          % bottom
         verti_scn_width - 120,...       % width
@@ -143,7 +154,7 @@ if strcmp(HostName,'D-13-L-2')
             0,...                       % bottom
             scn_width*2/3 - edge,...    % width
             scn_height-10];             % height
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     pos_knl = [edge,...                 % left
             0,...                       % bottom
             verti_scn_width - edge,...  % width
@@ -154,7 +165,7 @@ end
 % position for the realmodel-testmodel-kernel plot
 if strcmp(HostName,'D-13-L-2')
     pos_rtk = [1152         520        1519         968];
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     pos_rtk = [1152         520        1519         968];
 % pos_rtk = [40,...                 % left
 %         40,...                       % bottom
@@ -165,7 +176,7 @@ end
 % position for the gravity kernel buildup figure
 if strcmp(HostName,'D-13-L-2')
     pos_gravknl_buildup =  [1123         589        1039         916];
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     pos_gravknl_buildup =  [1123         589        1039         916];
 end
 
@@ -173,6 +184,6 @@ end
 % position for the misfit evolution plot
 if strcmp(HostName,'D-13-L-2')
     pos_misfit =  [679 128 808 1049];
-elseif strcmp(HostName,'doffer.geo.uu.nl')
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     pos_misfit =  [679 128 808 1049];
 end

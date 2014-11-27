@@ -29,7 +29,7 @@ function fig_mod = plot_model(varargin)
 
 input_parameters;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
-set_figure_properties_maggi;
+set_figure_properties_bothmachines;
 
 load 'propagation/cm_model.mat';
 
@@ -43,11 +43,12 @@ for params = fieldnames(Model)';
 
     param = Model.(params{1});
 
-    g = subplot(2,3,j);
-    
-    p = get(g,'position');
-%     p(4) = p(4)*1.50;  % Add 10 percent to height
-    set(g, 'position', p);
+%     g = subplot(2,3,j);
+%     p = get(g,'position');
+% %     p(4) = p(4)*1.50;  % Add 10 percent to height
+%     set(g, 'position', p);
+
+    subplot(1,3,j);
     
     hold on
     pcolor(X,Z,param');
@@ -150,8 +151,16 @@ switch narg
     
     case 1
         % disp '1 argument'
-        Model = arg{1};
-%         middle = [NaN NaN NaN];
+        
+        if isstruct(arg{1})
+            Model = arg{1};
+        elseif isnumeric(arg{1})
+            modelnr = arg{1};
+            Model = update_model(modelnr);
+        else
+            error('input has to be a model structure or modelnr');
+        end
+        %         middle = [NaN NaN NaN];
         middle.rho = NaN;
         middle.mu = NaN;
         middle.lambda = NaN;

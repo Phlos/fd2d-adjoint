@@ -30,6 +30,9 @@ title('misfit evolution - semilogarithmic in misfit');
 subplot(4,2,3);
 plot(misf_seis,'b');
 title('misfit evolution (seis)');
+% text(0.95*max(X(:)),0.92*max(Z(:)),['max = \pm', num2str(scale,'%3.1e')], ... 
+%                       'HorizontalAlignment','right', ...
+%                       'Color',[0.5 0.5 0.5])
 subplot(4,2,4);
 semilogy(misf_seis,'b');
 title('misfit evolution (seis) - semilog in misfit');

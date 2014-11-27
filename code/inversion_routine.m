@@ -9,51 +9,79 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-niter = 40;
-
-% initial step length;
-% stepInit = 3.5e14;    % good for circular configuration
-% stepInit = 5e15;        % good for circular src and rec @ top of domain
-stepInit = 1e-1;        % kernels normalised by 1st misfit size. (20-11-2014)
-
-% obtain project name
-[project_name, axrot, apply_hc, parametrisation, ...
- rec_g, X, Z, normalise_misfits] = get_input_info;
+niter = 3;
+istart = 1;
 
 
 
-
-
-
-
+% obtain useful parameters from input_parameters
+[project_name, axrot, apply_hc, use_grav, parametrisation, ...
+ rec_g, X, Z, normalise_misfits, stepInit] = get_input_info;
 
 
 
 
 % MAKE SURE V_OBS IS PRESENT!!! AND SAVED!!!
- %[Model_real, v_obs, t_obs, props_obs, g_obs] = prepare_obs(modelnr)
-
+ %[Model_real, v_obs, t_obs, props_obs, g_obs] = prepare_obs(modelnr);
 
 % saving the observed variables
 disp 'saving obs variables to matfile...'
-savename = ['../output/obs.all-vars.mat'];
+savename = ['../output/',project_name,'obs.all-vars.mat'];
 save(savename, 'v_obs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
 
 
 
 
 
+%=========================================================================
+
+
+
 % save initial rho mu lambda (from input_parameters) as iter 1 Params values:
-Model(1) = update_model();
+Model_start = update_model();
 
 % % set the background values for plot_model to mode of the initial model
-middle.rho    = mode(Model(1).rho(:));
-middle.mu     = mode(Model(1).mu(:));
-middle.lambda = mode(Model(1).lambda(:));
+middle.rho    = mode(Model_start.rho(:));
+middle.mu     = mode(Model_start.mu(:));
+middle.lambda = mode(Model_start.lambda(:));
+
+% plot very initial model
+fig_mod = plot_model(Model_start,middle,parametrisation);
+titel = [project_name,': model of iter 0'];
+mtit(fig_mod, titel);
+figname = ['../output/iter0.model.',parametrisation,'.png'];
+print(fig_mod,'-dpng','-r400',figname);
+
+% apply hard constraints in initial model
+if(strcmp(apply_hc,'yes'))
+    % -> no negative velocities
+    % -> mass of the Earth and/or its moment of inertia
+    switch parametrisation
+        case 'rhomulambda'
+            [Model(1).rho, fig_hcupdate,~,~] = ...
+                apply_hard_constraints(props_obs, Model_start.rho,axrot);
+        case 'rhovsvp'
+            Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_start);
+            [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
+                apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
+            Model(1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
+        otherwise
+            error('the parametrisation of the inversion was not recognised')
+    end
+    figname = ['../output/iter0.hard-constraints-rhoupdate.png'];
+    titel = [project_name,': hc update of model 0'];
+    mtit(fig_hcupdate, titel, 'xoff', 0.001, 'yoff', 0.05);
+    print(fig_hcupdate,'-dpng','-r400',figname);
+    close(fig_hcupdate);
+    clearvars fig_rhoupdate
+else
+    %             disp 'model 1 is model start'
+    Model(1) = Model_start;
+end
 
 
-for i = 1:niter;
-%  if i > 2
+for i = istart : niter;
+%   if i > 1
         cd ../code;
         
         disp  ' ';
@@ -69,6 +97,8 @@ for i = 1:niter;
         
         % plot model
         fig_mod = plot_model(Model(i),middle,parametrisation);
+        titel = [project_name,': model of iter ', num2str(i)];
+        mtit(fig_mod, titel);
         figname = ['../output/iter',num2str(i),'.model.',parametrisation,'.png'];
         print(fig_mod,'-dpng','-r400',figname);
         close(fig_mod);
@@ -76,49 +106,52 @@ for i = 1:niter;
         
         %% MISFITS
         
-                % compare gravity fields:
-        % gravity field of current model
-        [g(i), fig_grav] = calculate_gravity_field(Model(i).rho, rec_g);
-        figname = ['../output/iter',num2str(i),'.gravity_recordings.png'];
-        titel = ['gravity field of ', num2str(i), 'th model'];
-        mtit(fig_grav, titel);
-        print(fig_grav, '-dpng', '-r400', figname);
-        close(fig_grav);
-        % comparison to real model:
-        fig_grav_comp = plot_gravity_quivers(rec_g, g(i), g_obs, X, Z, Model(i).rho);
-        figname = ['../output/iter',num2str(i),'.gravity_difference.png'];
-        titel = ['Difference between gravity field of the iter ', num2str(i), ' model and that of the real model'];
-        mtit(fig_grav_comp, titel);
-        print(fig_grav_comp, '-dpng', '-r400', figname);
-        close(fig_grav_comp);
-        clearvars('fig_mod');
-        
-        %- calculate gravity misfit:
-        % normalise the total misfit by first misfit (if already calc'd)
-        if ( strcmp(normalise_misfits, 'byfirstmisfit')  && i==1)
-            norm_misf_g = NaN;
-        elseif (strcmp(normalise_misfits, 'byfirstmisfit') && i>1)
-            norm_misf_g = misfit_g(1).total;
+        if strcmp('use_grav','yes')
+            % gravity field of current model
+            [g(i), fig_grav] = calculate_gravity_field(Model(i).rho, rec_g);
+            figname = ['../output/iter',num2str(i),'.gravity_recordings.png'];
+            titel = [project_name,': gravity field of ', num2str(i), 'th model'];
+            mtit(fig_grav, titel, 'xoff', 0.001, 'yoff', 0.05);
+            print(fig_grav, '-dpng', '-r400', figname);
+            close(fig_grav);
+            % comparison to real model:
+            fig_grav_comp = plot_gravity_quivers(rec_g, g(i), g_obs, X, Z, Model(i).rho);
+            figname = ['../output/iter',num2str(i),'.gravity_difference.png'];
+            titel = [project_name,': gravity diff iter ', num2str(i), ' - real model'];
+            mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.05);
+            print(fig_grav_comp, '-dpng', '-r400', figname);
+            close(fig_grav_comp);
+            clearvars('fig_mod');
+            
+            %- calculate gravity misfit:
+            % normalise the total misfit by first misfit (if already calc'd)
+            if ( strcmp(normalise_misfits, 'byfirstmisfit')  && i==1)
+                norm_misf_g = NaN;
+            elseif (strcmp(normalise_misfits, 'byfirstmisfit') && i>1)
+                norm_misf_g = misfit_g(1).total;
+            else
+                norm_misf_g = 1;
+            end
+            [g_src, misfit_g(i)] = make_gravity_sources(g(i), g_obs, norm_misf_g);
+            clearvars norm_misf;
+            
+            % gravity misfit
+            sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
+            div_by_gobs = misfit_g(i).total / sumgobs;
+            disp ' ';
+            disp(['gravity misfit for iter ',num2str(i),': ', ...
+                num2str(misfit_g(i).total,'%3.2e')])
+            disp(['   percent of g_obs ',num2str(i),': ', ...
+                num2str(div_by_gobs,'%3.2e')])
+            if strcmp(normalise_misfits,'byfirstmisfit')
+                disp(['   percent of 1st misfit: ', ...
+                    num2str(misfit_g(i).normd,'%3.2e')])
+            end
+            disp ' ';
         else
-            norm_misf_g = 1;
+            misfit_g(i).total = NaN;
+            misfit_g(i).normd = NaN;
         end
-        [g_src, misfit_g(i)] = make_gravity_sources(g(i), g_obs, norm_misf_g);
-        clearvars norm_misf;
-        
-        % gravity misfit
-        sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
-        div_by_gobs = misfit_g(i).total / sumgobs;
-        disp ' ';
-        disp(['gravity misfit for iter ',num2str(i),': ', ...
-            num2str(misfit_g(i).total,'%3.2e')])
-        disp(['   percent of g_obs ',num2str(i),': ', ...
-            num2str(div_by_gobs,'%3.2e')])
-        if strcmp(normalise_misfits,'byfirstmisfit')
-            disp(['   percent of 1st misfit: ', ...
-                num2str(misfit_g(i).normd,'%3.2e')])
-        end
-        disp ' ';
-        
 
         
 
@@ -154,6 +187,8 @@ for i = 1:niter;
        
         % plot seismogram difference
         fig_seisdif = plot_seismogram_difference(v_obs,v_iter(i),t);
+        titel = [project_name,': difference between seismograms iter ', num2str(i), ' and obs'];
+        mtit(fig_seisdif, titel, 'xoff', 0.001, 'yoff', 0.02);
         figname = ['../output/iter',num2str(i),'.seisdif.png'];
         print(fig_seisdif,'-dpng','-r400',figname);
         close(fig_seisdif);
@@ -165,18 +200,20 @@ for i = 1:niter;
         disp '=========================================='
         disp(['           MISFIT ITER ',num2str(i)]);
         
-        % gravity misfit
-        sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
-        div_by_gobs = misfit_g(i).total / sumgobs;
-        disp(['GRAVITY MISFIT FOR ITER ',num2str(i),': ', ...
-            num2str(misfit_g(i).total,'%3.2e')])
-        disp(['   fraction of g_obs:       ', ...
-            num2str(div_by_gobs,'%3.2e')])
-        if strcmp(normalise_misfits,'byfirstmisfit')
-        disp(['   fraction of 1st misfit:  ', ...
-            num2str(misfit_g(i).normd,'%3.2e')])
+        if strcmp('use_grav','yes')
+            % gravity misfit
+            sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
+            div_by_gobs = misfit_g(i).total / sumgobs;
+            disp(['GRAVITY MISFIT FOR ITER ',num2str(i),': ', ...
+                num2str(misfit_g(i).total,'%3.2e')])
+            disp(['   fraction of g_obs:       ', ...
+                num2str(div_by_gobs,'%3.2e')])
+            if strcmp(normalise_misfits,'byfirstmisfit')
+                disp(['   fraction of 1st misfit:  ', ...
+                    num2str(misfit_g(i).normd,'%3.2e')])
+            end
+            disp ' ';
         end
-        disp ' ';
         
         % seismic misfit
         sumvobs = sum(v_obs.x(:) .^2) + sum(v_obs.z(:) .^2);
@@ -192,8 +229,12 @@ for i = 1:niter;
         end
         disp ' ';
         
-        misfit(i) = misfit_seis(i).normd + misfit_g(i).normd;
-        disp ' ';
+        if strcmp('use_grav','yes')
+            misfit(i) = misfit_seis(i).normd + misfit_g(i).normd;
+        else
+            misfit(i) = misfit_seis(i).normd;
+        end
+        
         disp(['TOTAL MISFIT FOR ITER ',num2str(i),': ', ...
             num2str(misfit(i),'%3.2e')])
         disp ' ';
@@ -209,7 +250,7 @@ for i = 1:niter;
         % plot misfit evolution
         fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit,modeldifn);
         figname = '../output/misfit-evolution.png';
-        mtit(fig_misfit, project_name);
+        mtit(fig_misfit, project_name, 'xoff', 0.001, 'yoff', 0.04);
         print(fig_misfit,'-dpng','-r400',figname);
         close(fig_misfit);
         clearvars fig_misfit
@@ -217,33 +258,35 @@ for i = 1:niter;
 %  end
         %% GRAVITY KERNEL
         
-        % kernels only to be calculated when a next iteration will take place.
-        if(i < niter)
-            %- calculate gravity kernels
-            disp ' ';
-            disp(['iter ',num2str(i),': calculating gravity kernel']);
-            % normalising the gravity kernel
-            if strcmp(normalise_misfits,'byfirstmisfit')
-                normKg = 1.0 / misfit_g(1).total;
-            else
-                normKg = 1.0;
-            end
-            % calculating the gravity kernel
-            if i == 1
-                [Kg{i}, fig_Kg] = compute_kernels_gravity(g_src,rec_g,normKg,'no'); % 'no' is for plotting gravity kernel update
-            else
-                [Kg{i}, fig_Kg] = compute_kernels_gravity(g_src,rec_g,normKg,'no'); % 'no' is for plotting gravity kernel update
-            end
+        if strcmp('use_grav','yes')
             
-            %  plot gravity kernel
-            figname = ['../output/iter',num2str(i),'.kernel_grav.rho.png'];
-            titel = ['Gravity kernel for iter ',num2str(i)];
-            mtit(fig_Kg,titel)
-            print(fig_Kg,'-dpng','-r400',figname);
-            close(fig_Kg);
-            clearvars fig_Kg;
+            % kernels only to be calculated when a next iteration will take place.
+            if(i < niter)
+                %- calculate gravity kernels
+                disp ' ';
+                disp(['iter ',num2str(i),': calculating gravity kernel']);
+                % normalising the gravity kernel
+                if strcmp(normalise_misfits,'byfirstmisfit')
+                    normKg = 1.0 / misfit_g(1).total;
+                else
+                    normKg = 1.0;
+                end
+                % calculating the gravity kernel
+                if i == 1
+                    [Kg{i}, fig_Kg] = compute_kernels_gravity(g_src,rec_g,normKg,'no'); % 'no' is for plotting gravity kernel update
+                else
+                    [Kg{i}, fig_Kg] = compute_kernels_gravity(g_src,rec_g,normKg,'no'); % 'no' is for plotting gravity kernel update
+                end
+                
+                %  plot gravity kernel
+                figname = ['../output/iter',num2str(i),'.kernel_grav.rho.png'];
+                titel = [project_name,': gravity kernel for iter ',num2str(i)];
+                mtit(fig_Kg,titel, 'xoff', 0.001, 'yoff', 0.00001);
+                print(fig_Kg,'-dpng','-r400',figname);
+                close(fig_Kg);
+                clearvars fig_Kg;
+            end
         end
-        
         
         
         %% SEISMIC KERNEL
@@ -283,13 +326,23 @@ for i = 1:niter;
                     [~, K_reltemp] = calculate_other_kernels(Kseis(i), Model(i));
                     fig_knl = plot_kernels_rho_mu_lambda_relative(K_rel);
                     figname = ['../output/iter',num2str(i),'.kernels.relative.rho-mu-lambda.png'];
+                    titel = [project_name,': seismic kernels (relative rhomulambda) for iter ',num2str(i)];
+                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     print(fig_knl,'-dpng','-r400',figname);
                     close(fig_knl);
                 case 'rhovsvp'
-                    [~, K_reltemp] = calculate_other_kernels(Kseis(i), Model(i));
+                    [Kabs, K_reltemp] = calculate_other_kernels(Kseis(i), Model(i));
                     %                 K_reltemp = change_parametrisation_kernels('rhomulambda','rhovsvp',K_rel, Model(i));
                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
+                    titel = [project_name,': seismic kernels (relative rhovsvp) for iter ',num2str(i)];
+                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(i),'.kernels.relative.rho-vs-vp.png'];
+                    print(fig_knl,'-dpng','-r400',figname);
+                    close(fig_knl);
+                    fig_knl = plot_kernels_rho_vs_vp(Kabs);
+                    titel = [project_name,': seismic kernels (absolute rhovsvp) for iter ',num2str(i)];
+                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+                    figname = ['../output/iter',num2str(i),'.kernels.abs.rho-vs-vp.png'];
                     print(fig_knl,'-dpng','-r400',figname);
                     close(fig_knl);
                 otherwise
@@ -309,29 +362,34 @@ for i = 1:niter;
     if (i<niter)
 %    if i>1
 
-        % determine weight of relative kernels
-        w_Kseis = 1;
-        w_Kg = 1; 
-        
-        disp(['seismic kernel 98th prctile:        ',num2str(prctile(abs(Kseis(i).rho.total(:)),98))]);
-        disp(['gravity kernel 98th prctile:        ',num2str(prctile(abs(Kg{i}(:)),98))]);
-        
-        
-        verhouding(i) = prctile(abs(Kseis(i).rho.total(:)),98) / prctile(abs(Kg{i}(:)),98);
-        disp(['the ratio of seis and grav kernels: ',num2str(verhouding(i))]);
-        disp(['the ratio of grav and seis weights: ',num2str(w_Kg/w_Kseis)]);
-        
-        % combine seismic and gravity kernels
-        disp ' ';
-        disp(['iter ',num2str(i),': combining gravity and seismic kernels']);
-        Ktest = change_parametrisation_kernels('rhomulambda',parametrisation,Kseis(i),Model(i));
-        Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg{i};
-        Ktest1 = change_parametrisation_kernels(parametrisation,'rhomulambda', Ktest,Model(i));
-        K_total(i).rho.total    = Ktest1.rho.total;
-        K_total(i).mu.total     = Ktest1.mu.total;
-        K_total(i).lambda.total = Ktest1.lambda.total;
-        clearvars('Ktest', 'Ktest1');
-%     end      
+        if strcmp('use_grav','yes')
+            % determine weight of relative kernels
+            w_Kseis = 1;
+            w_Kg = 1;
+            
+            disp(['seismic kernel 98th prctile:        ',num2str(prctile(abs(Kseis(i).rho.total(:)),98))]);
+            disp(['gravity kernel 98th prctile:        ',num2str(prctile(abs(Kg{i}(:)),98))]);
+            
+            
+            verhouding(i) = prctile(abs(Kseis(i).rho.total(:)),98) / prctile(abs(Kg{i}(:)),98);
+            disp(['the ratio of seis and grav kernels: ',num2str(verhouding(i))]);
+            disp(['the ratio of grav and seis weights: ',num2str(w_Kg/w_Kseis)]);
+            
+            % combine seismic and gravity kernels
+            disp ' ';
+            disp(['iter ',num2str(i),': combining gravity and seismic kernels']);
+            Ktest = change_parametrisation_kernels('rhomulambda',parametrisation,Kseis(i),Model(i));
+            Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg{i};
+            Ktest1 = change_parametrisation_kernels(parametrisation,'rhomulambda', Ktest,Model(i));
+            K_total(i).rho.total    = Ktest1.rho.total;
+            K_total(i).mu.total     = Ktest1.mu.total;
+            K_total(i).lambda.total = Ktest1.lambda.total;
+            clearvars('Ktest', 'Ktest1');
+        else
+            K_total(i) = Kseis(i);
+        end
+%     end
+
         % calculate the step length and model update
         disp ' ';
         disp(['iter ',num2str(i),': calculating step length']);
@@ -348,6 +406,8 @@ for i = 1:niter;
         end        
         % save linesearch figure
         figname = ['../output/iter',num2str(i),'.step-linesearch.png'];
+        titel = [project_name,': linesearch for iter ',num2str(i)];
+        mtit(fig_lnsrch,titel, 'xoff', 0.001, 'yoff', 0.00001);
         print(fig_lnsrch,'-dpng','-r400',figname);
         close(fig_lnsrch);
         clearvars fig_lnsrc;
@@ -366,19 +426,21 @@ for i = 1:niter;
             % -> mass of the Earth and/or its moment of inertia
             switch parametrisation
                 case 'rhomulambda'
-                    [Model(i+1).rho, fig_rhoupdate,~,~] = ...
+                    [Model(i+1).rho, fig_hcupdate,~,~] = ...
                         apply_hard_constraints(props_obs, Model(i+1).rho,axrot);
                 case 'rhovsvp'
                     Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model(i+1));
-                    [Model_rhovsvp.rho, fig_rhoupdate,~,~] = ...
+                    [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
                         apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
                     Model(i+1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
                 otherwise
                     error('the parametrisation of the inversion was not recognised')
             end
             figname = ['../output/iter',num2str(i),'.hard-constraints-rhoupdate.png'];
-            print(fig_rhoupdate,'-dpng','-r400',figname);
-            close(fig_rhoupdate);
+            titel = [project_name,': hard constraints update for iter ',num2str(i)];
+            mtit(fig_hcupdate,titel, 'xoff', 0.001, 'yoff', 0.00001);
+            print(fig_hcupdate,'-dpng','-r400',figname);
+            close(fig_hcupdate);
             clearvars fig_rhoupdate
         end
         
@@ -401,52 +463,7 @@ for i = 1:niter;
     
 end
 
-disp ' ';
-disp ' ';
-disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
-disp '======================================';
-disp '|         ...FINISHING UP...         |';
-disp '======================================';
 
-% % PLOT MODEL
-% fig_mod = plot_model(Model(niter+1), parametrisation);
-% figname = ['../output/iter',num2str(niter+1),'.model.',parametrisation,'.png'];
-% print(fig_mod,'-dpng','-r400',figname);
-% close(fig_mod);
-
-
-% % FORWARD PROPAGATION
-% disp(['iter ',num2str(niter+1),': calculating forward wave propagation']);
-% [v_iter(niter+1),t,u_fw,v_fw,rec_x,rec_z]=run_forward(Model(niter+1));
-% close(clf);
-% close(clf);
-% close(clf);
-% % empty the big variables so that the computer doesn't slow down.
-% clearvars('u_fw');
-% clearvars('v_fw');
-
-% % save v_rec per iter
-% filenm_old = ['../output/', project_name, '.v_rec.mat'];
-% filenm_new = ['../output/iter', num2str(niter+1),'.v_rec.mat'];
-% movefile(filenm_old, filenm_new);
-
-
-% % MISFIT:
-% cd ../tools
-% disp(['iter ',num2str(niter+1),': calculating adjoint stf']);
-% [adstf, misfit_iter(niter+1)] = make_all_adjoint_sources(v_iter(niter+1),v_obs,t,'waveform_difference','auto');
-
-% % plot seismogram difference
-% fig_seisdif = plot_seismogram_difference(v_obs,v_iter(niter+1),t);
-% %     figname = ['../output/iter',num2str(i),'.seisdif-', num2str(misfit_iter(i).total, '%3.2e'), '.png'];
-% figname = ['../output/iter',num2str(niter+1),'.seisdif.png'];
-% print(fig_seisdif,'-dpng','-r400',figname);
-% close(fig_seisdif);
-
-% disp ' ';
-% disp(['MISFIT FOR ITER ',num2str(niter+1),': ', ...
-%       num2str(misfit_iter(niter+1).total,'%3.2e')])
-% disp ' ';
 
 
 
@@ -454,17 +471,16 @@ disp '======================================';
 
 %% WRAP-UP: misfit evolution & saving all variables to file
 
-% % plot misfit evolution
-% fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit, modeldifnorm);
-% figname = '../output/misfit-evolution.png';
-% mtit(fig_misfit, project_name);
-% print(fig_misfit,'-dpng','-r400',figname);
-% close(fig_misfit);
-% clearvars fig_misfit
+disp ' ';
+disp ' ';
+disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
+disp '======================================';
+disp '|         ...FINISHING UP...         |';
+disp '======================================';
 
-disp 'saving misfit evolution...'
-savename = ['../output/',project_name,'.misfit-evolution.mat'];
-save(savename, 'misfit', '-v7.3');
+% disp 'saving misfit evolution...'
+% savename = ['../output/',project_name,'.misfit-evolution.mat'];
+% save(savename, 'misfit', '-v7.3');
 
 disp 'saving all current variables...'
 clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...

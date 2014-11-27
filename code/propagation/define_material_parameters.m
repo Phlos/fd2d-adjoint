@@ -326,10 +326,10 @@ elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
         filt.fnorm = 10^3 * filt.f / max(filt.f(:)); % normalised filter (max value is 1)
         % make half of the anomalies negative
         if (rem(i,2)==0)
-            disp 'negative anomaly'
+%             disp 'negative anomaly'
             filt.fnorm = - filt.fnorm;
         else
-            disp 'positive anomaly'
+%             disp 'positive anomaly'
         end
         % add the anomaly to the density field at (anom.dx, anom.dz)
         rho2 = add_crop_matrix(rho2, filt.fnorm, anom{i}.dx, anom{i}.dz);
@@ -351,6 +351,27 @@ elseif (model_type==100) % layered: left = high velocity, right = low vel.
     mu(1:330,:)=3.675e10;
     mu(331:end,:)=2.7e10;
     lambda=mu;
+    
+elseif (model_type == 101) % test model with tiny rho anomaly
+    
+        % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    
+    % rho-vs-vp
+    vp    = sqrt((lambda + 2*mu) ./ rho);
+    vs    = sqrt(mu ./ rho);
+    rho2 = rho;
+    
+    rho2(98:102,123:127)=rho2(98:102,123:127)+50.0;
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
 else
     

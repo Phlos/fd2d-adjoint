@@ -13,6 +13,16 @@ initialise_dynamic_fields;  % this just makes all dynamic field (v, stress,
 absbound=ones(nx,nz);
 init_absbound;
 
+% figure;
+% pcolor(X,Z,absbound');
+% shading interp
+% axis image
+% colorbar
+% title('absorbing boundaries?');
+% 
+% disp(['absbound min: ', num2str(min(absbound(:))), ', max: ', num2str(max(absbound(:)))]);
+
+
 %%
 %==========================================================================
 % iterate
