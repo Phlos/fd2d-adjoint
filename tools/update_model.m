@@ -84,7 +84,7 @@ elseif narg == 3 || narg == 4
         parametrisation = 'rhomulambda';
     end
     
-    disp(['updating model in ', parametrisation])
+%     disp(['updating model in ', parametrisation])
     
 %     disp 'after reading input'
 %     parametrisation

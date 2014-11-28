@@ -68,11 +68,11 @@ function sf = checkargs(args)
 nargs = length(args);
 
 if (nargs == 0)
-    disp 'make_all_adjoint_sources: no scaling factor supplied'
+%     disp 'make_all_adjoint_sources: no scaling factor supplied'
     sf = 1;
 elseif (nargs == 1 && isnumeric(args{1}))
     sf = args{1};
-    disp(['make_all_adjoint_sources: scaling factor = ', num2str(sf)]);
+%     disp(['make_all_adjoint_sources: scaling factor = ', num2str(sf)]);
     if isnan(sf)
         disp ' --> misfit will be scaled by itself'
     end

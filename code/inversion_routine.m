@@ -9,8 +9,8 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-niter = 3;
-istart = 1;
+niter = 60;
+istart = 43;
 
 
 
