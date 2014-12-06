@@ -43,9 +43,15 @@ for i = 1:nrec
     % calculate length or the vectors r for each point
     r{i}.length = sqrt(r{i}.x.^2 + r{i}.z.^2);
     
+    % THIS IS FOR GRAVITY DUE TO A 'SHEET' IN THE X-Z PLANE!!
     % calculate dg{i}.x,z: gravity increment for each block of model for each receiver
     dg{i}.x = - dm ./ r{i}.length .^3 .* r{i}.x * G;
     dg{i}.z = - dm ./ r{i}.length .^3 .* r{i}.z * G;
+    
+%     % FOR GRAVITY WITH Y STRETCHING TO INFINITY AT BOTH SIDES
+%     % calculate dg{i}.x,z: gravity increment for each block of model for each receiver
+%     dg{i}.x = - dm ./ r{i}.length .^3 .* r{i}.x * G    .* 2 .* r{i}.length;
+%     dg{i}.z = - dm ./ r{i}.length .^3 .* r{i}.z * G    .* 2 .* r{i}.length;
 
     % calculate g(i): gravity for each receiver
 %     g{i}.x = sum(dg{i}.x(:));

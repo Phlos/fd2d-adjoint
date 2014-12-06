@@ -198,7 +198,8 @@ input_parameters;
 set_figure_properties_bothmachines;
 
     %% calculate updated model using steptry
-    Model_try = update_model(K_abs, steptry, Model_prev, parametrisation);
+    disp 'now updating model in calc_misfit_perstep'
+    Model_try = update_model(K_abs, steptry, Model_prev, parametrisation)
     
     %- some output
     max_mu = max(Model_try.mu(:));
@@ -236,7 +237,11 @@ set_figure_properties_bothmachines;
     close(gcf);
     
     %- for each step, calculate the misfit using make_adstf --> adapt mk adstf!
-    scaling_s = misfit_seis(1).total;
+    if strcmp(normalise_misfits, 'byfirstmisfit')
+        scaling_s = misfit_seis(1).total;
+    else
+        scaling_s = 1;
+    end
     [~, misf_s_test] = make_all_adjoint_sources(v_try,v_obs,t, ...
         'waveform_difference','auto', scaling_s);
     misfit.seis = misf_s_test.normd;

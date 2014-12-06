@@ -187,3 +187,10 @@ if strcmp(HostName,'D-13-L-2')
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     pos_misfit =  [679 128 808 1049];
 end
+
+% position for the final inversion development plot
+if strcmp(HostName,'D-13-L-2')
+    pos_invplot =  [ 1082         474        1388        1046];
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
+    pos_invplot =  [ 1082         474        1388        1046];
+end

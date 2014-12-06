@@ -15,7 +15,7 @@ function [Model] = update_model(varargin)
 %           length, (relative!) kernel and previous model
 %
 % INPUT (in case II):
-% - K_rel:  relative kernel (struct) -- needs K_rel.{parameter}.total at
+% - K_abs:  relative kernel (struct) -- needs K_abs.{parameter}.total at
 %           the very least
 % - step:   step length
 % - Model_previous: the previous model parameter values. Struct with

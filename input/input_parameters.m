@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Showcase-AGU.test04-onlyseis.inv-rvv.seis-nograv-nohc';
+project_name='test-magnitude-kernels.grav-infinite-y-bars';
 
 %==========================================================================
 % inversion properties
@@ -12,19 +12,22 @@ adjoint_source_path='../input/sources/adjoint/';
 
 % apply hard constraints?
 apply_hc = 'no';   % 'yes' or 'no'
+% hard constraints
+axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'no'; % 'yes' or 'no'
+use_grav = 'yes'; % 'yes' or 'no'
 
 % inversion parametrisation
 parametrisation = 'rhovsvp';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 
 % normalise misfits:
-normalise_misfits = 'byfirstmisfit'; % normalises both the s and g misfits by their first value, so that they're same magnitudes
+normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both the s and g misfits by their first value, so that they're same magnitudes
 
 % initial step length;
 % stepInit = 3.5e14;    % good for circular configuration
 % stepInit = 5e15;        % good for circular src and rec @ top of domain
+% stepInit = 5e14;        % good for src @ bottom, rec @ top of domain (2-12-2014)
 stepInit = 1e-1;        % kernels normalised by 1st misfit size. (20-11-2014)
 % stepInit = 1e-8;        % normalised misfit, TINY rho anomaly (model 101) (24-11-2014)
 
@@ -33,8 +36,7 @@ stepInit = 1e-1;        % kernels normalised by 1st misfit size. (20-11-2014)
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
 
-% hard constraints
-axrot = 'x';     % 'x' or 'z' at the moment.
+
 
 
 %==========================================================================
@@ -234,7 +236,7 @@ absorb_bottom=0;% absorb waves on the bottom boundary
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
 plot_every=100000; % value larger than nt, so that no plotting takes place
-% plot_every = 100;
+% plot_every = 25;
 
 plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation

@@ -9,8 +9,8 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-niter = 60;
-istart = 43;
+niter = 2;
+istart = 1;
 
 
 
@@ -26,11 +26,25 @@ istart = 43;
 
 % saving the observed variables
 disp 'saving obs variables to matfile...'
-savename = ['../output/',project_name,'obs.all-vars.mat'];
+savename = ['../output/',project_name,'.obs.all-vars.mat'];
 save(savename, 'v_obs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
 
-
-
+disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
+disp '======================================';
+disp(['INVERSION RUN ', project_name]);
+disp '-- using seis? ... YES!!'
+if strcmp(use_grav , 'yes')
+    disp '-- using grav? ... YES!!'
+else
+    disp '-- using grav? ... no'
+end
+if strcmp(apply_hc , 'yes')
+    disp '-- using h.c.? ... YES!!'
+else
+    disp '-- using h.c.? ... no'
+end
+disp '======================================';
+disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 
 
 %=========================================================================
@@ -48,9 +62,10 @@ middle.lambda = mode(Model_start.lambda(:));
 % plot very initial model
 fig_mod = plot_model(Model_start,middle,parametrisation);
 titel = [project_name,': model of iter 0'];
-mtit(fig_mod, titel);
+mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
 figname = ['../output/iter0.model.',parametrisation,'.png'];
 print(fig_mod,'-dpng','-r400',figname);
+close(fig_mod);
 
 % apply hard constraints in initial model
 if(strcmp(apply_hc,'yes'))
@@ -89,7 +104,7 @@ for i = istart : niter;
         disp  ' ';
         disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
         disp '======================================';
-        disp(['STARTING ITER ', num2str(i)]);
+        disp(['STARTING ITER ', num2str(i), ' OUT OF ', num2str(niter)]);
         disp '======================================';
         disp ' ';
         
@@ -98,7 +113,7 @@ for i = istart : niter;
         % plot model
         fig_mod = plot_model(Model(i),middle,parametrisation);
         titel = [project_name,': model of iter ', num2str(i)];
-        mtit(fig_mod, titel);
+        mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
         figname = ['../output/iter',num2str(i),'.model.',parametrisation,'.png'];
         print(fig_mod,'-dpng','-r400',figname);
         close(fig_mod);
@@ -106,19 +121,19 @@ for i = istart : niter;
         
         %% MISFITS
         
-        if strcmp('use_grav','yes')
+%         if strcmp(use_grav,'yes')
             % gravity field of current model
             [g(i), fig_grav] = calculate_gravity_field(Model(i).rho, rec_g);
-            figname = ['../output/iter',num2str(i),'.gravity_recordings.png'];
-            titel = [project_name,': gravity field of ', num2str(i), 'th model'];
-            mtit(fig_grav, titel, 'xoff', 0.001, 'yoff', 0.05);
-            print(fig_grav, '-dpng', '-r400', figname);
+%             figname = ['../output/iter',num2str(i),'.gravity_recordings.png'];
+%             titel = [project_name,': gravity field of ', num2str(i), 'th model'];
+%             mtit(fig_grav, titel, 'xoff', 0.001, 'yoff', 0.00001);
+%             print(fig_grav, '-dpng', '-r400', figname);
             close(fig_grav);
             % comparison to real model:
             fig_grav_comp = plot_gravity_quivers(rec_g, g(i), g_obs, X, Z, Model(i).rho);
             figname = ['../output/iter',num2str(i),'.gravity_difference.png'];
             titel = [project_name,': gravity diff iter ', num2str(i), ' - real model'];
-            mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.05);
+            mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.00001);
             print(fig_grav_comp, '-dpng', '-r400', figname);
             close(fig_grav_comp);
             clearvars('fig_mod');
@@ -141,17 +156,17 @@ for i = istart : niter;
             disp ' ';
             disp(['gravity misfit for iter ',num2str(i),': ', ...
                 num2str(misfit_g(i).total,'%3.2e')])
-            disp(['   percent of g_obs ',num2str(i),': ', ...
+            disp(['   fraction of g_obs ',num2str(i),': ', ...
                 num2str(div_by_gobs,'%3.2e')])
             if strcmp(normalise_misfits,'byfirstmisfit')
-                disp(['   percent of 1st misfit: ', ...
+                disp(['   fraction of 1st misfit: ', ...
                     num2str(misfit_g(i).normd,'%3.2e')])
             end
             disp ' ';
-        else
-            misfit_g(i).total = NaN;
-            misfit_g(i).normd = NaN;
-        end
+%         else
+%             misfit_g(i).total = NaN;
+%             misfit_g(i).normd = NaN;
+%         end
 
         
 
@@ -200,7 +215,7 @@ for i = istart : niter;
         disp '=========================================='
         disp(['           MISFIT ITER ',num2str(i)]);
         
-        if strcmp('use_grav','yes')
+        if strcmp(use_grav,'yes')
             % gravity misfit
             sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
             div_by_gobs = misfit_g(i).total / sumgobs;
@@ -229,7 +244,7 @@ for i = istart : niter;
         end
         disp ' ';
         
-        if strcmp('use_grav','yes')
+        if strcmp(use_grav,'yes')
             misfit(i) = misfit_seis(i).normd + misfit_g(i).normd;
         else
             misfit(i) = misfit_seis(i).normd;
@@ -258,7 +273,7 @@ for i = istart : niter;
 %  end
         %% GRAVITY KERNEL
         
-        if strcmp('use_grav','yes')
+        if strcmp(use_grav,'yes')
             
             % kernels only to be calculated when a next iteration will take place.
             if(i < niter)
@@ -362,7 +377,7 @@ for i = istart : niter;
     if (i<niter)
 %    if i>1
 
-        if strcmp('use_grav','yes')
+        if strcmp(use_grav,'yes')
             % determine weight of relative kernels
             w_Kseis = 1;
             w_Kg = 1;
@@ -494,3 +509,5 @@ disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '======================================';
 disp '|               DONE!                |'
 disp '======================================';
+disp ' ';
+disp(['  (this was inversion ',project_name,')']);

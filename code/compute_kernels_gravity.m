@@ -48,9 +48,15 @@ for i = 1:nrec % loop over recorders
     % calculate length or the vectors r for each point
     r{i}.length = sqrt(r{i}.x.^2 + r{i}.z.^2);
     
+    % THIS IS FOR GRAVITY DUE TO A 'SHEET' IN THE X-Z PLANE!!
     % gravity kernel per component per receiver
     Kg_rec{i}.x = -1 * normfac * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
     Kg_rec{i}.z = -1 * normfac * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
+    
+%     % FOR GRAVITY WITH Y STRETCHING TO INFINITY AT BOTH SIDES
+%     % gravity kernel per component per receiver
+%     Kg_rec{i}.x = -1 * normfac * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3    .* 2 .* r{i}.length;
+%     Kg_rec{i}.z = -1 * normfac * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3    .* 2 .* r{i}.length;
     
     % gravity kernel per receiver
     Kg_rec{i}.total = Kg_rec{i}.x + Kg_rec{i}.z;
@@ -164,6 +170,9 @@ caxis([-scale scale]);
 end
 
 function [normalise, plotornot] = checkargs(arg)
+% determine whether the kernels should be normalised by some number
+% (for instance when the gravity misfit is normalised by the initial
+% misfit)
 
 % size(arg)
 narg = size(arg,1);

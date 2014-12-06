@@ -5,15 +5,20 @@ function fig_grav = plot_gravity_quivers(rec_g, g1, g2, X, Z, rho)
 %
 % fig_grav = plot_gravity_quivers(rec_g, g1, g2, X, Z, rho)
 
+%% preparation
+load '../code/propagation/cm_model.mat';
+
 fig_grav = figure;
 clf;
 
+%% actual plotting
 % first plot the gravity receiver since they're outside of the actual img
 plot(rec_g.x, rec_g.z, 'ko');
 hold on;
 
 % then plot image
 pcolor(X,Z,rho');
+colormap(cm_model);
 shading interp;
 axis image;
 colorbar;
