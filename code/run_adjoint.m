@@ -132,8 +132,7 @@ run_wavefield_propagation;
 
 %% normalise the kernels
 
-disp(['normalising the seismic kernels by normfac = ', num2str(normfac)]);
-% disp(num2str(normfac));
+% disp(['normalising the seismic kernels by normfac = ', num2str(normfac,'%3.2e')]);
 params = fieldnames(K);
 for m = 1:length(params)
 %     disp(['i ', num2str(m),' PARAM: ', params{m}])

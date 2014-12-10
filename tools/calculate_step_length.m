@@ -199,7 +199,7 @@ set_figure_properties_bothmachines;
 
     %% calculate updated model using steptry
     disp 'now updating model in calc_misfit_perstep'
-    Model_try = update_model(K_abs, steptry, Model_prev, parametrisation)
+    Model_try = update_model(K_abs, steptry, Model_prev, parametrisation);
     
     %- some output
     max_mu = max(Model_try.mu(:));
@@ -217,7 +217,7 @@ set_figure_properties_bothmachines;
       
     %% gravity misfit
     
-    if strcmp('use_grav','yes')
+    if strcmp(use_grav,'yes')
       [g_try, fig_grav] = calculate_gravity_field(Model_try.rho, rec_g);
       close(fig_grav);
       
@@ -225,7 +225,7 @@ set_figure_properties_bothmachines;
       scaling_g = misfit_grav(1).total;
       [~, misf_g_test] = make_gravity_sources(g_try, g_obs, scaling_g);
       
-      misfit.grav(ntry) = misf_g_test.normd;
+      misfit.grav = misf_g_test.normd;
     end
     
     %% seismic misfit
@@ -248,14 +248,14 @@ set_figure_properties_bothmachines;
 
 
     %% combine the misfits
-    if strcmp('use_grav','yes')
+    if strcmp(use_grav,'yes')
         misfit.total = misfit.seis + misfit.grav;
     else
         misfit.total =  misfit.seis;
     end
     misfittotal = misfit.total;
     
-    if strcmp('use_grav','yes')
+    if strcmp(use_grav,'yes')
         disp(['seismic misfit:  ', ...
             num2str(misfit.seis,'%3.2e')])
         disp(['gravity misfit:  ', ...

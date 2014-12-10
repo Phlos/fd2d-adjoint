@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='test-magnitude-kernels.grav-infinite-y-bars';
+project_name='Showcase-AGU.test06-upscaled-Kg.inv-rvv.seis-grav-normd-hcx.upscaled-Kg';
 
 %==========================================================================
 % inversion properties
@@ -11,7 +11,7 @@ project_name='test-magnitude-kernels.grav-infinite-y-bars';
 adjoint_source_path='../input/sources/adjoint/';
 
 % apply hard constraints?
-apply_hc = 'no';   % 'yes' or 'no'
+apply_hc = 'yes';   % 'yes' or 'no'
 % hard constraints
 axrot = 'x';     % 'x' or 'z' at the moment.
 

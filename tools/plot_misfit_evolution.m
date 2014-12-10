@@ -48,7 +48,7 @@ title('misfit evolution (grav) - semilog in misfit');
 % norm of the projected gradient
 subplot(4,2,7)
 plot(modeldifnorm, 'g');
-title('norm ||current model - previous model|| - semilog in norm');
+title('norm ||current model - previous model||');
 subplot(4,2,8)
 semilogy(modeldifnorm, 'g');
 title('norm ||current model - previous model|| - semilog in norm');

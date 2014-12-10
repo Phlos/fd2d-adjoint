@@ -9,7 +9,7 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-niter = 2;
+niter = 100;
 istart = 1;
 
 
@@ -18,16 +18,29 @@ istart = 1;
 [project_name, axrot, apply_hc, use_grav, parametrisation, ...
  rec_g, X, Z, normalise_misfits, stepInit] = get_input_info;
 
+%% just to get 'middle' right
+% save initial rho mu lambda (from input_parameters) as iter 1 Params values:
+Model_start = update_model();
+
+% % set the background values for plot_model to mode of the initial model
+middle.rho    = mode(Model_start.rho(:));
+middle.mu     = mode(Model_start.mu(:));
+middle.lambda = mode(Model_start.lambda(:));
 
 
+%% OBS
 
 % MAKE SURE V_OBS IS PRESENT!!! AND SAVED!!!
- %[Model_real, v_obs, t_obs, props_obs, g_obs] = prepare_obs(modelnr);
+%[Model_real, v_obs, t_obs, props_obs, g_obs] = prepare_obs(modelnr);
+ 
+
 
 % saving the observed variables
 disp 'saving obs variables to matfile...'
 savename = ['../output/',project_name,'.obs.all-vars.mat'];
 save(savename, 'v_obs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
+
+%% INVERSION
 
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '======================================';
@@ -61,10 +74,11 @@ middle.lambda = mode(Model_start.lambda(:));
 
 % plot very initial model
 fig_mod = plot_model(Model_start,middle,parametrisation);
+set(fig_mod,'Renderer','painters');
 titel = [project_name,': model of iter 0'];
 mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-figname = ['../output/iter0.model.',parametrisation,'.png'];
-print(fig_mod,'-dpng','-r400',figname);
+figname = ['../output/iter0.model.',parametrisation,'.eps'];
+print(fig_mod,'-depsc','-r400',figname);
 close(fig_mod);
 
 % apply hard constraints in initial model
@@ -256,17 +270,17 @@ for i = istart : niter;
         disp '=========================================='
         
         if i>1
-        modeldifn(i) =   norm( (Model(i).rho(:) - Model(i-1).rho(:)) ./ Model(i-1).rho(:) ) ...
-                          + norm( (Model(i).mu(:)  - Model(i-1).mu(:))  ./ Model(i-1).mu(:) ) ...
-                          + norm( (Model(i).lambda(:) - Model(i-1).lambda(:)) ./ Model(i-1).lambda(:) );
+        modeldifn(i) =   norm( (Model(i).rho(:) - Model(i-1).rho(:)) ./ Model(1).rho(:) ) ...
+                          + norm( (Model(i).mu(:)  - Model(i-1).mu(:))  ./ Model(1).mu(:) ) ...
+                          + norm( (Model(i).lambda(:) - Model(i-1).lambda(:)) ./ Model(1).lambda(:) );
         else
             modeldifn(i) = NaN;
         end 
         % plot misfit evolution
         fig_misfit = plot_misfit_evolution(misfit_seis,misfit_g,misfit,modeldifn);
-        figname = '../output/misfit-evolution.png';
+        figname = '../output/misfit-evolution.pdf';
         mtit(fig_misfit, project_name, 'xoff', 0.001, 'yoff', 0.04);
-        print(fig_misfit,'-dpng','-r400',figname);
+        print(fig_misfit,'-dpdf','-r400',figname);
         close(fig_misfit);
         clearvars fig_misfit
         
@@ -380,15 +394,20 @@ for i = istart : niter;
         if strcmp(use_grav,'yes')
             % determine weight of relative kernels
             w_Kseis = 1;
-            w_Kg = 1;
+            w_Kg = 1e5;
             
+            disp ' ';
+            disp '---'
             disp(['seismic kernel 98th prctile:        ',num2str(prctile(abs(Kseis(i).rho.total(:)),98))]);
             disp(['gravity kernel 98th prctile:        ',num2str(prctile(abs(Kg{i}(:)),98))]);
-            
-            
-            verhouding(i) = prctile(abs(Kseis(i).rho.total(:)),98) / prctile(abs(Kg{i}(:)),98);
-            disp(['the ratio of seis and grav kernels: ',num2str(verhouding(i))]);
-            disp(['the ratio of grav and seis weights: ',num2str(w_Kg/w_Kseis)]);
+            disp '---'
+            disp(['norm seismic kernel:                ',num2str(norm(Kseis(i).rho.total(:)),'%3.2e')]);
+            disp(['norm gravity kernel:                ',num2str(norm(Kg{i}(:)),'%3.2e')]);
+            disp '---'
+            verhouding(i) = norm(Kseis(i).rho.total(:)) / norm(Kg{i}(:));
+            disp(['the ratio of seis and grav kernel norms: ',num2str(verhouding(i),'%3.2e')]);
+            disp(['the ratio of grav and seis weights:      ',num2str(w_Kg/w_Kseis,'%3.2e')]);
+            disp '---'
             
             % combine seismic and gravity kernels
             disp ' ';
@@ -496,6 +515,29 @@ disp '======================================';
 % disp 'saving misfit evolution...'
 % savename = ['../output/',project_name,'.misfit-evolution.mat'];
 % save(savename, 'misfit', '-v7.3');
+
+% plot nice vector plot of misfit evolution + real, start, end model
+plot_models_vector;
+
+% useful output
+for i = 1:niter
+misfitseis(i) = misfit_seis(i).normd;
+end
+for i = 1:niter
+misfitgrav(i) = misfit_g(i).normd;
+end
+
+% plot+save real, start and end models as vector plots (also inversion result)
+plot_models_vector;
+
+% inversion results with landscape plot
+fig_inv2 = plot_inversion_development_landscapeshape(misfit, misfit_seis, misfit_g, step);
+figname = ['../output/inversion_development.',project_name,'.misfit-landscape.png'];
+print(fig_inv2,'-dpng','-r400',figname);
+figname = ['../output/inversion_development.',project_name,'.misfit-landscape.eps'];
+print(fig_inv2,'-deps','-r400',figname);
+
+
 
 disp 'saving all current variables...'
 clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...

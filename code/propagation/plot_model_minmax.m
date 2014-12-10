@@ -9,6 +9,7 @@ function fig_mod = plot_model(varargin)
 % - fig_mod = plot_model(Model);
 % - fig_mod = plot_model(Model, outparam);
 % - fig_mod = plot_model(Model, middle);
+% - fig_mod = plot_model(Model, minmax, outparam);
 % - fig_mod = plot_model(Model, middle, outparam);
 %
 % INPUT:
@@ -24,8 +25,9 @@ function fig_mod = plot_model(varargin)
 
 % format long
 
-[Model, middle] = checkargs(varargin);
-
+[Model, middle, minmax, outparam] = checkargs(varargin);
+%  middle
+%  minmax
 
 input_parameters;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
@@ -56,7 +58,10 @@ for params = fieldnames(Model)';
     % difference_mumax_mumin = max(mu(:)) - min(mu(:));
     
     %- colour scale
-    if (isnan( middle.(params{1}) ))
+    if ~(isnan (minmax.(params{1})) )
+        cmin = minmax.(params{1})(1);
+        cmax = minmax.(params{1})(2);
+    elseif (isnan( middle.(params{1}) ))
         
         if all(abs(param-mode(param(:))) <= 1e-14*mode(param(1)))
             cmax = param(1) + 0.01*param(1);
@@ -135,13 +140,13 @@ for params = fieldnames(Model)';
     
     j = j+1;
     
-    disp(['cmin: ',num2str(cmin,'%5.5e'),'   cmax: ', num2str(cmax,'%5.5e')]);
+%     disp(['cmin: ',num2str(cmin,'%5.5e'),'   cmax: ', num2str(cmax,'%5.5e')]);
 %     cmax
 end
 
 end
 
-function [Model, middle, outparam] = checkargs(arg)
+function [Model, middle, minmax, outparam] = checkargs(arg)
 
 % checks the input argument and defines the fields to be plotted, the
 % middle of the plot colour (in all three) and 
@@ -201,15 +206,29 @@ switch narg
     case 3
         % disp '3 arguments'
         Model = arg{1};
-        middle1 = arg{2};
+        midmima = arg{2};
         outparam = arg{3};
         
         if length(Model) > 1
             error('You supplied more than one models (i.e. a struct w/ multiple models?)');
         end
-        
         Model = change_parametrisation('rhomulambda',outparam,Model);
+        
+        if length(midmima.rho) > 1
+            minmax1 = midmima;
+            middle1.rho = NaN;
+            middle1.mu = NaN;
+            middle1.lambda = NaN;
+        elseif length(midmima.rho) == 1
+            middle1 = midmima;
+            minmax1.rho = [NaN NaN];
+            minmax1.mu = [NaN NaN];
+            minmax1.lambda = [NaN NaN];
+        else
+            disp('midmima doesn''t have the right size');
+        end
         middle = change_parametrisation('rhomulambda',outparam,middle1);
+        minmax = change_parametrisation('rhomulambda',outparam,minmax1);
         
 
     otherwise
