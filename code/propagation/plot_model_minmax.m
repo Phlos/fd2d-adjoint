@@ -196,6 +196,11 @@ switch narg
             middle1.lambda = NaN;
             middle = change_parametrisation('rhomulambda',outparam,middle1);
             
+            minmax1.rho = [NaN NaN];
+            minmax1.mu = [NaN NaN];
+            minmax1.lambda = [NaN NaN];
+            minmax = change_parametrisation('rhomulambda',outparam,minmax1);
+            
         elseif isstruct(arg{2})
             middle = arg{2};
         else

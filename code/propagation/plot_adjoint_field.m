@@ -7,7 +7,7 @@ ncols=4;
 colormap(flipud(cm));
 
 temps = nt*dt - (n-plot_every)*dt;
-timestamp=['t [s] = ',num2str(temps,'%4.0f')];
+timestamp=['t [s] = ',num2str(floor(temps),'%4.0f')];
 % disp(timestamp);
 
 

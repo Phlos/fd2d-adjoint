@@ -200,7 +200,7 @@ for i=1:nplots
     %======================================================================
     %- plot timestamp and source and receiver positions -------------------
     
-    timestamp=['t [s] = ',num2str(n*dt,'%4.0f')];
+    timestamp=['t [s] = ',num2str(floor(n*dt),'%4.0f')];
     timestamp_text = text(0.05*Lx,0.92*Lz,timestamp) ;
     text(0.95*Lx,0.92*Lz,['max = \pm', num2str(plotting(i).scale,'%3.1e')], ...
         'HorizontalAlignment','right')

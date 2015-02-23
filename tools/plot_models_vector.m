@@ -1,7 +1,7 @@
 %- plot all figures nicely
 
 % inversion development
-fig_inv = plot_inversion_development(misfit, misfit_seis, misfit_g, step, modeldifn, ...
+fig_inv = plot_inversion_development(InvProps, ...
                            Model(niter), Model(1), Model_real, middle);
 figname = ['../output/inversion_development.',project_name,'.pdf'];
 set(fig_inv,'Renderer','painters')
@@ -11,7 +11,7 @@ close(fig_inv)
 % real model
 if(exist('Model_real','var'))
     fig_mod = plot_model(Model_real, middle, parametrisation);
-    set(fig_inv,'Renderer','painters')
+    set(fig_mod,'Renderer','painters')
     figname = ['../output/obs.',parametrisation,'.eps'];
     print(fig_mod,'-depsc','-r400',figname);
     close(fig_mod)

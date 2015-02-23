@@ -46,8 +46,8 @@ path(path,'../input/');
 path(path,'../code/propagation/');
 path(path,'./misfits/')
 
-% delete previous instances of files
-delete(['../input/sources/adjoint/src*',direction])
+% % delete previous instances of files
+% delete(['../input/sources/adjoint/src*',direction])
 
 
 input_parameters;
@@ -129,6 +129,10 @@ for n=1:nrec
     end
     
     width=t(end)/10;                                                    % why divide by ten??
+    if (left < width) || (right > t(end) - width)
+        left = min(left,width);
+        right = max(right,t(end)-width);
+    end
     v(n,:)=taper(v(n,:),t,left,right,width);
     v_0(n,:)=taper(v_0(n,:),t,left,right,width);
     
@@ -204,9 +208,9 @@ end
 
 
 
-% save stf variable to a .mat file
-filename=['../input/sources/adjoint/adjoint_sources',direction];
-save(filename,'adjoint_stf','-v7.3')
+% % save stf variable to a .mat file
+% filename=['../input/sources/adjoint/adjoint_sources',direction];
+% save(filename,'adjoint_stf','-v7.3')
 
 %==========================================================================
 %- clean up ---------------------------------------------------------------

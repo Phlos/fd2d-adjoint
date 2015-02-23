@@ -74,15 +74,24 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     %- make and plot source time function ---------------------------------
 
     stf = make_source_time_function(t,stf_type,simulation_mode,f_min,f_max,tauw_0,tauw,tee_0);
-    plot_source_time_function;
-    %%
-    % add the same source time function to all the sources.
-    stf_all=zeros(3,ns,nt);
-    
+%     plot_source_time_function;
+
+%     % add the same source time function to all the sources.
+%     stf_all=zeros(3,ns,nt);
+%     
+%     prefactor = 1.875e5;
+%     for i=1:ns
+%         stf_all(1,i,:) = prefactor* stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
+%         stf_all(2,i,:) = prefactor* stf;                           % y direction
+%         stf_all(3,i,:) = prefactor* stf.*stf_PSV(2)./norm(stf_PSV);  % z direction
+%     end
+
+    % add the same source time function to all the sources.    
+    prefactor = 1.875e5;
     for i=1:ns
-        stf_all(1,i,:) = stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
-        stf_all(2,i,:) = stf;                           % y direction
-        stf_all(3,i,:) = stf.*stf_PSV(2)./norm(stf_PSV);  % z direction
+        stf_all{i}.x = prefactor* stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
+        stf_all{i}.y = prefactor* stf;                           % y direction
+        stf_all{i}.z = prefactor* stf.*stf_PSV(2)./norm(stf_PSV);  % z direction
     end
     
     stf = stf_all;
@@ -94,18 +103,18 @@ end
 
 
 
-%% initialise seismograms ------------------------------------------------- % Change this to save velocity seismograms only!
-% only for forward
-if(strcmp(wave_propagation_type,'SH'))
-    v_rec.y=zeros(n_receivers,nt);
-elseif(strcmp(wave_propagation_type,'PSV'))
-    v_rec.x    =zeros(n_receivers,nt);
-    v_rec.z    =zeros(n_receivers,nt);
-elseif(strcmp(wave_propagation_type,'both'))
-    v_rec.x    =zeros(n_receivers,nt);
-    v_rec.y    =zeros(n_receivers,nt);
-    v_rec.z    =zeros(n_receivers,nt);
-end
+% %% initialise seismograms ------------------------------------------------- % Change this to save velocity seismograms only!
+% % only for forward
+% if(strcmp(wave_propagation_type,'SH'))
+%     v_rec.y=zeros(n_receivers,nt);
+% elseif(strcmp(wave_propagation_type,'PSV'))
+%     v_rec.x    =zeros(n_receivers,nt);
+%     v_rec.z    =zeros(n_receivers,nt);
+% elseif(strcmp(wave_propagation_type,'both'))
+%     v_rec.x    =zeros(n_receivers,nt);
+%     v_rec.y    =zeros(n_receivers,nt);
+%     v_rec.z    =zeros(n_receivers,nt);
+% end
 
 
 
@@ -200,7 +209,7 @@ if narg == 1;
 else
     updateParams = 'no';
     updateable = 0;
-    disp(['number of input arguments to run_forward: ', num2str(narg)]);
+%     disp(['number of input arguments to run_forward: ', num2str(narg)]);
     return
     
 end

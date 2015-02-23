@@ -135,7 +135,7 @@ for params = fieldnames(Model)';
     
     j = j+1;
     
-    disp(['cmin: ',num2str(cmin,'%5.5e'),'   cmax: ', num2str(cmax,'%5.5e')]);
+%     disp(['cmin: ',num2str(cmin,'%5.5e'),'   cmax: ', num2str(cmax,'%5.5e')]);
 %     cmax
 end
 

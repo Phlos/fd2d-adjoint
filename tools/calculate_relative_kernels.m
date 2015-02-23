@@ -19,8 +19,20 @@ function K_rel = calculate_relative_kernels(K, varargin)
 % - K_rel   the kernels of the same shape as K, but now relative to the
 %           model. [K_rel = K * modelparameter]
 
+% get the model in all parametrisations
 Model = checkargs(varargin(:));
-
+if isfield(Model, 'rho') && isfield(Model, 'vs') && isfield(Model, 'vp')
+    Model.rho2 = Model.rho;
+    Model.vs2 = Model.vs;
+    Model.vp2 = Model.vp;
+elseif isfield(Model, 'rho') && isfield(Model, 'mu') && isfield(Model, 'lambda')
+    Model_rvv = change_parametrisation('rhomulambda','rhovsvp',Model);
+    Model.rho2 = Model_rvv.rho;
+    Model.vs2 = Model_rvv.vs;
+    Model.vp2 = Model_rvv.vp;
+end
+% Model
+        
 fn_params = fieldnames(K);
 % whos('fn_params')
 
@@ -87,11 +99,7 @@ elseif narg == 1;
     elseif isstruct(args{1})
 %         disp 'we detected a structure array'
         Model = args{1};
-        if isfield(Model, 'rho') && isfield(Model, 'vs') && isfield(Model, 'vp')
-            Model.rho2 = Model.rho;
-            Model.vs2 = Model.vs;
-            Model.vp2 = Model.vp;
-        end
+
     else
         banaan = args{1};
         which('banaan')

@@ -373,6 +373,57 @@ elseif (model_type == 101) % test model with tiny rho anomaly
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
+
+elseif (model_type == 102) % Evangelos: ring shaped model
+    
+    vp_ring = 5000;
+    vs_ring  = 3000; % m/s
+    rho_ring = 2600; % kg/m3
+    
+    vp_out  = 5000;
+    vs_out  = 1; % m/s
+    rho_out = 2600; % kg/m3
+    
+    % rho-vs-vp
+    vp    = vp_out*ones(nx,nz);
+%     vs    = sqrt(mu ./ rho);
+    vs   = vs_out*ones(nx,nz);
+%     rho2 = zeros(nx,nz);
+    rho2 = rho_out*ones(nx,nz);
+    
+    % outer circle
+    c_outer.mid.x = nx/2;
+    c_outer.mid.z = nz/2;
+    c_outer.radius = min(nx,nz)/2;
+    
+    % inner circle
+    c_inner.mid.x = nx/2;
+    c_inner.mid.z = nz/2;
+    c_inner.radius = min(nx/2,nz/2)/2;
+    
+    for ii = 1:size(vs,1)
+        for jj = 1:size(vs,2)
+            location = sqrt((ii-c_outer.mid.x)^2 + (jj-c_outer.mid.z)^2);
+            if location < c_outer.radius
+                vp(ii,jj) = vp_ring;
+                vs(ii,jj) = vs_ring;
+                rho2(ii,jj) = rho_ring;
+                if location < c_inner.radius
+                    vp(ii,jj) = vp_out;
+                    vs(ii,jj) = vs_out;
+                    rho2(ii,jj) = rho_out;
+                end
+            end
+        end
+    end
+    
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+    
+    
 else
     
     load(['models/mu_' model_type]);

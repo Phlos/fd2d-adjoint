@@ -1,12 +1,17 @@
-function fig_misfit = plot_misfit_evolution(misfit_seis, misfit_g, misfit, modeldifnorm)
+function fig_misfit = plot_misfit_evolution(InvProps)
 
 % plot the misfit evolution for different data together & separately.
+% fig_misfit = plot_misfit_evoluition(InvProps);
 
 set_figure_properties_bothmachines;
 
+misfit_seis = InvProps.misfit_seis;
+misfit_g = InvProps.misfit_g;
+misfit = InvProps.misfit;
+modeldifnorm = InvProps.modeldifn;
 
 for i=1:length(misfit_seis)
-    misf_seis(i) = misfit_seis(i).normd;
+    misf_seis(i) = misfit_seis{i}.normd;
     misf_grav(i) = misfit_g(i).normd;
 end
 

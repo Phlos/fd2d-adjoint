@@ -32,6 +32,13 @@ disp 'iterating...'
 
 position_figures;
 
+% stf
+% stf{1}
+% for is=1:ns
+%     max(stf{is}.y)
+%     min(stf{is}.y)
+% end
+
 fprintf(1,'Percentage completed :       ');
 %%
 for n=1:nt
@@ -59,17 +66,17 @@ for n=1:nt
     
     if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green') ||  strcmp(simulation_mode,'adjoint') )
     
-        for i=1:ns
+        for is=1:ns
             
             if(strcmp(wave_propagation_type,'SH'))
-                DSY(src_x_id(i),src_z_id(i))= DSY(src_x_id(i),src_z_id(i)) + stf(2,i,n);
+                DSY(src_x_id(is),src_z_id(is))= DSY(src_x_id(is),src_z_id(is)) + stf{is}.y(n);
             elseif(strcmp(wave_propagation_type,'PSV'))
-                DSX(src_x_id(i),src_z_id(i))= DSX(src_x_id(i),src_z_id(i)) + stf(1,i,n);                   %%%%%%%%% Beetje krukkig zo... kan het mooier?
-                DSZ(src_x_id(i),src_z_id(i))= DSZ(src_x_id(i),src_z_id(i)) + stf(3,i,n);
+                DSX(src_x_id(is),src_z_id(is))= DSX(src_x_id(is),src_z_id(is)) + stf{is}.x(n);                   %%%%%%%%% Beetje krukkig zo... kan het mooier?
+                DSZ(src_x_id(is),src_z_id(is))= DSZ(src_x_id(is),src_z_id(is)) + stf{is}.z(n);
             elseif(strcmp(wave_propagation_type,'both'))
-                DSY(src_x_id(i),src_z_id(i))= DSY(src_x_id(i),src_z_id(i)) + stf(2,i,n);
-                DSX(src_x_id(i),src_z_id(i))= DSX(src_x_id(i),src_z_id(i)) + stf(1,i,n);                   %%%%%%%%% Beetje krukkig zo... kan het mooier?
-                DSZ(src_x_id(i),src_z_id(i))= DSZ(src_x_id(i),src_z_id(i)) + stf(3,i,n);
+                DSY(src_x_id(is),src_z_id(is))= DSY(src_x_id(is),src_z_id(is)) + stf{is}.y(n);
+                DSX(src_x_id(is),src_z_id(is))= DSX(src_x_id(is),src_z_id(is)) + stf{is}.x(n);                   %%%%%%%%% Beetje krukkig zo... kan het mooier?
+                DSZ(src_x_id(is),src_z_id(is))= DSZ(src_x_id(is),src_z_id(is)) + stf{is}.z(n);
             end
 
         end
@@ -167,14 +174,14 @@ for n=1:nt
         
         for k=1:n_receivers
             if(strcmp(wave_propagation_type,'SH'))
-                v_rec.y(k,n)=vy(rec_x_id(k),rec_z_id(k));
+                v_rec{k}.y(n)=vy(rec_x_id(k),rec_z_id(k));
             elseif(strcmp(wave_propagation_type,'PSV'))
-                v_rec.x(k,n)=vx(rec_x_id(k),rec_z_id(k));
-                v_rec.z(k,n)=vz(rec_x_id(k),rec_z_id(k));
+                v_rec{k}.x(n)=vx(rec_x_id(k),rec_z_id(k));
+                v_rec{k}.z(n)=vz(rec_x_id(k),rec_z_id(k));
             elseif(strcmp(wave_propagation_type,'both'))
-                v_rec.y(k,n)=vy(rec_x_id(k),rec_z_id(k));
-                v_rec.x(k,n)=vx(rec_x_id(k),rec_z_id(k));
-                v_rec.z(k,n)=vz(rec_x_id(k),rec_z_id(k));
+                v_rec{k}.y(n)=vy(rec_x_id(k),rec_z_id(k));
+                v_rec{k}.x(n)=vx(rec_x_id(k),rec_z_id(k));
+                v_rec{k}.z(n)=vz(rec_x_id(k),rec_z_id(k));
             end
         end
         
@@ -208,6 +215,7 @@ for n=1:nt
         % plot velocity field every so manyth time step -------------------
         
         if (mod(n,plot_every)==0)
+%             disp([num2str(n), ' ', num2str(n*dt), ' ', num2str(floor(n*dt),'%4.0f')]);
 %             disp(['time: ', num2str(n*dt)]);
             plot_velocity_field;
         end

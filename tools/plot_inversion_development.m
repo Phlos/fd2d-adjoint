@@ -1,14 +1,25 @@
-function fig_inv = plot_inversion_development(misfit, misfit_seis, misfit_g, step, modeldifn, Model_end, Model_start, Model_real , middle)
+function fig_inv = plot_inversion_development(InvProps, Model_end, Model_start, Model_real , middle)
+
+% function that plots the inversion development
+% SYNTAX:
+% fig_inv = plot_inversion_development(InvProps, Model_end, Model_start, Model_real , middle)
 
 %% prep
 
 set_figure_properties_bothmachines;
 
+%- variables
+misfit = InvProps.misfit;
+misfit_seis = InvProps.misfit_seis;
+misfit_g = InvProps.misfit_g;
+step = InvProps.step;
+modeldifn = InvProps.modeldifn;
+
 % input_parameters;
 iters = 1:(length(misfit));
 niter = length(iters);
 for i = 1:niter
-misfitseis1(i) = misfit_seis(i).normd;
+misfitseis1(i) = misfit_seis{i}.normd;
 end
 for i = 1:niter
 misfitgrav1(i) = misfit_g(i).normd;

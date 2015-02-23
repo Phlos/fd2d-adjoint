@@ -6,7 +6,7 @@
 % K: sensitivity kernel with respect to density
 %==========================================================================
 
-function [K] = run_adjoint(u_fw,v_fw,stf,kerneltype,varargin) %(vx_forward, vy_forward, vz_forward)
+function [K] = run_adjoint(u_fw,v_fw,stf,varargin) %(vx_forward, vy_forward, vz_forward)
 % disp 'Welcome to the ultimate adjoint experience!!'
 disp 'initialising...'
 
@@ -102,23 +102,23 @@ src_z = rec_z;
 
 %- read adjoint source time functions + plot 'em --------------------------
 
-fig_adjoint_stf = figure;
+% fig_adjoint_stf = figure;
 
-figure(fig_adjoint_stf);
-for n=1:ns          % loop over sources
-    for dir= 1:3    % loop over directions 1,2,3 = x,y,z
-%         disp(['reading direction ',num2str(dir),'.'])
-%         fid=fopen(['../input/sources/adjoint/src_' num2str(n) '_' num2str(dir)],'r');
-%         stf(dir,n,1:nt)=fscanf(fid,'%g',nt);
-        
-        % plotting the source time functions
-        subplot(3,1,dir);
-        thee=0:dt:nt*dt-dt;
-        oempa=reshape(stf(dir,n,:),1,nt);
-        plot(thee,oempa);
-    end
-    pause(0.05);
-end
+% figure(fig_adjoint_stf);
+% for n=1:ns          % loop over sources
+%     for dir= 1:3    % loop over directions 1,2,3 = x,y,z
+% %         disp(['reading direction ',num2str(dir),'.'])
+% %         fid=fopen(['../input/sources/adjoint/src_' num2str(n) '_' num2str(dir)],'r');
+% %         stf(dir,n,1:nt)=fscanf(fid,'%g',nt);
+%         
+%         % plotting the source time functions
+%         subplot(3,1,dir);
+%         thee=0:dt:nt*dt-dt;
+%         oempa=reshape(stf(dir,n,:),1,nt);
+%         plot(thee,oempa);
+%     end
+%     pause(0.05);
+% end
 
 
 
@@ -163,8 +163,10 @@ if strcmp(make_movie_adj,'yes')
 end
 
 
-close(fig_adjoint_stf);
-close(fig_adjoint);
+% close(fig_adjoint_stf);
+if(nt>plot_every)
+    close(fig_adjoint);
+end
 close(fig_mod);
 
 end

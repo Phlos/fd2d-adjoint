@@ -64,11 +64,16 @@ if strcmp(HostName,'D-13-L-2')
             scn_width*2/3 - edge,...    % width
             scn_height/3];              % height
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
-% pos_mod = [edge,...                     % left
-%         verti_scn_height * (4/5),...    % bottom
-%         verti_scn_width - edge,...      % width
-%         verti_scn_height/5];            % height
-pos_mod = [1082        1134         983         376];
+    % pos_mod = [edge,...                     % left
+    %         verti_scn_height * (4/5),...    % bottom
+    %         verti_scn_width - edge,...      % width
+    %         verti_scn_height/5];            % height
+    % pos_mod = [1082        1134         983         376];
+    if strcmp(version('-release'),'2014b')
+    pos_mod = [3         701        1063         302];
+    else 
+        pos_mod = [1082        1134         983         376];
+    end
 end
 
 % position for the source time function plot
@@ -95,10 +100,11 @@ pos_vel_nplots3 = [edge,...
         2/3*scn_width,...
         1/3*scn_height];
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
-pos_vel = [edge,...
-        verti_scn_height * 2/5,...
-        2/3 * verti_scn_width - edge,...
-        pos_mod(4)];
+% pos_vel = [edge,...
+%         verti_scn_height * 2/5,...
+%         2/3 * verti_scn_width - edge,...
+%         pos_mod(4)];
+pos_vel = [4    38   752   610];
     
 pos_vel_nplots3 = [edge,...
         verti_scn_height * 2/5,...

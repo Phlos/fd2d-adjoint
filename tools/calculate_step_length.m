@@ -236,14 +236,21 @@ set_figure_properties_bothmachines;
     close(gcf);
     close(gcf);
     
-    %- for each step, calculate the misfit using make_adstf --> adapt mk adstf!
-    if strcmp(normalise_misfits, 'byfirstmisfit')
-        scaling_s = misfit_seis(1).total;
+    %- for each step, calculate the misfit
+%     if strcmp(normalise_misfits, 'byfirstmisfit')
+%         scaling_s = misfit_seis{1}.total;
+%     else
+%         scaling_s = 1;
+%     end
+    [~, misf_s_test] = calc_misfitseis_adstf('waveform_difference',t,v_try,v_obs);
+%     [~, misf_s_test] = make_all_adjoint_sources(v_try,v_obs,t, ...
+%         'waveform_difference','auto', scaling_s);
+    if ( strcmp(normalise_misfits, 'byfirstmisfit') )
+        misf_s_test.normd = misf_s_test.total / ...
+            misfit_seis{1}.total;
     else
-        scaling_s = 1;
+        misf_s_test.normd = misf_s_test.total;
     end
-    [~, misf_s_test] = make_all_adjoint_sources(v_try,v_obs,t, ...
-        'waveform_difference','auto', scaling_s);
     misfit.seis = misf_s_test.normd;
 
 
