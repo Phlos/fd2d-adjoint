@@ -9,14 +9,16 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-InvProps.niter = 1;
-InvProps.istart = 1;
+InvProps.niter = 110;
+InvProps.istart = 100;
 
 niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
-[project_name, axrot, apply_hc, use_grav, parametrisation, ...
- rec_g, X, Z, misfit_type, normalise_misfits, InvProps.stepInit] = get_input_info;
+% which get_input_info
+% blips = update_model(10);
+[project_name, axrot, apply_hc, use_grav, parametrisation, rec_g, X, Z, misfit_type, normalise_misfits, InvProps.stepInit] = get_input_info;
+
 
 %% just to get 'middle' right
 % save initial rho mu lambda (from input_parameters) as iter 1 Params values:
@@ -356,7 +358,7 @@ for iter = InvProps.istart : InvProps.niter;
             disp ' ';
             disp(['iter ',num2str(iter),': calculating adjoint wave propagation']);
             cd ../code/
-            Kseis(iter) = run_adjoint(u_fw,v_fw,adstf{iter},'waveform_difference',Model(iter),normKseis);
+            Kseis(iter) = run_adjoint(u_fw,v_fw,adstf{iter},Model(iter),normKseis);
             % storing kernels is not really necessary when allvars are saved at the end
 %             disp 'storing kernels...'
 %             kernelsavename = ['../output/iter', num2str(i),'.kernels.mat'];
@@ -414,7 +416,8 @@ for iter = InvProps.istart : InvProps.niter;
         if strcmp(use_grav,'yes')
             % determine weight of relative kernels
             w_Kseis = 1;
-            w_Kg = 1e7;
+            w_Kg = 1;
+%             w_Kg = 1e7;
             
             disp ' ';
             disp '---'
@@ -517,7 +520,19 @@ for iter = InvProps.istart : InvProps.niter;
 %     InvProps.angleKg(i).kernelskeerelkaar = Kg{i-1}(:)'*Kg{i}(:);
 %     InvProps.angleKg(i).norm = norm(Kg{i-1}(:))*norm(Kg{i}(:));
 %     InvProps.angleKg(i).angle = acos(angle(i).kernelskeerelkaar / angle(i).norm);
+
+    % useful output
+    InvProps{iter} = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model);
+
+    % inversion results with inversion landscape plot
+    fig_inv2 = plot_inversion_development_landscapeshape(InvProps, iter);
+    figname = ['../output/inversion_development.',project_name,'.misfit-landscape.png'];
+    print(fig_inv2,'-dpng','-r400',figname);
+    figname = ['../output/inversion_development.',project_name,'.misfit-landscape.eps'];
+    print(fig_inv2,'-deps','-r400',figname);
+    close(fig_inv2)
     
+    %% safety
     % saving current variables to file (crash safeguard)
     disp 'saving all current variables...'
     clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
@@ -549,25 +564,6 @@ disp '======================================';
 
 % plot nice vector plot of misfit evolution + real, start, end model
 plot_models_vector;
-
-% useful output
-for iter = 1:InvProps.niter
-InvProps.misfitseis(iter) = InvProps.misfit_seis{iter}.normd;
-InvProps.misfitgrav(iter) = InvProps.misfit_g(iter).normd;
-end
-% for iter = 1:InvProps.niter
-% InvProps.misfitgrav(iter) = InvProps.misfit_g(iter).normd;
-% end
-
-% % plot+save real, start and end models as vector plots (also inversion result)
-% plot_models_vector;
-
-% inversion results with inversion landscape plot
-fig_inv2 = plot_inversion_development_landscapeshape(InvProps);
-figname = ['../output/inversion_development.',project_name,'.misfit-landscape.png'];
-print(fig_inv2,'-dpng','-r400',figname);
-figname = ['../output/inversion_development.',project_name,'.misfit-landscape.eps'];
-print(fig_inv2,'-deps','-r400',figname);
 
 
 

@@ -181,10 +181,11 @@ disp ' ';
 
 
 
-
+figure(fig_mod_prev);
+pause(10);
 
 close(fig_mod_prev);
-
+close all;
 
 end
 
@@ -232,9 +233,9 @@ set_figure_properties_bothmachines;
     
     %- for each step, run forward update
     [v_try,t,~,~,~,~] = run_forward(Model_try);
-    close(gcf);
-    close(gcf);
-    close(gcf);
+%     close(gcf);
+%     close(gcf);
+%     close(gcf);
     
     %- for each step, calculate the misfit
 %     if strcmp(normalise_misfits, 'byfirstmisfit')

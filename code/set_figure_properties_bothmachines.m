@@ -161,10 +161,17 @@ if strcmp(HostName,'D-13-L-2')
             scn_width*2/3 - edge,...    % width
             scn_height-10];             % height
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
-    pos_knl = [edge,...                 % left
+    if strcmp(version('-release'),'2014b')
+%         disp 'plotting kernel in Matlab version 2014b'
+%         pos_knl = [3  0  1063  1046];
+        pos_knl = [-1080        -439        1064        1529];
+    else
+%         disp 'plotting knl as SOME OLD VERSION'
+        pos_knl = [edge,...                 % left
             0,...                       % bottom
             verti_scn_width - edge,...  % width
             verti_scn_height*2/3];      % height
+    end
 end
 
 
@@ -194,9 +201,23 @@ elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL'
     pos_misfit =  [edge 0 808 1049];
 end
 
-% position for the final inversion development plot
+% position for one of the inversion development plots
 if strcmp(HostName,'D-13-L-2')
     pos_invplot =  [ 1082         474        1388        1046];
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     pos_invplot =  [ 1082         474        1388        1046];
+end
+
+% position for the final inversion development plot
+if strcmp(HostName,'D-13-L-2')
+%     pos_invres = [1          34        1308        1047];
+    pos_invres = [-1080        -439        1080        1543];
+elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
+    if strcmp(version('-release'),'2014b')
+%         pos_invres = [1          34        1308        1047];
+    pos_invres = [-1080        -439        1080        1543];
+    else
+%         pos_invres = [1          34        1308        1047];
+    pos_invres = [-1080        -439        1080        1543];
+    end
 end

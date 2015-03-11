@@ -39,8 +39,10 @@ end
 
 %% allowed stf frequency
 
+npw = 10; % n samples per wavelength
+
 % minimum wavelength allowed
-min_wavelength = min(10*dz, 10*dz);
+min_wavelength = min(npw*dz, npw*dz);
 max_freq = min(vs(:)) / min_wavelength;
 
 disp(['Your maximum allowed stf frequency is ', num2str(max_freq), ' Hz']);

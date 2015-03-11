@@ -76,18 +76,10 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     stf = make_source_time_function(t,stf_type,simulation_mode,f_min,f_max,tauw_0,tauw,tee_0);
 %     plot_source_time_function;
 
-%     % add the same source time function to all the sources.
-%     stf_all=zeros(3,ns,nt);
-%     
-%     prefactor = 1.875e5;
-%     for i=1:ns
-%         stf_all(1,i,:) = prefactor* stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
-%         stf_all(2,i,:) = prefactor* stf;                           % y direction
-%         stf_all(3,i,:) = prefactor* stf.*stf_PSV(2)./norm(stf_PSV);  % z direction
-%     end
-
     % add the same source time function to all the sources.    
-    prefactor = 1.875e5;
+%     prefactor = 1.875e5;
+%     prefactor = 1.875e5 / dx / dz;
+    prefactor = 1.0 / dx / dz;
     for i=1:ns
         stf_all{i}.x = prefactor* stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
         stf_all{i}.y = prefactor* stf;                           % y direction

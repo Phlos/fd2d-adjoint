@@ -1,4 +1,10 @@
+function fig_stf = plot_source_time_function(t,stf)
+
 % plots the source time function in the format described here.
+
+set_figure_properties_bothmachines;
+
+dt = t(2) - t(1);
 
 fig_stf = figure;
 set(fig_stf,'OuterPosition',pos_stf);
@@ -22,3 +28,5 @@ spectrum=2*abs(Y(1:NFFT/2+1));
 plot(f,spectrum);
     xlabel('frequency [Hz]');
     title('... and its frequency (amp) spectrum');
+    
+end

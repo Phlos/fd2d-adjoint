@@ -33,6 +33,7 @@ function [adstf, misfit] = calc_misfitseis_adstf(misfit_type, t, v_rec, varargin
 
 %- prepare 
 input_parameters; % should get nrec here, also nt and dt
+[~, ~, dx, dz] = define_computational_domain(Lx, Lz, nx, nz);
 
 %- get v_obs from varargin
 [vobspresent, v_obs, picking_mode] = checkargs(varargin(:));
@@ -119,6 +120,10 @@ for irec = 1:nrec
             title(['adjoint source after time reversal'])
             pause(3.0);
         end
+        
+        % give the adstf the right magnitude so that the spatial integral
+        % is 1 (because the stf/adstf are spatial delta functions)
+        adstf_temp = adstf_temp / dx / dz;
         
         adstf{irec}.(comp{icomp}) = adstf_temp;
         
