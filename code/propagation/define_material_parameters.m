@@ -342,6 +342,46 @@ elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
     
+elseif (model_type==50) % PREM background model
+                        % NOTE: PREM read from table with columns like
+                        % http://ds.iris.edu/ds/products/emc-prem/PREM_1s.csv
+                        % units on that website are in g/cm^3, m/s, m/s
+    
+    %- make a grid using the normal Lx, Lz, nx, nz
+    input_parameters;
+    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
+    
+    %- load PREM data from file
+    PREM = csvread('~/Dropbox/DensityInversion/PREM-reference-model/PREM_1s.csv');
+    
+    %- depth coordinate manipulation
+    depth = PREM(:,2);      % in km
+    % change double occurrences of depth so that interpolation doesn't flip
+    dif_dep = find([NaN; diff(depth)] <= 0);
+    depth(dif_dep) = depth(dif_dep)+1E-5;
+    %- convert depth to height above CMB
+    h_CMB = 2891 - depth;   % in km!
+
+    %- make a grid using PREM values (nonuniform grid)
+    %  (1000* for units km -> m , g/cm^3 -> kg/m^3 , km/s -> m/s)
+    [X_PREM, Z_PREM] = meshgrid( X(1,:),1000* h_CMB(:) );
+    [~, rho_PREM] = meshgrid(X(1,:),1000* PREM(:,3));
+    [~, vp_PREM]  = meshgrid(X(1,:),1000* PREM(:,4));     % in reality vp_vertical 
+    [~, vs_PREM]  = meshgrid(X(1,:),1000* PREM(:,6));     % in reality vs_vertical
+    
+        
+    %- interpolate PREM vp, vs, rho to our grid sampling vp, vs, rho
+    rho_new = interp2(X_PREM, Z_PREM, rho_PREM, X,Z);
+    vp_new  = interp2(X_PREM, Z_PREM, vp_PREM,  X,Z);
+    vs_new  = interp2(X_PREM, Z_PREM, vs_PREM,  X,Z);
+    
+    
+    %- convert to rho,mu,lambda
+    rho     = rho_new';
+    mu      = vs_new' .^ 2 .* rho_new';
+    lambda  = rho_new' .* ( vp_new'.^2 - 2* vs_new'.^2);
+    
+    
 elseif (model_type==100) % layered: left = high velocity, right = low vel.
     
     rho=3000.0*ones(nx,nz);

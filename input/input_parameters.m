@@ -54,8 +54,8 @@ wave_propagation_type='PSV';   % can be 'PSV' or 'SH' or 'both'
 Lx=6000e3;     % model extension in x-direction [m]
 Lz=2900e3;     % model extension in z-direction [m]
 
-nx=600;     % grid points in x-direction
-nz=290;     % grid points in z-direction
+nx=601;     % grid points in x-direction
+nz=291;     % grid points in z-direction
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
@@ -89,6 +89,8 @@ model_type=10;
 % 31= five 'rand' positive rho2 anomalies (rho2 = rho in rho-vs-vp)
 % 41= ten 'rand' rho2 anomalies: 5 pos 5 neg (rho2 = rho in rho-vs-vp)
 % 100= layered: left = high velocity, right = low velocity (any difference with model 3???)
+% 101= homogeneous model (Tromp like) with tiny rho anomaly
+% 102= Ring shaped model (Evangelos): vp=5000, vs=3000, rho=2600 | outside: 5000,1,2600
 
 % 'initial'= read initial model for waveform inversion (mu_initial, rho_initial)
 
@@ -110,8 +112,8 @@ stf_type = 'ricker';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed
                         % delta function)
 % needed for 'ricker'
 tauw_0  = 2.628;      % seconds
-tauw    = 4.0;        % source duration, seconds
-tee_0   = 2.5;        % source start time, seconds
+tauw    = 6*4.0;        % source duration, seconds
+tee_0   = 6*2.5;        % source start time, seconds
 
 % needed for 'delta_bp'    
 f_min=0.2;          % minimum frequency [Hz]

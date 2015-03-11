@@ -26,6 +26,9 @@ elseif (strcmp(stf_type,'ricker'))
     alfa = 2 * tauw_0 / tauw;
     stf = ( -2*alfa^3 / pi) * (t-tee_0) .* exp( -alfa^2 * (t-tee_0).^2);
     
+    % normalise amplitude
+    stf = stf ./ max(stf);
+    
 %     stf = 10^3*stf;
 end
 
