@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.initial-test';
+project_name='Mantle.initial-test.single-source-verti';
 
 %==========================================================================
 % inversion properties
@@ -35,14 +35,12 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both
 % stepInit = 1e-8;        % normalised misfit, TINY rho anomaly (model 101) (24-11-2014)
 % ---------------- changed stf adstf: now divided by surface of cell to
 %                  make it a spatial delta function
-stepInit = 1e4;
+stepInit = 1e4;         % KMP solved dd ~25 feb 2015
 
 % smoothing properties
 % smoothnp = 15;  % size of the smoothing filter
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
-
-
 
 
 %==========================================================================
@@ -52,17 +50,18 @@ smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
 wave_propagation_type='PSV';   % can be 'PSV' or 'SH' or 'both'
 
 Lx=6000e3;     % model extension in x-direction [m]
-Lz=2900e3;     % model extension in z-direction [m]
+Lz=2890e3;     % model extension in z-direction [m] ! PREM: don't exceed 2891
 
-nx=601;     % grid points in x-direction
-nz=291;     % grid points in z-direction
+nx=901;     % grid points in x-direction
+nz=430;     % grid points in z-direction
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
-% dt=0.33;     % time step [s] fine for SH in a grid   dx=dz=334 m, max vp=3600 m/s
-% dt=0.1;      % time step [s] fine for P-SV in a grid dx=dz=334 m, max vp=3600 m/s
-dt=0.5;      % time step [s]
-nt=3500;      % number of iterations
+dt=0.25;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
+% dt=0.1;       % time step [s] 0.4 suffices @PREM
+% nt=700;      % number of iterations
+tmax = 1500;  % final time
+nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
@@ -70,7 +69,7 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % model type
 %==========================================================================
 
-model_type=10;
+model_type=50;
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -88,6 +87,7 @@ model_type=10;
 % 21= gaussian off-central rho2 anomaly (rho2 = rho in rho-vs-vp)
 % 31= five 'rand' positive rho2 anomalies (rho2 = rho in rho-vs-vp)
 % 41= ten 'rand' rho2 anomalies: 5 pos 5 neg (rho2 = rho in rho-vs-vp)
+% 50= PREM background values model (will be selected at true height above cmb)
 % 100= layered: left = high velocity, right = low velocity (any difference with model 3???)
 % 101= homogeneous model (Tromp like) with tiny rho anomaly
 % 102= Ring shaped model (Evangelos): vp=5000, vs=3000, rho=2600 | outside: 5000,1,2600
@@ -119,7 +119,7 @@ tee_0   = 6*2.5;        % source start time, seconds
 f_min=0.2;          % minimum frequency [Hz]
 f_max=1.00;         % maximum frequency [Hz]
 
-stf_PSV = [1 1];    % [x z]
+stf_PSV = [0 1];    % [x z]
                     % direction of the source-time-function in P-SV wave 
                     % propagation. The final stf will be normalised with
                     % such that its original amplitude is preserved.
@@ -141,10 +141,14 @@ simulation_mode='forward';
 
 %- line of sources at the bottom of the domain -- use with absbound bottom?
 nsrc = 8;
-% nsrc = 1;
 src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
 dz = 1/16 * Lz;
 src_z=ones(size(src_x)) * (0 + 2*dz); % -2*dz necessary as a result of b.c.)
+
+%- line of sources near top of the domain
+nsrc = 1;
+src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
+src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
 
 % %- 'random' source positions, 8x
 % src_x = Lx *   [ 0.2769    0.0462    0.0971    0.8235    0.6948    0.3171    0.9502    0.0344];
@@ -234,10 +238,10 @@ rec_g.z=ones(size(rec_g.x)) * (Lz + rec_height);
 % absorbing boundaries
 %==========================================================================
 
-width=25000.0;     % width of the boundary layer in m
+width=250000.0;     % width of the boundary layer in m
 
-absorb_left=0;  % absorb waves on the left boundary
-absorb_right=0; % absorb waves on the right boundary
+absorb_left=1;  % absorb waves on the left boundary
+absorb_right=1; % absorb waves on the right boundary
 absorb_top=0;   % absorb waves on the top boundary
 absorb_bottom=0;% absorb waves on the bottom boundary
 
@@ -246,8 +250,9 @@ absorb_bottom=0;% absorb waves on the bottom boundary
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-plot_every=100000; % value larger than nt, so that no plotting takes place
-% plot_every = 25;
+% plot_every=100000; % value larger than nt, so that no plotting takes place
+plot_every = 40;
+% plot_every = 100;
 
 plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation
@@ -274,7 +279,7 @@ save_v_fw = 'no';       % 'yes' or 'no' -- save the v_forward matfile
 
 
 %- movies -----
-make_movie='no';                                   % 'yes' or 'no'
+make_movie='yes';                                   % 'yes' or 'no'
 make_movie_adj='no';                               % 'yes' or 'no'
 movie_file=['../output/',project_name,'.forward'];        % output file name
 movie_file_adj=['../output/',project_name,'.adjoint'];

@@ -29,16 +29,21 @@ for irec = 1:nrec
     comp = fieldnames(v_obs{irec});
     for icomp = 1:length(comp);
         
-        subplot(ncomp,1,icomp);
-        plot(t,v_rec{irec}.(comp{icomp}),'k')
-        hold on
-        plot(t,v_obs{irec}.(comp{icomp}),'r--')
+%         subplot(ncomp,1,icomp);
+        subplot(nrec,ncomp,(irec-1)*ncomp + icomp)
+%         hold on
+        plot(t,v_rec{irec}.(comp{icomp}),'k', ...
+             t,v_obs{irec}.(comp{icomp}),'r--', ...
+             t,v_rec{irec}.(comp{icomp}) - v_obs{irec}.(comp{icomp}), 'b');
         %     plot(t,v_rec.(comp{1}) - v_obs.(comp{1}), 'b', 'LineWidth',2)
-        plot(t,v_rec{irec}.(comp{icomp}) - v_obs{irec}.(comp{icomp}), 'b');
-        hold off
+%         hold off
         
-        title([comp{icomp},' component: synth - black, obs - red, diff - blue'])
+        if irec==1
+        title({[comp{icomp},' component:']; 'synth - black, obs - red, diff - blue'})
+        end
+        if irec==nrec
         xlabel('t [s]')
+        end
         ylabel('v [m/s]')
         
 %         icomp=icomp+1;

@@ -74,7 +74,7 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     %- make and plot source time function ---------------------------------
 
     stf = make_source_time_function(t,stf_type,simulation_mode,f_min,f_max,tauw_0,tauw,tee_0);
-%     plot_source_time_function;
+%     fig_stf = plot_source_time_function(t,stf);
 
     % add the same source time function to all the sources.    
 %     prefactor = 1.875e5;

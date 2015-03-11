@@ -4,8 +4,9 @@ function v_out = make_seismogram_zeros(v_in)
 
 for ii = 1:length(v_in)
     
-    for comps = fieldnames(v_in{ii})
-        v_out{ii}.(comps{1}) = zeros( size(v_in{ii}.(comps{1})) );
+    comps = fieldnames(v_in{ii});
+    for jj = 1:length(comps)
+        v_out{ii}.(comps{jj}) = zeros( size(v_in{ii}.(comps{jj})) );
     end
 end
 

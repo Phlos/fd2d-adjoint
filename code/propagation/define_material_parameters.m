@@ -343,9 +343,13 @@ elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
     
     
 elseif (model_type==50) % PREM background model
-                        % NOTE: PREM read from table with columns like
-                        % http://ds.iris.edu/ds/products/emc-prem/PREM_1s.csv
-                        % units on that website are in g/cm^3, m/s, m/s
+                        % model values will be sampled at height above CMB!
+                        % IMPORTANT: 
+                        % so don't make the model higher than 2891 km!!
+                        
+    % NOTE: PREM read from table with columns like
+    % http://ds.iris.edu/ds/products/emc-prem/PREM_1s.csv
+    % units on that website are in g/cm^3, m/s, m/s
     
     %- make a grid using the normal Lx, Lz, nx, nz
     input_parameters;
