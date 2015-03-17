@@ -174,11 +174,18 @@ switch narg
         
     case 2
         % disp '2 arguments'
+        if isstruct(arg{1})
         Model = arg{1};
-        
-        if length(Model) > 1
-            error('You supplied more than one models (i.e. a struct w/ multiple models?)');
+            if length(Model) > 1
+                error('You supplied more than one models (i.e. a struct w/ multiple models?)');
+            end
+        elseif isnumeric(arg{1})
+            modelnr = arg{1};
+            Model = update_model(modelnr);
+        else
+            error('1st input has to be a model or a modelnr');
         end
+        
 
         if ischar(arg{2})
             

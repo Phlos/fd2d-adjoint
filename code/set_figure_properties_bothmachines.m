@@ -148,10 +148,16 @@ end
 if strcmp(HostName,'D-13-L-2')
     pos_seis = [99    17   562   501];
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
-pos_seis = [60,...                      % left
-        80,...                          % bottom
-        verti_scn_width - 120,...       % width
-        verti_scn_height*2/3];          % height
+    if strcmp(version('-release'),'2014b')
+%         disp 'plotting kernel in Matlab version 2014b'
+%         pos_knl = [3  0  1063  1046];
+        pos_seis = [-1080 -439 1081 1688];
+    else
+        pos_seis = [60,...                      % left
+                80,...                          % bottom
+                verti_scn_width - 120,...       % width
+                verti_scn_height*2/3];          % height
+    end
 end
 
 % position for the kernel plots

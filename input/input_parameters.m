@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.initial-test.single-source-verti';
+project_name='Mantle.initial-test.8-source-verti';
 
 %==========================================================================
 % inversion properties
@@ -35,7 +35,7 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both
 % stepInit = 1e-8;        % normalised misfit, TINY rho anomaly (model 101) (24-11-2014)
 % ---------------- changed stf adstf: now divided by surface of cell to
 %                  make it a spatial delta function
-stepInit = 1e4;         % KMP solved dd ~25 feb 2015
+stepInit = 5e3;         % KMP solved dd ~25 feb 2015
 
 % smoothing properties
 % smoothnp = 15;  % size of the smoothing filter
@@ -60,7 +60,7 @@ nz=430;     % grid points in z-direction
 dt=0.25;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % dt=0.1;       % time step [s] 0.4 suffices @PREM
 % nt=700;      % number of iterations
-tmax = 1500;  % final time
+tmax = 1400;  % final time
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -139,15 +139,16 @@ simulation_mode='forward';
 % source positions
 %==========================================================================
 
-%- line of sources at the bottom of the domain -- use with absbound bottom?
+% %- line of sources at the bottom of the domain -- use with absbound bottom?
+% nsrc = 8;
+% src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
+% dz = 1/16 * Lz;
+% src_z=ones(size(src_x)) * (0 + 2*dz); % -2*dz necessary as a result of b.c.)
+
+%- line of sources near top of the domain
 nsrc = 8;
 src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
 dz = 1/16 * Lz;
-src_z=ones(size(src_x)) * (0 + 2*dz); % -2*dz necessary as a result of b.c.)
-
-%- line of sources near top of the domain
-nsrc = 1;
-src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
 src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
 
 % %- 'random' source positions, 8x
@@ -250,8 +251,8 @@ absorb_bottom=0;% absorb waves on the bottom boundary
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-% plot_every=100000; % value larger than nt, so that no plotting takes place
-plot_every = 40;
+plot_every=100000; % value larger than nt, so that no plotting takes place
+% plot_every = 40;
 % plot_every = 100;
 
 plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
@@ -279,7 +280,7 @@ save_v_fw = 'no';       % 'yes' or 'no' -- save the v_forward matfile
 
 
 %- movies -----
-make_movie='yes';                                   % 'yes' or 'no'
+make_movie='no';                                   % 'yes' or 'no'
 make_movie_adj='no';                               % 'yes' or 'no'
 movie_file=['../output/',project_name,'.forward'];        % output file name
 movie_file_adj=['../output/',project_name,'.adjoint'];

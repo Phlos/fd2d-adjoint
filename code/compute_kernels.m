@@ -48,20 +48,20 @@ end
 
 % forward velocity field (remember: saved backwards in time)
 if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-    vx_fw = squeeze(v_fw.x(n/5,:,:));
-    vz_fw = squeeze(v_fw.z(n/5,:,:));
+    vx_fw = squeeze(v_fw.x(n/sfe,:,:));
+    vz_fw = squeeze(v_fw.z(n/sfe,:,:));
 end
 if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-    vy_fw = squeeze(v_fw.y(n/5,:,:));
+    vy_fw = squeeze(v_fw.y(n/sfe,:,:));
 end
 
 % forward displacement field
 if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-    ux_fw = squeeze(u_fw.x(n/5,:,:));
-    uz_fw = squeeze(u_fw.z(n/5,:,:));
+    ux_fw = squeeze(u_fw.x(n/sfe,:,:));
+    uz_fw = squeeze(u_fw.z(n/sfe,:,:));
 end
 if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-    uy_fw = squeeze(u_fw.y(n/5,:,:));
+    uy_fw = squeeze(u_fw.y(n/sfe,:,:));
 end
 
 % forward strain tensor

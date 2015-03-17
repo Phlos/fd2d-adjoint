@@ -16,7 +16,8 @@ function seisdif = plot_seismogram_difference(v_obs, v_rec, t)
 % - seisdif: figure handle of this figure
 
 seisdif = figure;
-
+set_figure_properties_bothmachines;
+set(seisdif, 'OuterPosition', pos_seis);
 
 
 % number of receivers for which we have seismograms

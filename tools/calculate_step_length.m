@@ -1,6 +1,6 @@
 % calculate the step length
 
-function [step, fig_lnsrch ] = calculate_step_length(teststep, niter, ...
+function [step, fig_lnsrch , steplnArray, misfitArray ] = calculate_step_length(teststep, niter, ...
                                       currentMisfit, misfit_seis, misfit_grav, ...
                                       Model_prev, K_abs, v_obs, g_obs)
 %== 1. Preparation ===========================================================
@@ -113,7 +113,7 @@ while ( (p(1) < 0 || step < 0) && nextra < 5 )
     end
     
     % determine new steplnarray
-    if nextra ==1
+    if ( nextra ==1 && steplnArray_prev(2) ~= stepInit)
         steplnArray_new = [0 , stepInit , steplnArray_prev(2)];
     else
         steplnArray_new = [0 , 0.5*steplnArray_prev(2) , steplnArray_prev(2)];
@@ -137,7 +137,7 @@ while ( (p(1) < 0 || step < 0) && nextra < 5 )
     
     % determine whether we now get a minimum at positive step length
 %     disp 'fitting the NEW polynomial'
-    close(fig_lnsrch);
+%     close(fig_lnsrch);
     [step, minval, p, fig_lnsrch] = fit_polynomial(steplnArray_new, misfitArray_new.total);
     
     
@@ -181,10 +181,10 @@ disp ' ';
 
 
 
-figure(fig_mod_prev);
-pause(10);
+% figure(fig_mod_prev);
+% pause(10);
 
-close(fig_mod_prev);
+% close(fig_mod_prev);
 close all;
 
 end
@@ -201,26 +201,33 @@ set_figure_properties_bothmachines;
     %% calculate updated model using steptry
     disp 'now updating model in calc_misfit_perstep'
     Model_try = update_model(K_abs, steptry, Model_prev, parametrisation);
+
     
     %- some output
-    max_mu = max(Model_try.mu(:));
-    max_rh = max(Model_try.rho(:));
-    max_la = max(Model_try.lambda(:));
-    min_mu = min(Model_try.mu(:));
-    min_rh = min(Model_try.rho(:));
-    min_la = min(Model_try.lambda(:));
+    max_mu = max(Model_try.mu(:) - Model_prev.mu(:));
+    max_rh = max(Model_try.rho(:) - Model_prev.rho(:));
+    max_la = max(Model_try.lambda(:) - Model_prev.lambda(:));
+    min_mu = min(Model_try.mu(:) - Model_prev.mu(:));
+    min_rh = min(Model_try.rho(:) - Model_prev.rho(:));
+    min_la = min(Model_try.lambda(:) - Model_prev.lambda(:));
     
     disp(['Maxima -- mu: ',num2str(max_mu,'%3.2e'), '   rho: ', num2str(max_rh), ...
           '   lambda: ', num2str(max_la,'%3.2e')]);
     disp(['Minima -- mu: ',num2str(min_mu,'%3.2e'), '   rho: ', num2str(min_rh), ...
           '   lambda: ', num2str(min_la,'%3.2e')]);
+    
+    fig_mod = plot_model(Model_try);
+%     close fig_mod;
+close all
+    
+
 %     dada
       
     %% gravity misfit
     
     if strcmp(use_grav,'yes')
       [g_try, fig_grav] = calculate_gravity_field(Model_try.rho, rec_g);
-      close(fig_grav);
+%       close(fig_grav);
       
       %- calculate gravity misfit:
       scaling_g = misfit_grav(1).total;

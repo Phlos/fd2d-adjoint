@@ -105,10 +105,20 @@ elseif narg == 3 || narg == 4
 %     Model_prev
     
     % calculate relative kernels
+%         max(K_abs.rho2.total(:))
+%         max(Model_prev.rho(:))
     K_rel = calculate_relative_kernels(K_abs, Model_prev);
+%     max(K_rel.rho2.total(:))
     
 %     disp 'after calculating relative kernels'
 %     K_rel
+
+%     bips = [max(K_rel.rho2.total(:)), min(K_rel.rho2.total(:))]
+%     baps = [max(K_rel.vs2.total(:)), min(K_rel.vs2.total(:))]
+%     bops = [max(K_rel.vp2.total(:)), min(K_rel.vp2.total(:))]
+%     size(K_rel.rho2.total)
+%     [nanrows, nancols]= find(isnan(K_rel.rho2.total));
+% pause(2);
     
     % smooth the kernels
     % K_sm = smooth_kernels(K_rel, smoothnp, smoothgwid);
@@ -117,12 +127,20 @@ elseif narg == 3 || narg == 4
         K_sm.mu =       filter_kernels(K_rel.mu.total,smoothgwid);
         K_sm.lambda =   filter_kernels(K_rel.lambda.total,smoothgwid);
     elseif strcmp(parametrisation,'rhovsvp')
+%         disp 'filtering in rhovsvp'
         K_sm.rho2 =      filter_kernels(K_rel.rho2.total,smoothgwid);
         K_sm.vs2 =       filter_kernels(K_rel.vs2.total,smoothgwid);
         K_sm.vp2 =   filter_kernels(K_rel.vp2.total,smoothgwid);
     else
         error('Parametrisation not recognised (smoothing kernels)');
     end
+    
+    
+    
+%     bips = [max(K_sm.rho2(:)), min(K_sm.rho2(:))]
+%     baps = [max(K_sm.vs2(:)), min(K_sm.vs2(:))]
+%     bops = [max(K_sm.vp2(:)), min(K_sm.vp2(:))]
+%     figure; pcolor(K_sm.rho2); shading interp
     
 %     disp 'after smoothing the kernels'
 %     K_sm

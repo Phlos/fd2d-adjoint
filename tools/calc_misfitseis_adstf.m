@@ -45,7 +45,7 @@ else
     fig_manual = NaN;
 end
 
-% whos v_rec
+
 
 %- loop over receivers
 nrec = size(v_rec,2);

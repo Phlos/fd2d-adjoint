@@ -22,8 +22,13 @@ misfit_g.total = misfit_g.x + misfit_g.z;
 if isnan(scalingfactor)
     scalingfactor = misfit_g.total;
 end
-misfit_g.normd = misfit_g.total / scalingfactor;
 
+% divide-by-zero catch
+if scalingfactor == 0
+    misfit_g.normd = misfit_g.total;
+else
+    misfit_g.normd = misfit_g.total / scalingfactor;
+end
 
 
 end
@@ -42,9 +47,9 @@ if (nargs == 0)
     sf = 1;
 elseif (nargs == 1 && isnumeric(args{1}))
     sf = args{1};
-    disp(['make_gravity_sources: scaling factor = ', num2str(sf)]);
+%     disp(['make_gravity_sources: scaling factor = ', num2str(sf)]);
     if isnan(sf)
-        disp ' --> misfit will be scaled by itself'
+%         disp ' --> misfit will be scaled by itself'
     end
 else
     error('too many or wrong input arguments to make_gravity_sources')

@@ -20,9 +20,9 @@ misfit_seis = InvProps.misfit_seis;
 misfit_g = InvProps.misfit_g;
 modeldifn = InvProps.modeldifn;
 step = InvProps.step;
-angletot = InvProps.Ktotaal_angle;
-angleseis = InvProps.Kseis_angle;
-anglegrav = InvProps.Kg_angle;
+angletot = InvProps.angle.Ktotal;
+angleseis = InvProps.angle.Kseis;
+anglegrav = InvProps.angle.Kg;
 
 % some adaptations
 niter = length(misfit); % the actual total number of iters run
@@ -78,7 +78,9 @@ legend('all data combined', 'seismic data only', 'gravity data only', 'Location'
 % subplot(4,4,13)
 subplot(9,2,[7 9])
 % plot(modeldifn,'k');
+if imax > 1
 Lmdifn = semilogy(iters(2:imax), modeldifn(2:imax),'k');
+end
 xlim([min(iters), iters(imax)]);
 grid on
 set(Lmdifn, 'LineWidth', 1)
@@ -86,12 +88,14 @@ title('|current - previous model| / |1st model|');
 
 % angle between consecutive kernels - vs. iter
 subplot(9,2,[11 13])
+if imax > 2
 Langle = plot(iters(2:imax-1), angletot(2:imax-1) ./ pi .* 180, 'k',... 
         iters(2:imax-1), angleseis(2:imax-1) ./ pi .* 180, '-r', ...
         iters(2:imax-1), anglegrav(2:imax-1) ./ pi .* 180, '-b');
     set(Langle(1), 'LineWidth', 2)
     set(Langle(2), 'LineWidth', 1)
     set(Langle(3), 'LineWidth',1)
+end
 xlim([min(iters), iters(imax)]);
 grid on
 % set(Lmdifn, 'LineWidth', 1)
@@ -131,12 +135,14 @@ subplot(9,2,[12 14])
 % EI = [InvProps.Ktotaal_angle(2:imax-1);InvProps.Kseis_angle(2:imax-1); ...
 %       InvProps.Kg_angle(2:imax-1)]';
 %   Rangle = stem(IKS, EI);
-Rangle = plot(stepcumsum(2:imax-1), InvProps.Ktotaal_angle(2:imax-1) ./ pi .* 180, '--ko',...
-              stepcumsum(2:imax-1), InvProps.Kseis_angle(2:imax-1) ./ pi .* 180, '--ro', ...
-              stepcumsum(2:imax-1), InvProps.Kg_angle(2:imax-1) ./ pi .* 180, '--bo');
+if imax > 2
+Rangle = plot(stepcumsum(2:imax-1), angletot(2:imax-1) ./ pi .* 180, '--ko',...
+              stepcumsum(2:imax-1), angleseis(2:imax-1) ./ pi .* 180, '--ro', ...
+              stepcumsum(2:imax-1), anglegrav(2:imax-1) ./ pi .* 180, '--bo');
     set(Rangle(1), 'LineWidth', 2)
     set(Rangle(2), 'LineWidth', 1)
     set(Rangle(3), 'LineWidth',1)
+end
 xlim([min(stepcumsum), stepcumsum(imax)]);
 grid on
 % set(Lmdifn, 'LineWidth', 1)

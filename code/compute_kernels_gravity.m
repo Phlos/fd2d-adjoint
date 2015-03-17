@@ -6,7 +6,8 @@ function [Kg, fig_Kg] = compute_kernels_gravity(g_src, rec_grav, varargin)
 %- PREPARATION
 
 %- varargin
-[normfac, plotornot] = checkargs(varargin(:)); % plots figures by default
+% [normfac, plotornot] = checkargs(varargin(:)); % plots figures by default
+plotornot = checkargs(varargin(:)); % plots figures by default
 
 %- prepare necessary information
 path(path,'../input');
@@ -21,7 +22,7 @@ input_parameters;
 
 
 % gravitational constant
-% 6.67384 � 10-11 m3 kg-1 s-2
+% 6.67384 * 10-11 m3 kg-1 s-2
 G = 6.67384e-11;
 
 nrec = size(rec_grav.x,2);
@@ -39,7 +40,7 @@ end
 
 %- actual gravity kernel calculation
 
-for i = 1:nrec % loop over recorders
+for i = 1:nrec % separate kernel per receiver
     
     % calculate distance vector r{i}.x, r{i}.z
     r{i}.x = rec_grav.x(i) - X';
@@ -50,8 +51,10 @@ for i = 1:nrec % loop over recorders
     
     % THIS IS FOR GRAVITY DUE TO A 'SHEET' IN THE X-Z PLANE!!
     % gravity kernel per component per receiver
-    Kg_rec{i}.x = -1 * normfac * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
-    Kg_rec{i}.z = -1 * normfac * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
+    Kg_rec{i}.x = -1 * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
+    Kg_rec{i}.z = -1 * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
+%     Kg_rec{i}.x = -1 * normfac * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
+%     Kg_rec{i}.z = -1 * normfac * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
     
 %     % FOR GRAVITY WITH Y STRETCHING TO INFINITY AT BOTH SIDES
 %     % gravity kernel per component per receiver
@@ -88,7 +91,7 @@ for i = 1:nrec
         % top left
         figure(totalkernel)
         subplot(2,2,1)
-        Kg_sm = filter_kernels(Kg, 15);
+        Kg_sm = filter_kernels(Kg, smoothgwid);
         pcolor(X,Z, Kg_sm')
         colormap(cm);
         shading interp
@@ -169,31 +172,48 @@ caxis([-scale scale]);
 
 end
 
-function [normalise, plotornot] = checkargs(arg)
-% determine whether the kernels should be normalised by some number
-% (for instance when the gravity misfit is normalised by the initial
-% misfit)
+function [plotornot] = checkargs(arg)
+% NEW VERSION AS OF 19-3-2015
+% determine whether the kernels should be plotted (default: 1, and 'yes')
 
 % size(arg)
 narg = size(arg,1);
 
-if (narg == 2 && isnumeric(arg{1}) && ischar(arg{2}))
-    normalise = arg{1};
-    plotornot = arg{2};
-elseif narg == 1
-    if isstring(arg{1})
+if ( narg == 1 && ischar(arg{1}) )
         plotornot = arg{1};
-        normalise = 1.0;
-    elseif isnumeric(arg{1})
-        normalise = arg{1};
-        plotornot = 'yes';
-    end
-        
 elseif narg == 0
     plotornot = 'yes';
-    normalise = 1.0;
 else
     error('input to compute_kernels_gravity was not understood.')
 end
 
 end
+
+% function [normalise, plotornot] = checkargs(arg)
+% % determine whether the kernels should be normalised by some number
+% % (for instance when the gravity misfit is normalised by the initial
+% % misfit) and whether the kernels should be plotted (default: 1, and 'yes')
+% 
+% % size(arg)
+% narg = size(arg,1);
+% 
+% if (narg == 2 && isnumeric(arg{1}) && ischar(arg{2}))
+%     normalise = arg{1};
+%     plotornot = arg{2};
+% elseif narg == 1
+%     if ischar(arg{1})
+%         plotornot = arg{1};
+%         normalise = 1.0;
+%     elseif isnumeric(arg{1})
+%         normalise = arg{1};
+%         plotornot = 'yes';
+%     end
+%         
+% elseif narg == 0
+%     plotornot = 'yes';
+%     normalise = 1.0;
+% else
+%     error('input to compute_kernels_gravity was not understood.')
+% end
+% 
+% end

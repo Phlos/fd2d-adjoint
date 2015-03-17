@@ -187,27 +187,30 @@ for n=1:nt
         
         
         % store time-reversed history ----------------------------------------
+        store_fw_every = 10; % These params also defined below at calc knl
+        sfe = store_fw_every;
         
         % save every 5th velocity&displacement field to the big-ass 3 direction matrix
-        if (mod(n,5)==0)
+
+        if (mod(n,sfe)==0)
             if(strcmp(wave_propagation_type,'SH'))
-                vy_forward(nt/5+1-n/5,:,:)=vy(:,:);
+                vy_forward(nt/sfe+1-n/sfe,:,:)=vy(:,:);
                 % displacement
-                uy_forward(nt/5+1-n/5,:,:)=uy(:,:);
+                uy_forward(nt/sfe+1-n/sfe,:,:)=uy(:,:);
             elseif(strcmp(wave_propagation_type,'PSV'))
-                vx_forward(nt/5+1-n/5,:,:)=vx(:,:);
-                vz_forward(nt/5+1-n/5,:,:)=vz(:,:);
+                vx_forward(nt/sfe+1-n/sfe,:,:)=vx(:,:);
+                vz_forward(nt/sfe+1-n/sfe,:,:)=vz(:,:);
                 % displacement
-                ux_forward(nt/5+1-n/5,:,:)=ux(:,:);
-                uz_forward(nt/5+1-n/5,:,:)=uz(:,:);
+                ux_forward(nt/sfe+1-n/sfe,:,:)=ux(:,:);
+                uz_forward(nt/sfe+1-n/sfe,:,:)=uz(:,:);
             elseif(strcmp(wave_propagation_type,'both'))
-                vy_forward(nt/5+1-n/5,:,:)=vy(:,:);
-                vx_forward(nt/5+1-n/5,:,:)=vx(:,:);
-                vz_forward(nt/5+1-n/5,:,:)=vz(:,:);
+                vy_forward(nt/sfe+1-n/sfe,:,:)=vy(:,:);
+                vx_forward(nt/sfe+1-n/sfe,:,:)=vx(:,:);
+                vz_forward(nt/sfe+1-n/sfe,:,:)=vz(:,:);
                 % displacement
-                uy_forward(nt/5+1-n/5,:,:)=uy(:,:);
-                ux_forward(nt/5+1-n/5,:,:)=ux(:,:);
-                uz_forward(nt/5+1-n/5,:,:)=uz(:,:);
+                uy_forward(nt/sfe+1-n/sfe,:,:)=uy(:,:);
+                ux_forward(nt/sfe+1-n/sfe,:,:)=ux(:,:);
+                uz_forward(nt/sfe+1-n/sfe,:,:)=uz(:,:);
             end
         end
 
@@ -226,7 +229,9 @@ for n=1:nt
     elseif(strcmp(simulation_mode,'adjoint'))
         
         % plot and compute kernel every 5th iteration -----------------------
-        if (mod(n,5)==0)
+        store_fw_every = 10; % These params also defined above at save fwd
+        sfe = store_fw_every;
+        if (mod(n,sfe)==0)
                         
             % calculate kernels
             compute_kernels;

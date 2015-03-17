@@ -9,25 +9,23 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-InvProps.niter = 110;
-InvProps.istart = 100;
+InvProps.niter = 20;
+InvProps.istart = 1;
 
 niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
-% which get_input_info
-% blips = update_model(10);
 [project_name, axrot, apply_hc, use_grav, parametrisation, rec_g, X, Z, misfit_type, normalise_misfits, InvProps.stepInit] = get_input_info;
 
 
-%% just to get 'middle' right
-% save initial rho mu lambda (from input_parameters) as iter 1 Params values:
-Model_start = update_model();
-
-% % set the background values for plot_model to mode of the initial model
-middle.rho    = mode(Model_start.rho(:));
-middle.mu     = mode(Model_start.mu(:));
-middle.lambda = mode(Model_start.lambda(:));
+% %% just to get 'middle' right
+% % save initial rho mu lambda (from input_parameters) as iter 1 Params values:
+% Model_start = update_model();
+% 
+% % % set the background values for plot_model to mode of the initial model
+% middle.rho    = mode(Model_start.rho(:));
+% middle.mu     = mode(Model_start.mu(:));
+% middle.lambda = mode(Model_start.lambda(:));
 
 
 %% OBS
@@ -42,7 +40,7 @@ disp 'saving obs variables to matfile...'
 savename = ['../output/',project_name,'.obs.all-vars.mat'];
 save(savename, 'v_obs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
 
-%% INVERSION
+%% Inversion preparation
 
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '======================================';
@@ -66,15 +64,15 @@ disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 
 
 
-% save initial rho mu lambda (from input_parameters) as iter 1 Params values:
+% save initial model (from input_parameters)
 Model_start = update_model();
 
-% % set the background values for plot_model to mode of the initial model
+% set the background values for plot_model to mode of the initial model
 middle.rho    = mode(Model_start.rho(:));
 middle.mu     = mode(Model_start.mu(:));
 middle.lambda = mode(Model_start.lambda(:));
 
-% plot very initial model
+% plot initial model
 fig_mod = plot_model(Model_start,middle,parametrisation);
 set(fig_mod,'Renderer','painters');
 titel = [project_name,': model of iter 0'];
@@ -83,22 +81,25 @@ figname = ['../output/iter0.model.',parametrisation,'.eps'];
 print(fig_mod,'-depsc','-r400',figname);
 close(fig_mod);
 
-% apply hard constraints in initial model
+% apply hard constraints to initial model (if applicable)
 if(strcmp(apply_hc,'yes'))
     % -> no negative velocities
     % -> mass of the Earth and/or its moment of inertia
-    switch parametrisation
-        case 'rhomulambda'
-            [Model(1).rho, fig_hcupdate,~,~] = ...
+    Model(1) = Model_start;
+    [Model(1).rho, fig_hcupdate,~,~] = ...
                 apply_hard_constraints(props_obs, Model_start.rho,axrot);
-        case 'rhovsvp'
-            Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_start);
-            [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
-                apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
-            Model(1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
-        otherwise
-            error('the parametrisation of the inversion was not recognised')
-    end
+%     switch parametrisation
+%         case 'rhomulambda'
+%             [Model(1).rho, fig_hcupdate,~,~] = ...
+%                 apply_hard_constraints(props_obs, Model_start.rho,axrot);
+%         case 'rhovsvp'
+%             Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_start);
+%             [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
+%                 apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
+%             Model(1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
+%         otherwise
+%             error('the parametrisation of the inversion was not recognised')
+%     end
     figname = ['../output/iter0.hard-constraints-rhoupdate.png'];
     titel = [project_name,': hc update of model 0'];
     mtit(fig_hcupdate, titel, 'xoff', 0.001, 'yoff', 0.05);
@@ -110,6 +111,7 @@ else
     Model(1) = Model_start;
 end
 
+%% start of iterations
 
 for iter = InvProps.istart : InvProps.niter;
 %   if i > 1
@@ -135,6 +137,14 @@ for iter = InvProps.istart : InvProps.niter;
         close(fig_mod);
         clearvars('fig_mod');
         
+        fig_mod = plot_model_diff(Model(iter),Model_start,parametrisation);
+        titel = [project_name,': model diff of iter ', num2str(iter), ' and starting model'];
+        mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
+        figname = ['../output/iter',num2str(iter),'.model-diff.',parametrisation,'.png'];
+        print(fig_mod,'-dpng','-r400',figname);
+        close(fig_mod);
+        clearvars('fig_mod');
+        
         %% misfit
         
 %         if strcmp(use_grav,'yes')
@@ -155,15 +165,20 @@ for iter = InvProps.istart : InvProps.niter;
             clearvars('fig_mod');
             
             %- calculate gravity misfit:
-            % normalise the total misfit by first misfit (if already calc'd)
-            if ( strcmp(normalise_misfits, 'byfirstmisfit')  && iter==1)
-                norm_misf_g = NaN;
-            elseif (strcmp(normalise_misfits, 'byfirstmisfit') && iter>1)
-                norm_misf_g = InvProps.misfit_g(1).total;
-            else
-                norm_misf_g = 1;
-            end
+%             % normalise the total misfit by first misfit (if already calc'd)
+%             if ( strcmp(normalise_misfits, 'byfirstmisfit')  && iter==1)
+%                 InvProps.norm_misf_g = NaN;
+%             elseif (strcmp(normalise_misfits, 'byfirstmisfit') && iter>1)
+%                 InvProps.norm_misf_g = InvProps.misfit_g(1).total;
+%             else
+%                 InvProps.norm_misf_g = 1;
+%             end
             [g_src, InvProps.misfit_g(iter)] = make_gravity_sources(g(iter), g_obs, norm_misf_g);
+            
+            % NEW AS OF 17-3-2015
+            InvProps.misfit_g(iter).normd = ...
+                norm_misfit(InvProps.misfit_g(iter).total, ...
+                            InvProps.misfit_g(1).total, normalise_misfits);
             clearvars norm_misf;
             
             % gravity misfit
@@ -174,10 +189,10 @@ for iter = InvProps.istart : InvProps.niter;
                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
             disp(['   fraction of g_obs ',num2str(iter),': ', ...
                 num2str(div_by_gobs,'%3.2e')])
-            if strcmp(normalise_misfits,'byfirstmisfit')
-                disp(['   fraction of 1st misfit: ', ...
-                    num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
-            end
+%             if strcmp(normalise_misfits,'byfirstmisfit')
+            disp(['   normalised ',normalise_misfits, ': ', ...
+                num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
+%             end
             disp ' ';
 %         else
 %             misfit_g(i).total = NaN;
@@ -208,26 +223,26 @@ for iter = InvProps.istart : InvProps.niter;
         
         % make adjoint sources
         cd ../tools
-        disp ' ';
-        disp(['iter ',num2str(iter),': calculating adjoint stf']);
+        disp ' '; disp(['iter ',num2str(iter),': calculating adjoint stf']);
         
-
-        
-        % really make adjoint sources
         [adstf{iter}, InvProps.misfit_seis{iter}] = calc_misfitseis_adstf(misfit_type,t,v_iter{iter},v_obs);
-%         [adstf, InvProps.misfit_seis(i)] = make_all_adjoint_sources( ...
-%                 v_iter{i},v_obs,t,'waveform_difference','auto', norm_misf_s);
-        % determine misfit normalisation factor by first misfit (if already calc'd)
-        if ( strcmp(normalise_misfits, 'byfirstmisfit') )
-             InvProps.misfit_seis{iter}.normd = InvProps.misfit_seis{iter}.total / ...
-                                    InvProps.misfit_seis{1}.total;
-%             norm_misf_s = NaN;
-%         elseif (strcmp(normalise_misfits, 'byfirstmisfit') && iter>1)
-%             norm_misf_s = InvProps.misfit_seis(1).total;
-        else
-            InvProps.misfit_seis{iter}.normd = InvProps.misfit_seis{iter}.total;
-%             norm_misf_s = 1;
-        end
+        % NEW AS OF 17-3-2015
+            InvProps.misfit_seis{iter}.normd = ...
+                norm_misfit(InvProps.misfit_seis{iter}.total, ...
+                            InvProps.misfit_seis{1}.total, normalise_misfits);
+        
+        
+%         % determine misfit normalisation factor by first misfit (if already calc'd)
+%         if ( strcmp(normalise_misfits, 'byfirstmisfit') )
+%              InvProps.misfit_seis{iter}.normd = InvProps.misfit_seis{iter}.total / ...
+%                                     InvProps.misfit_seis{1}.total;
+% %             norm_misf_s = NaN;
+% %         elseif (strcmp(normalise_misfits, 'byfirstmisfit') && iter>1)
+% %             norm_misf_s = InvProps.misfit_seis(1).total;
+%         else
+%             InvProps.misfit_seis{iter}.normd = InvProps.misfit_seis{iter}.total;
+% %             norm_misf_s = 1;
+%         end
         
         
 %         % plot stf to adstf for one station
@@ -255,10 +270,10 @@ for iter = InvProps.istart : InvProps.niter;
                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
             disp(['   fraction of g_obs:       ', ...
                 num2str(div_by_gobs,'%3.2e')])
-            if strcmp(normalise_misfits,'byfirstmisfit')
-                disp(['   fraction of 1st misfit:  ', ...
+%             if strcmp(normalise_misfits,'byfirstmisfit')
+                disp(['   normalised ',normalise_misfits,':  ', ...
                     num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
-            end
+%             end
             disp ' ';
         end
         
@@ -271,15 +286,15 @@ for iter = InvProps.istart : InvProps.niter;
             end
         end
         div_by_vobs = InvProps.misfit_seis{iter}.total / sumvobs;
-        disp ' ';
+%         disp ' ';
         disp(['SEISMIC misfit FOR ITER ',num2str(iter),': ', ...
             num2str(InvProps.misfit_seis{iter}.total,'%3.2e')])
         disp(['   fraction of v_obs:       ', ...
             num2str(div_by_vobs,'%3.2e')])
-        if strcmp(normalise_misfits,'byfirstmisfit')
-        disp(['   fraction of 1st misfit:  ', ...
+%         if strcmp(normalise_misfits,'byfirstmisfit')
+        disp(['   normalised ',normalise_misfits,':  ', ...
             num2str(InvProps.misfit_seis{iter}.normd,'%3.2e')])
-        end
+%         end
         disp ' ';
         
         if strcmp(use_grav,'yes')
@@ -290,7 +305,7 @@ for iter = InvProps.istart : InvProps.niter;
         
         disp(['TOTAL misfit FOR ITER ',num2str(iter),': ', ...
             num2str(InvProps.misfit(iter),'%3.2e')])
-        disp ' ';
+%         disp ' ';
         disp '=========================================='
         
         if iter>1
@@ -318,18 +333,24 @@ for iter = InvProps.istart : InvProps.niter;
                 %- calculate gravity kernels
                 disp ' ';
                 disp(['iter ',num2str(iter),': calculating gravity kernel']);
-                % normalising the gravity kernel
-                if strcmp(normalise_misfits,'byfirstmisfit')
-                    normKg = 1.0 / InvProps.misfit_g(1).total;
-                else
-                    normKg = 1.0;
-                end
+
                 % calculating the gravity kernel
                 if iter == 1
-                    [Kg{iter}, fig_Kg] = compute_kernels_gravity(g_src,rec_g,normKg,'no'); % 'no' is for plotting gravity kernel update
+                    [Kg_temp, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
                 else
-                    [Kg{iter}, fig_Kg] = compute_kernels_gravity(g_src,rec_g,normKg,'no'); % 'no' is for plotting gravity kernel update
+                    [Kg_temp, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
                 end
+                
+                % normalising the gravity kernel
+                Kg{iter} = norm_kernel(Kg_temp, InvProps.misfit_g(1).total, normalise_misfits);
+                clearvars Kg_temp;
+                
+%                 normKg = InvProps
+%                 if strcmp(normalise_misfits,'byfirstmisfit')
+%                     normKg = 1.0 / InvProps.misfit_g(1).total;
+%                 else
+%                     normKg = 1.0;
+%                 end
                 
                 %  plot gravity kernel
                 figname = ['../output/iter',num2str(iter),'.kernel_grav.rho.png'];
@@ -344,29 +365,26 @@ for iter = InvProps.istart : InvProps.niter;
         
         %% SEISMIC KERNEL
         
-        % kernels only to be calculated when a next iteration will take place.
-        if(iter < InvProps.niter)
+        if(iter < InvProps.niter) % kernels only to be calculated when a next iteration will take place.
             %  if (i>1)
-            % normalising the gravity kernel
-            if strcmp(normalise_misfits,'byfirstmisfit')
-                normKseis = 1.0 / InvProps.misfit_seis{1}.total;
-            else
-                normKseis = 1.0;
-            end
+            % normalising the seismic kernel
+%             if strcmp(normalise_misfits,'byfirstmisfit')
+%                 InvProps.normKseis = 1.0 / InvProps.misfit_seis{1}.total;
+%             else
+%                 normKseis = 1.0;
+%             end
             
             % run adjoint to obtain seismic kernels
             disp ' ';
             disp(['iter ',num2str(iter),': calculating adjoint wave propagation']);
             cd ../code/
-            Kseis(iter) = run_adjoint(u_fw,v_fw,adstf{iter},Model(iter),normKseis);
-            % storing kernels is not really necessary when allvars are saved at the end
-%             disp 'storing kernels...'
-%             kernelsavename = ['../output/iter', num2str(i),'.kernels.mat'];
-%             save(kernelsavename,'Kseis', 'Kg','-v7.3');
+            Kseis_temp = run_adjoint(u_fw,v_fw,adstf{iter},Model(iter));
             
-
-%  end
-%  disp 'hellooooo'
+            % normalise kernels
+            Kseis(iter) = norm_kernel(Kseis_temp, InvProps.misfit_seis{1}.total, normalise_misfits);
+            clearvars Kseis_temp;
+            
+            
             % plot the kernels
             disp ' ';
             disp(['iter ',num2str(iter),': plotting kernels']);
@@ -402,8 +420,6 @@ for iter = InvProps.istart : InvProps.niter;
         end
         clearvars K_reltemp fig_knl;
         
-%     disp 'hellooooo'
-%     end
     
     
     %% COMBINE KERNELS & UPDATE MODEL
@@ -417,7 +433,7 @@ for iter = InvProps.istart : InvProps.niter;
             % determine weight of relative kernels
             w_Kseis = 1;
             w_Kg = 1;
-%             w_Kg = 1e7;
+%             w_Kg = 1e7; % was necessary before discovery KMP problem: spatial delta
             
             disp ' ';
             disp '---'
@@ -431,7 +447,7 @@ for iter = InvProps.istart : InvProps.niter;
             InvProps.verhouding(iter) = norm(Kseis(iter).rho.total(:)) / norm(Kg{iter}(:));
             disp(['the ratio of seis and grav kernel 98th prctiles: ',num2str(InvProps.verhouding98th(iter),'%3.2e')]);
             disp(['the ratio of seis and grav kernel norms:         ',num2str(InvProps.verhouding(iter),'%3.2e')]);
-            disp(['the ratio of grav and seis weights:              ',num2str(w_Kg/w_Kseis,'%3.2e')]);
+%             disp(['the ratio of grav and seis weights:              ',num2str(w_Kg/w_Kseis,'%3.2e')]);
             disp '---'
             
             % combine seismic and gravity kernels
@@ -447,26 +463,33 @@ for iter = InvProps.istart : InvProps.niter;
         else
             K_total(iter) = Kseis(iter);
         end
-%     end
 
-            % empty the big variables so that the computer doesn't slow down.
-            clearvars('u_fw');
-            clearvars('v_fw');
+
+    % empty the big variables so that the computer doesn't slow down.
+    clearvars u_fw v_fw;
 
         % calculate the step length and model update
         disp ' ';
         disp(['iter ',num2str(iter),': calculating step length']);
-        if iter==1;
-            % basis for new step is initial step length
-            [InvProps.step(iter), fig_lnsrch] = calculate_step_length(InvProps.stepInit,iter, ...
+        if iter==1; stapje = InvProps.stepInit;
+        elseif iter>1; stapje = InvProps.step(iter-1);
+        end
+        [InvProps.step(iter), fig_lnsrch] = calculate_step_length(stapje,iter, ...
                 InvProps.misfit(iter), InvProps.misfit_seis, InvProps.misfit_g, ...
                 Model(iter),K_total(iter),v_obs, g_obs);
-        elseif iter>1;
-            % basis for new step length is previous one.
-            [InvProps.step(iter), fig_lnsrch] = calculate_step_length(InvProps.step(iter-1),iter, ...
-                InvProps.misfit(iter), InvProps.misfit_seis, InvProps.misfit_g, ...
-                Model(iter),K_total(iter),v_obs, g_obs);
-        end        
+        clearvars stapje;
+%         if iter == 1
+%             % basis for new step is initial step length
+%             [InvProps.step(iter), fig_lnsrch] = calculate_step_length(InvProps.stepInit,iter, ...
+%                 InvProps.misfit(iter), InvProps.misfit_seis, InvProps.misfit_g, ...
+%                 Model(iter),K_total(iter),v_obs, g_obs);
+%         elseif iter>1;
+%             % basis for new step length is previous one.
+%             [InvProps.step(iter), fig_lnsrch] = calculate_step_length(InvProps.step(iter-1),iter, ...
+%                 InvProps.misfit(iter), InvProps.misfit_seis, InvProps.misfit_g, ...
+%                 Model(iter),K_total(iter),v_obs, g_obs);
+%         end        
+
         % save linesearch figure
 %         figname = ['../output/iter',num2str(i),'.step-linesearch.png'];
 %         titel = [project_name,': linesearch for iter ',num2str(i)];
@@ -522,8 +545,9 @@ for iter = InvProps.istart : InvProps.niter;
 %     InvProps.angleKg(i).angle = acos(angle(i).kernelskeerelkaar / angle(i).norm);
 
     % useful output
-    InvProps{iter} = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model);
+    InvProps = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model);
 
+    if (iter > 1)
     % inversion results with inversion landscape plot
     fig_inv2 = plot_inversion_development_landscapeshape(InvProps, iter);
     figname = ['../output/inversion_development.',project_name,'.misfit-landscape.png'];
@@ -531,6 +555,17 @@ for iter = InvProps.istart : InvProps.niter;
     figname = ['../output/inversion_development.',project_name,'.misfit-landscape.eps'];
     print(fig_inv2,'-deps','-r400',figname);
     close(fig_inv2)
+    
+    fig_invres = plot_inversion_result(InvProps, iter);
+    figname = ['../output/inversion_result.',project_name,'.png'];
+    print(fig_invres,'-dpng','-r400',figname);
+    figname = ['../output/inversion_result.',project_name,'.eps'];
+    print(fig_invres,'-deps','-r400',figname);
+    close(fig_invres)
+    
+    end
+    
+    
     
     %% safety
     % saving current variables to file (crash safeguard)
@@ -558,20 +593,18 @@ disp '======================================';
 disp '|         ...FINISHING UP...         |';
 disp '======================================';
 
-% disp 'saving misfit evolution...'
-% savename = ['../output/',project_name,'.misfit-evolution.mat'];
-% save(savename, 'InvProps.misfit', '-v7.3');
 
 % plot nice vector plot of misfit evolution + real, start, end model
+disp 'plotting nice vector figures of models and misfit evo'
 plot_models_vector;
 
 
 
-disp 'saving all current variables...'
-clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
-    'filenm_old', 'filenm_new', 'fig_knl');
-savename = ['../output/',project_name,'.all-vars.mat'];
-save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
+% disp 'saving all current variables...'
+% clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
+%     'filenm_old', 'filenm_new', 'fig_knl');
+% savename = ['../output/',project_name,'.all-vars.mat'];
+% save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
 
 disp ' ';
 disp ' ';
