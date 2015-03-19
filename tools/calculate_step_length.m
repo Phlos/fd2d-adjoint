@@ -1,9 +1,9 @@
 % calculate the step length
 
-function [step, fig_lnsrch , steplnArray, misfitArray ] = calculate_step_length(teststep, niter, ...
+function [step, fig_lnsrch , steplnArray_total, misfitArray_total ] = calculate_step_length(teststep, niter, ...
                                       currentMisfit, misfit_seis, misfit_grav, ...
                                       Model_prev, K_abs, v_obs, g_obs)
-%== 1. Preparation ===========================================================
+%% == 1. Preparation ======================================================
 
 % % obtain useful parameters from input_parameters
 % [~, ~, ~, use_grav, ~, ~, ~, ~, ~, ~] = get_input_info;
@@ -21,7 +21,7 @@ fig_mod_prev = plot_model(Model_prev, parametrisation);
 
 %- determine the number of steps we'll try and divide teststep by that nr
 if (niter == 1)
-    nsteps = 3;
+    nsteps = 5;
 elseif (niter > 1)
     nsteps = 3;
 else
@@ -40,15 +40,7 @@ misfitArray.total(1) = currentMisfit;
 
 
 
-% In the end, I decided to filter the kernels after all. But this is done
-% (slightly inefficiently, because multiple times) inside the update_model
-% script instead of elsewhere. I could move the kernel filtering over to
-% calculate_other_kernels, I suppose... --- Nienke Blom, 5 July 2014
-% Ksmooth = smooth_kernels(kernel,11);
-
-
-
-%== 2. Calculating updates and misfits =====================================================
+%% == 2. Calculating updates and misfits ==================================
 
 
 %- START LOOP
@@ -67,7 +59,8 @@ for ntry = 2:nsteps
     %- give step nr, step length and misfit
     disp(['Step ',num2str(ntry), ...
           ': step length ', num2str(steptry,'%3.1e'), ...
-          ' and misfit ', num2str(misfitArray.total(ntry))]);
+          ' and misfit ', num2str(misfitArray.total(ntry)), ...
+          ' (diff ', num2str((misfitArray.total(ntry) - currentMisfit) / currentMisfit ),')']);
 
 end
 
@@ -81,42 +74,72 @@ end
 
 
 
-%== 4. Calculate the real step length =====================================
+%% == 3. Calculate the real step length ===================================
 
-[step, minval, p, fig_lnsrch] = fit_polynomial(steplnArray, misfitArray.total);
+close all;
+[step, minval, p, RSS, fig_lnsrch] = fit_polynomial(steplnArray, misfitArray.total);
+FitGoodness = RSS / (max(misfitArray.total) - min(misfitArray.total));
+print(fig_lnsrch,'-dpng','-r400','../output/fig_linesearch.initial.png');
+disp ' ';
+disp(['Resulting step: step length ', num2str(step,'%3.1e'), ...
+    ' --- misfit      ', num2str(minval,'%3.1e')]);
 
 
-%== 5. Catch a maximum in the polynomial or a negative step length ========
+%% == 4. Catch bad polynomials ============================================
+%- make a catch for:
+%  max extremum 
+%  negative step length
+%  poorly fitting polynomial
 
+% FitGoodness = S.normr / (max(misfitArray.total) - min(misfitArray.total));
+% FitGoodness = RSS / (max(misfitArray.total) - min(misfitArray.total));
 
+steplnArray_total = steplnArray;
+misfitArray_total = misfitArray;
 
-%- make a catch for max extremum and negative step length
-
-% teststep_prev = teststep;
 steplnArray_prev = steplnArray;
 misfitArray_prev = misfitArray;
+
 nextra = 1;
 
-% while the poly gives a max OR the steplength is negative
-% keep using the smallest previous test value to see if we end up with a
-% minimum / a positive step length etc.
-while ( (p(1) < 0 || step < 0) && nextra < 5 )
+% make new test points closer or farther away from starting point depending
+% on why the polyfit doesn't give a good step length
+while ( (p(1) < 0 || step < 0 || FitGoodness > 0.1) && nextra <= 5 )
     disp ' ';
     disp '----------------------------------------------';
     disp 'we obtained a max extremum or the step is negative'
-    if (p(1) < 0)
+    if (p(1) < 0) && step < 0
+        errorreason = 'neg_max';
+        disp 'it was a maximum AND negative step size'
+    elseif (p(1) < 0)
+        errorreason = 'max';
         disp 'it was a maximum'
     elseif step < 0
+        errorreason = 'neg';
         disp 'the step size was negative'
+    elseif (FitGoodness > 0.1)
+        errorreason = 'poorfit';
+        disp(['the polyfit is poor: ', num2str(FitGoodness)]);
     else
         error('none of the above wtf???')
     end
     
-    % determine new steplnarray
-    if ( nextra ==1 && steplnArray_prev(2) ~= stepInit)
+    % determine new steplnarray and misfitarray
+    if strcmp(errorreason,'neg_max')
+        steplnArray_new = [0 , steplnArray_prev(end), 2* steplnArray_prev(end)];
+        misfitArray_new.total(1) = misfitArray_prev.total(1);
+        misfitArray_new.total(2) = misfitArray_prev.total(end);
+        idxEmpty = 3;
+    elseif ( nextra ==1 && steplnArray_prev(2) > 2*stepInit)
         steplnArray_new = [0 , stepInit , steplnArray_prev(2)];
+        misfitArray_new.total(1) = misfitArray_prev.total(1);
+        misfitArray_new.total(3) = misfitArray_prev.total(2);
+        idxEmpty = 2;
     else
-        steplnArray_new = [0 , 0.5*steplnArray_prev(2) , steplnArray_prev(2)];
+        steplnArray_new = [0 , (1.0/3)*steplnArray_prev(2) , steplnArray_prev(2)];
+        misfitArray_new.total(1) = misfitArray_prev.total(1);
+        misfitArray_new.total(3) = misfitArray_prev.total(2);
+        idxEmpty = 2;
     end
     teststep_new = steplnArray_new(2);
     
@@ -124,22 +147,27 @@ while ( (p(1) < 0 || step < 0) && nextra < 5 )
     disp(['Testing NEW step ',num2str(nextra), ...
           ' --- step length ', num2str(teststep_new,'%3.1e')]);
     
-    % determine new misfitarray
-    misfitArray_new.total(1) = misfitArray_prev.total(1);
-    misfitArray_new.total(3) = misfitArray_prev.total(2);
-    
-    % fill in value 2 of new misfit array
-    misfitArray_new.total(2) = calc_misfit_perstep(K_abs, teststep_new, ...
+    % calculate misfit for the new teststep
+    misfit_new = calc_misfit_perstep(K_abs, teststep_new, ...
         Model_prev, misfit_grav, misfit_seis, g_obs, v_obs);
     disp ' ';
-    disp(['Result:          at step length ', num2str(teststep_new,'%3.1e'), ...
-        ' misfit : ', num2str(misfitArray_new.total(2),'%3.1e')]);
+        %- give step nr, step length and misfit
+    disp(['Extra step ',num2str(nextra), ...
+          ': step length ', num2str(teststep_new,'%3.1e'), ...
+          ' and misfit ', num2str(misfit_new,'%3.1e'), ...
+          ' (diff) ', num2str((misfit_new - currentMisfit) / currentMisfit )]);
+      
+      % save new misfit to appropriate place in new array and total array
+    misfitArray_new.total(idxEmpty) = misfit_new;
+    misfitArray_total.total = [misfitArray_total.total, misfit_new];
+    steplnArray_total = [steplnArray_total, teststep_new];
+    
     
     % determine whether we now get a minimum at positive step length
-%     disp 'fitting the NEW polynomial'
-%     close(fig_lnsrch);
-    [step, minval, p, fig_lnsrch] = fit_polynomial(steplnArray_new, misfitArray_new.total);
-    
+close all
+    [step, minval, p, RSS, fig_lnsrch] = fit_polynomial(steplnArray_new, misfitArray_new.total);
+    FitGoodness = RSS / (max(misfitArray.total) - min(misfitArray.total));
+    print(fig_lnsrch,'-dpng','-r400',['../output/fig_linesearch.extra-',num2str(nextra),'.png']);
     
     disp ' ';
     disp(['Found step:    ',num2str(nextra), ...
@@ -152,17 +180,33 @@ while ( (p(1) < 0 || step < 0) && nextra < 5 )
     nextra = nextra +1;
     
     % make the new 'prev' arrays
-%     disp 'making the NEW ''prev'' arrays'
     steplnArray_prev = steplnArray_new;
     misfitArray_prev = misfitArray_new;
     
-    % make something that stores all the extra misfits & tried steps into
-    % one array that can be plotted after we're all ready and done. (needs
-    % to be sorted as well)
+
 end
 
+%% == 5. Output ===========================================================
+
+%- do something with steplnArray_total and misfitArray_total here!
+close all;
+[~, ~, ~, ~, fig_lnsrch] = fit_polynomial(steplnArray_total, misfitArray_total.total);
+fig_lnsrch.Children.Children(1).Color = 'w';
+fig_lnsrch.Children.Children(2).LineStyle = '--';
+% add the final polyfit and step to it
+iksmin = min(steplnArray_total); iksmaks = max(steplnArray_total); 
+iks = iksmin:(iksmaks-iksmin)/30:iksmaks;
+ei = p(1)*iks.^2 + p(2)*iks + p(3);
+hold on; echtefit = plot(iks,ei,'-r', 'LineWidth', 1); %echtefit.LineWidth = 2;
+% calculate extremum value and plot
+echtestap = plot(step,minval,'kx', 'LineWidth', 2); %echtestap.LineWidth = 2;
+
+%% == 6. If linesearch still sucks, quit ==================================
+    
 %- check if extremum is a minimum, else error and quit
-if (p(1) < 0)
+if (p(1) < 0) && step < 0
+        disp 'Your step length line search obtained a NEGATIVE maximum!!'
+elseif (p(1) < 0)
     error('Your step length line search obtained a maximum...');
 elseif step < 0
     warning('The obtained step length is negative!!');
@@ -179,15 +223,10 @@ disp '----------------------------------------------------';
 disp ' ';
 
 
-
-
-% figure(fig_mod_prev);
-% pause(10);
-
-% close(fig_mod_prev);
-close all;
-
 end
+
+
+%% subfunctions
 
 function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, misfit_grav, misfit_seis, g_obs, v_obs)
 
@@ -201,6 +240,12 @@ set_figure_properties_bothmachines;
     %% calculate updated model using steptry
     disp 'now updating model in calc_misfit_perstep'
     Model_try = update_model(K_abs, steptry, Model_prev, parametrisation);
+    
+    % no negative density
+    min_rh = min(Model_try.rho(:));
+    if min_rh < 0
+        error('density inside the test model is negative somewhere!!')
+    end
 
     
     %- some output
@@ -211,55 +256,39 @@ set_figure_properties_bothmachines;
     min_rh = min(Model_try.rho(:) - Model_prev.rho(:));
     min_la = min(Model_try.lambda(:) - Model_prev.lambda(:));
     
-    disp(['Maxima -- mu: ',num2str(max_mu,'%3.2e'), '   rho: ', num2str(max_rh), ...
+    disp(['Max diff w prev model -- mu: ',num2str(max_mu,'%3.2e'), '   rho: ', num2str(max_rh), ...
           '   lambda: ', num2str(max_la,'%3.2e')]);
-    disp(['Minima -- mu: ',num2str(min_mu,'%3.2e'), '   rho: ', num2str(min_rh), ...
+    disp(['Min diff w prev model -- mu: ',num2str(min_mu,'%3.2e'), '   rho: ', num2str(min_rh), ...
           '   lambda: ', num2str(min_la,'%3.2e')]);
     
     fig_mod = plot_model(Model_try);
-%     close fig_mod;
-close all
-    
 
-%     dada
       
     %% gravity misfit
     
     if strcmp(use_grav,'yes')
       [g_try, fig_grav] = calculate_gravity_field(Model_try.rho, rec_g);
-%       close(fig_grav);
       
-      %- calculate gravity misfit:
-      scaling_g = misfit_grav(1).total;
-      [~, misf_g_test] = make_gravity_sources(g_try, g_obs, scaling_g);
-      
-      misfit.grav = misf_g_test.normd;
+%       %- calculate gravity misfit:
+      % NEW as of 18-3-2015
+      [~, misf_g_test] = make_gravity_sources(g_try, g_obs);
+      disp(['misfit_g_test.total ', misf_g_test.total]);
+      misfit.grav = norm_misfit(misf_g_test.total, ...
+                            misfit_grav(1).total, normalise_misfits);
     end
     
     %% seismic misfit
     
     %- for each step, run forward update
     [v_try,t,~,~,~,~] = run_forward(Model_try);
-%     close(gcf);
-%     close(gcf);
-%     close(gcf);
     
     %- for each step, calculate the misfit
-%     if strcmp(normalise_misfits, 'byfirstmisfit')
-%         scaling_s = misfit_seis{1}.total;
-%     else
-%         scaling_s = 1;
-%     end
     [~, misf_s_test] = calc_misfitseis_adstf('waveform_difference',t,v_try,v_obs);
-%     [~, misf_s_test] = make_all_adjoint_sources(v_try,v_obs,t, ...
-%         'waveform_difference','auto', scaling_s);
-    if ( strcmp(normalise_misfits, 'byfirstmisfit') )
-        misf_s_test.normd = misf_s_test.total / ...
-            misfit_seis{1}.total;
-    else
-        misf_s_test.normd = misf_s_test.total;
-    end
-    misfit.seis = misf_s_test.normd;
+      disp(['misfit_s_test.total ', misf_s_test.total]);
+    % NEW AS OF 18-3-2015
+    misfit.seis = norm_misfit(misf_s_test.total, ...
+                                misfit_seis{1}.total, normalise_misfits);
+
 
 
     %% combine the misfits
@@ -279,25 +308,32 @@ close all
 
 end
 
-function [step, minval, p, fig_lnsrch] = fit_polynomial(steplnArray, misfitArraytotal)
+function [step, minval, p, RSS, fig_lnsrch] = fit_polynomial(steplnArray, misfitArraytotal)
 
 %- determine teststep & nsteps
 maxstep = max(steplnArray(:));
 nsteps = length(steplnArray);
 
 %- fit quadratic
-p = polyfit(steplnArray,misfitArraytotal,2);
+[p] = polyfit(steplnArray,misfitArraytotal,2);
 %- determine minimum of quadratic --> step length
 step = -p(2)/(2*p(1));
+
+% goodness of fit
+iks = steplnArray;
+ei  = p(1)*iks.^2 + p(2)*iks + p(3);
+RSS = sum((misfitArraytotal - ei).^2);
 
 %- plot the misfit versus the step
 fig_lnsrch = figure;
 hold on;
 
 % plot misfits
-plot(steplnArray,misfitArraytotal,'b');
+plot(steplnArray,misfitArraytotal,'-bo');
 
 % plot fitting polynomial
+minstep = min([steplnArray, 0]);
+maxstep = max(maxstep,step);
 iks = 0: maxstep/(20*(nsteps-1)) : maxstep;
 ei  = p(1)*iks.^2 + p(2)*iks + p(3);
 plot(iks,ei,'r');

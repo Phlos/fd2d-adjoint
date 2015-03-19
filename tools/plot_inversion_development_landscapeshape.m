@@ -24,7 +24,7 @@ for i = 1:niter
 misfitgrav(i) = misfit_g(i).normd;
 end
 
-stepcumsum = cumsum(step(1:imax-1));
+stepcumsum = cumsum(abs(step(1:imax-1)));
 
 % plot prep
 fig_inv2 = figure;
@@ -49,7 +49,7 @@ subplot(3,1,2)
 h2 = semilogy(stepcumsum,misfit(2:imax), 'k-x', ...
     stepcumsum, misfitseis(2:imax), 'r-x', ...
     stepcumsum, misfitgrav(2:imax), '-bx');
-xlim([0 max(stepcumsum(1:imax-1))]);
+xlim([min([stepcumsum(1:imax-1), 0]) max(stepcumsum(1:imax-1))]);
 set(h2(1), 'LineWidth', 2)
 set(h2(2), 'LineWidth', 1)
 set(h2(3), 'LineWidth',1)

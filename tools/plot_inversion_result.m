@@ -34,7 +34,7 @@ for ii = 1:imax
     misfitgrav(ii) = misfit_g(ii).normd;
 end
 
-stepcumsum = [0, cumsum(step(1:imax-1))];
+stepcumsum = [0, cumsum(abs(step(1:imax-1)))];
 
 % % check output length
 % disp(['length misfit: ', num2str(length(misfit))]);
@@ -97,6 +97,7 @@ Langle = plot(iters(2:imax-1), angletot(2:imax-1) ./ pi .* 180, 'k',...
     set(Langle(3), 'LineWidth',1)
 end
 xlim([min(iters), iters(imax)]);
+ylim([0 90]);
 grid on
 % set(Lmdifn, 'LineWidth', 1)
 title('angle between consecutive kernels (degrees)');
@@ -144,10 +145,11 @@ Rangle = plot(stepcumsum(2:imax-1), angletot(2:imax-1) ./ pi .* 180, '--ko',...
     set(Rangle(3), 'LineWidth',1)
 end
 xlim([min(stepcumsum), stepcumsum(imax)]);
+ylim([0 90]);
 grid on
 % set(Lmdifn, 'LineWidth', 1)
 title('angle between consecutive kernels (degrees)');
-xlabel('iteration no.');
+xlabel('distance travelled in misfit landscape');
 % yt=get(gca,'ytick')
 % for k=1:numel(yt);
 % yt1{k}=sprintf('%4.1f°',yt(k));

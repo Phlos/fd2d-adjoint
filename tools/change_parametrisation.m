@@ -17,7 +17,7 @@ function outfields = change_parametrisation(inparam, outparam, infields)
 switch outparam
     case 'rhovsvp'
         if isfield(infields, 'vs') && isfield(infields, 'vp')
-            warning('your infields already has the parametrisation you want');
+%             warning('your infields already has the parametrisation you want');
             outfields = infields;
         else
             switch inparam

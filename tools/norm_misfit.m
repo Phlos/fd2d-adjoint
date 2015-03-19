@@ -7,7 +7,7 @@ function misfit_normd = norm_misfit(misfit,misfit_1,normalise_how)
 switch normalise_how
     case 'byfirstmisfit'
         if misfit_1 == 0
-            warning('your initial misfit is zero, cannot divide by that!')
+%             warning('your initial misfit is zero, cannot divide by that!')
             misfit_normd = misfit;
         else
             misfit_normd = misfit / misfit_1;

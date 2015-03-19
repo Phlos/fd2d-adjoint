@@ -30,9 +30,9 @@ for irec = 1:nrec
     comp = fieldnames(v_obs{irec});
     for icomp = 1:length(comp);
         
-%         subplot(ncomp,1,icomp);
-        subplot(nrec,ncomp,(irec-1)*ncomp + icomp)
-%         hold on
+        subplot(ncomp,1,icomp);
+%         subplot(nrec,ncomp,(irec-1)*ncomp + icomp)
+        hold on
         plot(t,v_rec{irec}.(comp{icomp}),'k', ...
              t,v_obs{irec}.(comp{icomp}),'r--', ...
              t,v_rec{irec}.(comp{icomp}) - v_obs{irec}.(comp{icomp}), 'b');

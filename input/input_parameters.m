@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.initial-test.8-source-verti';
+project_name='Mantle.initial-test.vs-anoms-1pct.8-source-hori.maxfreq0.1Hz';
 
 %==========================================================================
 % inversion properties
@@ -35,10 +35,13 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both
 % stepInit = 1e-8;        % normalised misfit, TINY rho anomaly (model 101) (24-11-2014)
 % ---------------- changed stf adstf: now divided by surface of cell to
 %                  make it a spatial delta function
-stepInit = 5e3;         % KMP solved dd ~25 feb 2015
+% stepInit = 5e9;         % KMP solved dd ~25 feb 2015
+stepInit = 7e7;         % PREM + 1% vs anomalies
 
-% smoothing properties
-% smoothnp = 15;  % size of the smoothing filter
+%- smoothing properties
+% smoothing (= filtering) seismograms before adstf
+max_freq = 0.2; % Hz
+% smoothing kernels
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
 
@@ -52,15 +55,21 @@ wave_propagation_type='PSV';   % can be 'PSV' or 'SH' or 'both'
 Lx=6000e3;     % model extension in x-direction [m]
 Lz=2890e3;     % model extension in z-direction [m] ! PREM: don't exceed 2891
 
-nx=901;     % grid points in x-direction
-nz=430;     % grid points in z-direction
+% nx=901;     % grid points in x-direction
+% nz=430;     % grid points in z-direction
+nx = 601;
+nz = 291;
+% nx = 1201;
+% nz = 581;
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
-dt=0.25;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
-% dt=0.1;       % time step [s] 0.4 suffices @PREM
+dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
+% dt=0.1;       % time step [s] 0.4 suffices @PREM dx=dz=10km
 % nt=700;      % number of iterations
-tmax = 1400;  % final time
+% tmax = 1400;  % final time [s]
+% tmax = 580;     % PcP = 510 s, ScS = 935 s
+tmax = 1100;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -112,14 +121,14 @@ stf_type = 'ricker';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed
                         % delta function)
 % needed for 'ricker'
 tauw_0  = 2.628;      % seconds
-tauw    = 6*4.0;        % source duration, seconds
-tee_0   = 6*2.5;        % source start time, seconds
+tauw    = 10*4.0;        % source duration, seconds
+tee_0   = 10*2.5;        % source start time, seconds
 
 % needed for 'delta_bp'    
 f_min=0.2;          % minimum frequency [Hz]
 f_max=1.00;         % maximum frequency [Hz]
 
-stf_PSV = [0 1];    % [x z]
+stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 
                     % propagation. The final stf will be normalised with
                     % such that its original amplitude is preserved.

@@ -235,7 +235,7 @@ for n=1:nt
                         
             % calculate kernels
             compute_kernels;
-%             [K, K_parts] = compute_kernels(vx, vy, vz, vx_forward, nhwgj;iosbvwr);
+%             [K, K_parts] = compute_kernels(vx, vy, vz, vx_forward);
             
             % plot adjoint fields (i.e. adjoint field + the above)
             if (mod(n,plot_every)==0)

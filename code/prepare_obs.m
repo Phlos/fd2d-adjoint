@@ -30,6 +30,13 @@ print(fig_grav_obs, '-dpng', '-r400', figname);
 % real wave propagation
 [v_obs,t_obs,~,~,~,~] = run_forward(Model_real);
 
+v_0 = make_seismogram_zeros(v_obs);
+fig_seis = plot_seismogram_difference(v_0,v_obs,t_obs);
+titel = [project_name,': observed seismograms'];
+mtit(fig_seis, titel, 'xoff', 0.001, 'yoff', -0.05);
+figname = ['../output/obs.seis.png'];
+print(fig_seis,'-dpng','-r400',figname);
+
 % saving the obs variables
 disp 'saving obs variables to matfile...'
 savename = ['../output/obs.all-vars.mat'];
