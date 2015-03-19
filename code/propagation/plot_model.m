@@ -22,7 +22,6 @@ function fig_mod = plot_model(varargin)
 %   given) -- otherwise, it is the actual max and min of the parameter 
 %   values, not some standard deviation.
 
-% format long
 
 [Model, middle] = checkargs(varargin);
 
@@ -42,6 +41,7 @@ for params = fieldnames(Model)';
     
 
     param = Model.(params{1});
+%     max(abs(param(:)))
 
 %     g = subplot(2,3,j);
 %     p = get(g,'position');
@@ -56,12 +56,14 @@ for params = fieldnames(Model)';
     % difference_mumax_mumin = max(mu(:)) - min(mu(:));
     
     %- colour scale
+%     disp 'bips'
     if (isnan( middle.(params{1}) ))
-        
-        if all(abs(param-mode(param(:))) <= 1e-14*mode(param(1)))
-            cmax = param(1) + 0.01*param(1);
-            cmin = param(1) - 0.01*param(1);
-            %     disp 'bips!!! all param are the same!'
+%         param_min_mode_param = max(abs(param(:)-mode(param(:))))
+%         mode_param_1 = mode(param(1))
+        if all(abs(param-mode(param(:))) <= max(1e-10*mode(param(1)), 1e-10))
+            cmax = param(1) + max(0.01*param(1), 1);
+            cmin = param(1) - max(0.01*param(1), 1);
+%                 disp 'bips!!! all param are the same!'
         else
             % max and min are calculated in this way so that the most common value
             % (i.e. the background value) is white, and that the extreme coulours
@@ -80,10 +82,10 @@ for params = fieldnames(Model)';
         
     else
         
-        if all(abs(param-mode(param(:))) <= 1e-14*mode(param(1)))
+        if all(abs(param-mode(param(:))) <= 1e-10*mode(param(1)))
             cmax = param(1) + 0.01*param(1);
             cmin = param(1) - 0.01*param(1);
-            %     disp 'bips!!! all param are the same!'
+%                 disp 'bips!!! all param are the same!'
         else
             
             % max and min are calculated in this way so that the the 
@@ -103,11 +105,11 @@ for params = fieldnames(Model)';
     
     
     for k=1:length(src_x)
-        plot(src_x(k),src_z(k),'kx')
+        plot(src_x(k),src_z(k),'kx','LineWidth',0.3,'MarkerSize',4)
     end
     
     for k=1:length(rec_x)
-        plot(rec_x(k),rec_z(k),'ko')
+        plot(rec_x(k),rec_z(k),'ko','LineWidth',0.3,'MarkerSize',4)
     end
     colormap(cm_model);
     axis image

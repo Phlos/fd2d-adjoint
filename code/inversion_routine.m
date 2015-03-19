@@ -9,8 +9,8 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-InvProps.niter = 10;
-istart = 3;
+InvProps.niter = 15;
+istart = 10;
 
 niter = InvProps.niter;
 

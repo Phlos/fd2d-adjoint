@@ -8,15 +8,15 @@ outparam = checkargs(varargin);
 
 switch outparam
     case 'rhomulambda'
+        Model_diff.rho = Model1.rho - Model2.rho;
         Model_diff.mu = Model1.mu - Model2.mu;
         Model_diff.lambda = Model1.lambda - Model2.lambda;
-        Model_diff.rho = Model1.rho - Model2.rho;
     case 'rhovsvp'
         Model1 = change_parametrisation('rhomulambda','rhovsvp',Model1);
         Model2 = change_parametrisation('rhomulambda','rhovsvp',Model2);
+        Model_diff.rho = Model1.rho - Model2.rho;
         Model_diff.vs = Model1.vs - Model2.vs;
         Model_diff.vp = Model1.vp - Model2.vp;
-        Model_diff.rho = Model1.rho - Model2.rho;
     otherwise
         error('parametrisation not recognised');
 end

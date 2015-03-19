@@ -14,9 +14,16 @@ Model_real = update_model(modelnr);
 
 % plotting the real model
 fig_mod_real = plot_model(Model_real, 'rhovsvp');
-mtit(fig_mod_real, 'real model - rho-vs-vp parametrisation');
+mtit(fig_mod_real, 'real model -- rho-vs-vp parametrisation');
 figname = ['../output/obs.model.rhovsvp.png'];
 print(fig_mod_real, '-dpng', '-r400', figname);
+
+% real - starting model
+Mstart = update_model(model_type);
+fig_mod_diff = plot_model_diff(Model_real, Mstart, 'rhovsvp');
+mtit(fig_mod_diff, 'real - starting model -- rho-vs-vp parametrisation');
+figname = ['../output/obs.model-real-diff-starting.rhovsvp.png'];
+print(fig_mod_diff, '-dpng', '-r400', figname);
 
 % h.c. model properties for real model
 props_obs = calculate_model_properties(Model_real.rho, 'x');

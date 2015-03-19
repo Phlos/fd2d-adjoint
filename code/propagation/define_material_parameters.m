@@ -300,41 +300,7 @@ elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
-%     willekeurig.x = [ 0.7577    0.7431    0.3922    0.6555    0.1712];
-%     willekeurig.x = [ 0.1576    0.9706    0.4854    0.9572    0.8003];
-%     willekeurig.z = [ 0.8235    0.6948    0.3171    0.9502    0.0344];
-    willekeurig.x = [0.906812, 0.493549, 0.499576, 0.175434, 0.441924, ...
-                     0.668359, 0.541729, 0.444079, 0.348643, 0.927618];
-    willekeurig.z = [0.261980, 0.930472, 0.645794, 0.534028, 0.907064, ...
-                     0.631545, 0.039304, 0.194939, 0.657794, 0.749388];
-                 
-    for i = 1:size(willekeurig.x,2)
-%         disp(['i = ', num2str(i), ' out of ']);
-        anom{i}.dxperc = willekeurig.x(i);
-        anom{i}.dzperc = willekeurig.z(i);
-        
-       
-        % x and z location of the anomaly
-        anom{i}.dx = round(anom{i}.dxperc*nx);
-        anom{i}.dz  = round(anom{i}.dzperc*nz);
-
-        % make anomaly
-        gwid = round(0.05 * max([nx nz])); % size of the anomaly
-        filt.width = 8*gwid; % 8*gwid is enough to taper out visibly
-        filt.height = filt.width; % don't see why it should ever be different..
-        filt.f = fspecial('gaussian',[filt.width filt.height],gwid);
-        filt.fnorm = 10^3 * filt.f / max(filt.f(:)); % normalised filter (max value is 1)
-        % make half of the anomalies negative
-        if (rem(i,2)==0)
-%             disp 'negative anomaly'
-            filt.fnorm = - filt.fnorm;
-        else
-%             disp 'positive anomaly'
-        end
-        % add the anomaly to the density field at (anom.dx, anom.dz)
-        rho2 = add_crop_matrix(rho2, filt.fnorm, anom{i}.dx, anom{i}.dz);
-
-    end
+    rho2 = add_10randanoms(rho2, 1e3);
     
     % recalculating to rho-mu-lambda
     rho     = rho2;
@@ -347,43 +313,12 @@ elseif (model_type==50) % PREM background model
                         % IMPORTANT: 
                         % so don't make the model higher than 2891 km!!
                         
-    % NOTE: PREM read from table with columns like
-    % http://ds.iris.edu/ds/products/emc-prem/PREM_1s.csv
-    % units on that website are in g/cm^3, m/s, m/s
-    
-    %- make a grid using the normal Lx, Lz, nx, nz
-    input_parameters;
-    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
-    
-    %- load PREM data from file
-    PREM = csvread('~/Dropbox/DensityInversion/PREM-reference-model/PREM_1s_nowater.csv');
-    
-    %- depth coordinate manipulation
-    depth = PREM(:,2);      % in km
-    % change double occurrences of depth so that interpolation doesn't flip
-    dif_dep = find([NaN; diff(depth)] <= 0);
-    depth(dif_dep) = depth(dif_dep)+1E-5;
-    %- convert depth to height above CMB
-    h_CMB = 2891 - depth;   % in km!
-
-    %- make a grid using PREM values (nonuniform grid)
-    %  (1000* for units km -> m , g/cm^3 -> kg/m^3 , km/s -> m/s)
-    [X_PREM, Z_PREM] = meshgrid( X(1,:),1000* h_CMB(:) );
-    [~, rho_PREM] = meshgrid(X(1,:),1000* PREM(:,3));
-    [~, vp_PREM]  = meshgrid(X(1,:),1000* PREM(:,4));     % in reality vp_vertical 
-    [~, vs_PREM]  = meshgrid(X(1,:),1000* PREM(:,6));     % in reality vs_vertical
-    
-        
-    %- interpolate PREM vp, vs, rho to our grid sampling vp, vs, rho
-    rho_new = interp2(X_PREM, Z_PREM, rho_PREM, X,Z);
-    vp_new  = interp2(X_PREM, Z_PREM, vp_PREM,  X,Z);
-    vs_new  = interp2(X_PREM, Z_PREM, vs_PREM,  X,Z);
-    
+    [rho_new, vs_new, vp_new] = load_PREM();    
     
     %- convert to rho,mu,lambda
-    rho     = rho_new';
-    mu      = vs_new' .^ 2 .* rho_new';
-    lambda  = rho_new' .* ( vp_new'.^2 - 2* vs_new'.^2);
+    rho     = rho_new;
+    mu      = vs_new .^ 2 .* rho_new;
+    lambda  = rho_new .* ( vp_new.^2 - 2* vs_new.^2);
     
     
     
@@ -391,241 +326,37 @@ elseif (model_type==51) % PREM background model + 10 rand +&- rho2 anoms
                         % model values will be sampled at height above CMB!
                         % IMPORTANT: 
                         % so don't make the model higher than 2891 km!!
-                        
-    % NOTE: PREM read from table with columns like
-    % http://ds.iris.edu/ds/products/emc-prem/PREM_1s.csv
-    % units on that website are in g/cm^3, m/s, m/s
-    
-    %- make a grid using the normal Lx, Lz, nx, nz
-    input_parameters;
-    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
-    
-    %- load PREM data from file
-    PREM = csvread('~/Dropbox/DensityInversion/PREM-reference-model/PREM_1s_nowater.csv');
-    
-    %- depth coordinate manipulation
-    depth = PREM(:,2);      % in km
-    % change double occurrences of depth so that interpolation doesn't flip
-    dif_dep = find([NaN; diff(depth)] <= 0);
-    depth(dif_dep) = depth(dif_dep)+1E-5;
-    %- convert depth to height above CMB
-    h_CMB = 2891 - depth;   % in km!
-
-    %- make a grid using PREM values (nonuniform grid)
-    %  (1000* for units km -> m , g/cm^3 -> kg/m^3 , km/s -> m/s)
-    [X_PREM, Z_PREM] = meshgrid( X(1,:),1000* h_CMB(:) );
-    [~, rho_PREM] = meshgrid(X(1,:),1000* PREM(:,3));
-    [~, vp_PREM]  = meshgrid(X(1,:),1000* PREM(:,4));     % in reality vp_vertical 
-    [~, vs_PREM]  = meshgrid(X(1,:),1000* PREM(:,6));     % in reality vs_vertical
-    
-        
-    %- interpolate PREM vp, vs, rho to our grid sampling vp, vs, rho
-    rho_new = interp2(X_PREM, Z_PREM, rho_PREM, X,Z);
-    vp_new  = interp2(X_PREM, Z_PREM, vp_PREM,  X,Z);
-    vs_new  = interp2(X_PREM, Z_PREM, vs_PREM,  X,Z);
-    
-    % transpose
-    rho2 = rho_new'; vp = vp_new'; vs = vs_new';
-
-    %% random anomalies
-    
-    % random locations of anomalies
-    willekeurig.x = [0.906812, 0.493549, 0.499576, 0.175434, 0.441924, ...
-                     0.668359, 0.541729, 0.444079, 0.348643, 0.927618];
-    willekeurig.z = [0.261980, 0.930472, 0.645794, 0.534028, 0.907064, ...
-                     0.631545, 0.039304, 0.194939, 0.657794, 0.749388];
-    
-    % add random anomalies to model
-    for i = 1:size(willekeurig.x,2)
-        % anomaly strength
-%         anom{i}.strength = 0.10 * 2600;
-        anom{i}.strength = 1e3;
-        
-        anom{i}.dxperc = willekeurig.x(i);
-        anom{i}.dzperc = willekeurig.z(i);
-       
-        % x and z location of the anomaly
-        anom{i}.dx = round(anom{i}.dxperc*nx);
-        anom{i}.dz  = round(anom{i}.dzperc*nz);
-
-        % make anomaly
-        gwid = round(0.05 * max([nx nz])); % size of the anomaly
-        filt.width = 8*gwid; % 8*gwid is enough to taper out visibly
-        filt.height = filt.width; % don't see why it should ever be different..
-        filt.f = fspecial('gaussian',[filt.width filt.height],gwid);
-        filt.fnorm = anom{i}.strength * filt.f / max(filt.f(:)); % normalised filter (max value is 1)
-        % make half of the anomalies negative
-        if (rem(i,2)==0)
-            filt.fnorm = - filt.fnorm;
-        else
-        end
-        % add the anomaly to the density field at (anom.dx, anom.dz)
-        rho2 = add_crop_matrix(rho2, filt.fnorm, anom{i}.dx, anom{i}.dz);
-    end
-    
+                      
+    [rho2, vs, vp] = load_PREM();
+    rho2 = add_10randanoms(rho2, 1e3);
+   
     % recalculating to rho-mu-lambda
     rho     = rho2;
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+    
     
 elseif (model_type==52) % PREM background model + 10 rand +&- vs anoms
                         % model values will be sampled at height above CMB!
                         % IMPORTANT: 
                         % so don't make the model higher than 2891 km!!
                         
-    % NOTE: PREM read from table with columns like
-    % http://ds.iris.edu/ds/products/emc-prem/PREM_1s.csv
-    % units on that website are in g/cm^3, m/s, m/s
-    
-    %- make a grid using the normal Lx, Lz, nx, nz
-    input_parameters;
-    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
-    
-    %- load PREM data from file
-    PREM = csvread('~/Dropbox/DensityInversion/PREM-reference-model/PREM_1s_nowater.csv');
-    
-    %- depth coordinate manipulation
-    depth = PREM(:,2);      % in km
-    % change double occurrences of depth so that interpolation doesn't flip
-    dif_dep = find([NaN; diff(depth)] <= 0);
-    depth(dif_dep) = depth(dif_dep)+1E-5;
-    %- convert depth to height above CMB
-    h_CMB = 2891 - depth;   % in km!
-
-    %- make a grid using PREM values (nonuniform grid)
-    %  (1000* for units km -> m , g/cm^3 -> kg/m^3 , km/s -> m/s)
-    [X_PREM, Z_PREM] = meshgrid( X(1,:),1000* h_CMB(:) );
-    [~, rho_PREM] = meshgrid(X(1,:),1000* PREM(:,3));
-    [~, vp_PREM]  = meshgrid(X(1,:),1000* PREM(:,4));     % in reality vp_vertical 
-    [~, vs_PREM]  = meshgrid(X(1,:),1000* PREM(:,6));     % in reality vs_vertical
-    
-        
-    %- interpolate PREM vp, vs, rho to our grid sampling vp, vs, rho
-    rho_new = interp2(X_PREM, Z_PREM, rho_PREM, X,Z);
-    vp_new  = interp2(X_PREM, Z_PREM, vp_PREM,  X,Z);
-    vs_new  = interp2(X_PREM, Z_PREM, vs_PREM,  X,Z);
-    
-    % transpose
-    rho2 = rho_new'; vp = vp_new'; vs = vs_new';
-
-    %% random anomalies
-    
-    % random locations of anomalies
-    willekeurig.x = [0.906812, 0.493549, 0.499576, 0.175434, 0.441924, ...
-                     0.668359, 0.541729, 0.444079, 0.348643, 0.927618];
-    willekeurig.z = [0.261980, 0.930472, 0.645794, 0.534028, 0.907064, ...
-                     0.631545, 0.039304, 0.194939, 0.657794, 0.749388];
-    
-    % add random anomalies to model
-    for i = 1:size(willekeurig.x,2)
-        % anomaly strength
-%         anom{i}.strength = 0.10 * 2600;
-        anom{i}.strength = 1e3;
-        
-        anom{i}.dxperc = willekeurig.x(i);
-        anom{i}.dzperc = willekeurig.z(i);
-       
-        % x and z location of the anomaly
-        anom{i}.dx = round(anom{i}.dxperc*nx);
-        anom{i}.dz  = round(anom{i}.dzperc*nz);
-
-        % make anomaly
-        gwid = round(0.05 * max([nx nz])); % size of the anomaly
-        filt.width = 8*gwid; % 8*gwid is enough to taper out visibly
-        filt.height = filt.width; % don't see why it should ever be different..
-        filt.f = fspecial('gaussian',[filt.width filt.height],gwid);
-        filt.fnorm = anom{i}.strength * filt.f / max(filt.f(:)); % normalised filter (max value is 1)
-        % make half of the anomalies negative
-        if (rem(i,2)==0)
-            filt.fnorm = - filt.fnorm;
-        else
-        end
-        
-        % add the anomaly to the VS field at (anom.dx, anom.dz)
-        vs = add_crop_matrix(vs, filt.fnorm, anom{i}.dx, anom{i}.dz);
-    end
-    
+    [rho2, vs, vp] = load_PREM();
+    vs = add_10randanoms(vs, 1e3);
+  
     % recalculating to rho-mu-lambda
     rho     = rho2;
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
+    
 elseif (model_type==53) % PREM background model + 10 SMALL rand +&- vs anoms
                         % model values will be sampled at height above CMB!
                         % IMPORTANT: 
                         % so don't make the model higher than 2891 km!!
-                        
-    % NOTE: PREM read from table with columns like
-    % http://ds.iris.edu/ds/products/emc-prem/PREM_1s.csv
-    % units on that website are in g/cm^3, m/s, m/s
-    
-    %- make a grid using the normal Lx, Lz, nx, nz
-    input_parameters;
-    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
-    
-    %- load PREM data from file
-    PREM = csvread('~/Dropbox/DensityInversion/PREM-reference-model/PREM_1s_nowater.csv');
-    
-    %- depth coordinate manipulation
-    depth = PREM(:,2);      % in km
-    % change double occurrences of depth so that interpolation doesn't flip
-    dif_dep = find([NaN; diff(depth)] <= 0);
-    depth(dif_dep) = depth(dif_dep)+1E-5;
-    %- convert depth to height above CMB
-    h_CMB = 2891 - depth;   % in km!
 
-    %- make a grid using PREM values (nonuniform grid)
-    %  (1000* for units km -> m , g/cm^3 -> kg/m^3 , km/s -> m/s)
-    [X_PREM, Z_PREM] = meshgrid( X(1,:),1000* h_CMB(:) );
-    [~, rho_PREM] = meshgrid(X(1,:),1000* PREM(:,3));
-    [~, vp_PREM]  = meshgrid(X(1,:),1000* PREM(:,4));     % in reality vp_vertical 
-    [~, vs_PREM]  = meshgrid(X(1,:),1000* PREM(:,6));     % in reality vs_vertical
-    
-        
-    %- interpolate PREM vp, vs, rho to our grid sampling vp, vs, rho
-    rho_new = interp2(X_PREM, Z_PREM, rho_PREM, X,Z);
-    vp_new  = interp2(X_PREM, Z_PREM, vp_PREM,  X,Z);
-    vs_new  = interp2(X_PREM, Z_PREM, vs_PREM,  X,Z);
-    
-    % transpose
-    rho2 = rho_new'; vp = vp_new'; vs = vs_new';
-
-    %% random anomalies
-    
-    % random locations of anomalies
-    willekeurig.x = [0.906812, 0.493549, 0.499576, 0.175434, 0.441924, ...
-                     0.668359, 0.541729, 0.444079, 0.348643, 0.927618];
-    willekeurig.z = [0.261980, 0.930472, 0.645794, 0.534028, 0.907064, ...
-                     0.631545, 0.039304, 0.194939, 0.657794, 0.749388];
-    
-    % add random anomalies to model
-    for i = 1:size(willekeurig.x,2)
-        % anomaly strength
-%         anom{i}.strength = 0.10 * 2600;
-        anom{i}.strength = 0.01*max(vs_new(:));
-        
-        anom{i}.dxperc = willekeurig.x(i);
-        anom{i}.dzperc = willekeurig.z(i);
-       
-        % x and z location of the anomaly
-        anom{i}.dx = round(anom{i}.dxperc*nx);
-        anom{i}.dz  = round(anom{i}.dzperc*nz);
-
-        % make anomaly
-        gwid = round(0.05 * max([nx nz])); % size of the anomaly
-        filt.width = 8*gwid; % 8*gwid is enough to taper out visibly
-        filt.height = filt.width; % don't see why it should ever be different..
-        filt.f = fspecial('gaussian',[filt.width filt.height],gwid);
-        filt.fnorm = anom{i}.strength * filt.f / max(filt.f(:)); % normalised filter (max value is 1)
-        % make half of the anomalies negative
-        if (rem(i,2)==0)
-            filt.fnorm = - filt.fnorm;
-        else
-        end
-        
-        % add the anomaly to the VS field at (anom.dx, anom.dz)
-        vs = add_crop_matrix(vs, filt.fnorm, anom{i}.dx, anom{i}.dz);
-    end
+    [rho2, vs, vp] = load_PREM();
+    vs = add_10randanoms(vs, 0.01*max(vs(:)));
     
     % recalculating to rho-mu-lambda
     rho     = rho2;
@@ -721,4 +452,88 @@ else
     
 end
 
+end
 
+function [rho2, vs, vp] = load_PREM()
+
+
+% NOTE: PREM read from table with columns like
+    % http://ds.iris.edu/ds/products/emc-prem/PREM_1s.csv
+    % units on that website are in g/cm^3, m/s, m/s
+    
+    %- make a grid using the normal Lx, Lz, nx, nz
+    input_parameters;
+    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
+    
+    %- load PREM data from file
+    PREM = csvread('~/Dropbox/DensityInversion/PREM-reference-model/PREM_1s_nowater.csv');
+    
+    %- depth coordinate manipulation
+    depth = PREM(:,2);      % in km
+    % change double occurrences of depth so that interpolation doesn't flip
+    dif_dep = find([NaN; diff(depth)] <= 0);
+    depth(dif_dep) = depth(dif_dep)+1E-5;
+    %- convert depth to height above CMB
+    h_CMB = 2891 - depth;   % in km!
+
+    %- make a grid using PREM values (nonuniform grid)
+    %  (1000* for units km -> m , g/cm^3 -> kg/m^3 , km/s -> m/s)
+    [X_PREM, Z_PREM] = meshgrid( X(1,:),1000* h_CMB(:) );
+    [~, rho_PREM] = meshgrid(X(1,:),1000* PREM(:,3));
+    [~, vp_PREM]  = meshgrid(X(1,:),1000* PREM(:,4));     % in reality vp_vertical 
+    [~, vs_PREM]  = meshgrid(X(1,:),1000* PREM(:,6));     % in reality vs_vertical
+    
+        
+    %- interpolate PREM vp, vs, rho to our grid sampling vp, vs, rho
+    rho_new = interp2(X_PREM, Z_PREM, rho_PREM, X,Z);
+    vp_new  = interp2(X_PREM, Z_PREM, vp_PREM,  X,Z);
+    vs_new  = interp2(X_PREM, Z_PREM, vs_PREM,  X,Z);
+    
+    % transpose
+    rho2 = rho_new'; vp = vp_new'; vs = vs_new';
+    
+end
+
+function mod_out = add_10randanoms(mod, anommax)
+
+nx = size(mod,1);
+nz = size(mod,2);
+
+% random locations of anomalies
+    willekeurig.x = [0.906812, 0.493549, 0.499576, 0.175434, 0.441924, ...
+                     0.668359, 0.541729, 0.444079, 0.348643, 0.927618];
+    willekeurig.z = [0.261980, 0.930472, 0.645794, 0.534028, 0.907064, ...
+                     0.631545, 0.039304, 0.194939, 0.657794, 0.749388];
+    
+    % add random anomalies to model
+    for ii = 1:size(willekeurig.x,2)
+        % anomaly strength
+%         anom{i}.strength = 0.10 * 2600;
+        anom{ii}.strength = anommax;
+        
+        anom{ii}.dxperc = willekeurig.x(ii);
+        anom{ii}.dzperc = willekeurig.z(ii);
+       
+        % x and z location of the anomaly
+        anom{ii}.dx = round(anom{ii}.dxperc*nx);
+        anom{ii}.dz  = round(anom{ii}.dzperc*nz);
+
+        % make anomaly
+        gwid = round(0.05 * max([nx nz])); % size of the anomaly
+        filt.width = 8*gwid; % 8*gwid is enough to taper out visibly
+        filt.height = filt.width; % don't see why it should ever be different..
+        filt.f = fspecial('gaussian',[filt.width filt.height],gwid);
+        filt.fnorm = anom{ii}.strength * filt.f / max(filt.f(:)); % normalised filter (max value is 1)
+        % make half of the anomalies negative
+        if (rem(ii,2)==0)
+            filt.fnorm = - filt.fnorm;
+        else
+        end
+        
+        % add the anomaly to the VS field at (anom.dx, anom.dz)
+        mod = add_crop_matrix(mod, filt.fnorm, anom{ii}.dx, anom{ii}.dz);
+    end
+    
+    mod_out = mod;
+
+end
