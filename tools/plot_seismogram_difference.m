@@ -1,7 +1,19 @@
-function seisdif = plot_seismogram_difference(v_obs, v_rec, t, varargin)
+function fig_seisdif = plot_seismogram_difference(v_obs, v_rec, t, varargin)
 
 % This function is (just like @ make_adjoint_sources) to plot the observed
 % and recorded seismograms, and the difference between them.
+%
+% SYNTAX:
+% fig_seisdif = plot_seismogram_difference(v_obs, v_rec, t)
+%           and plot_seismogram_difference(v_obs, v_rec, t, 'yesdiff')
+%               [plots seismograms from all stations obs, rec and diff]
+% fig_seisdif = plot_seismogram_difference(v_obs, v_rec, t, 'nodiff')
+%               [plots seismograms from all stations obs, rec - NO DIFF]
+% fig_seisdif = plot_seismogram_difference(v_obs, v_rec, t, [recs])
+%           and plot_seismogram_difference(v_obs, v_rec, t, [recs], 'yesdiff')
+%               [plots seismograms obs, rec and diff for stations defined in [recs] ]
+% fig_seisdif = plot_seismogram_difference(v_obs, v_rec, t, [recs], 'nodiff')
+%               [plots seismograms obs, rec for stations defined in [recs] - NO DIFF]
 %
 % INPUT:
 % - v_obs:  struct containing x and/or y and/or z traces of seismograms
@@ -15,9 +27,9 @@ function seisdif = plot_seismogram_difference(v_obs, v_rec, t, varargin)
 %   (v_rec - v_obs).
 % - seisdif: figure handle of this figure
 
-seisdif = figure;
+fig_seisdif = figure;
 set_figure_properties_bothmachines;
-set(seisdif, 'OuterPosition', pos_seis);
+set(fig_seisdif, 'OuterPosition', pos_seis);
 
 [recs_given, recs_in, plot_diff] = check_args(varargin(:));
 
@@ -46,7 +58,7 @@ for irec = recs
         hold on
         plot(t,v_rec{irec}.(comp{icomp}),'k', ...
              t,v_obs{irec}.(comp{icomp}),'r--');
-         if strcmp(plot_diff, 'yes')
+         if strcmp(plot_diff, 'yesdiff')
              plot(t,v_rec{irec}.(comp{icomp}) - v_obs{irec}.(comp{icomp}), 'b');
          end
         %     plot(t,v_rec.(comp{1}) - v_obs.(comp{1}), 'b', 'LineWidth',2)
@@ -77,14 +89,14 @@ switch nargs
         recs_given = 'no';
         rec_start = 1;
         rec_end = NaN;
-        plot_diff = 'yes';
+        plot_diff = 'yesdiff';
     case 1
         if ischar(args{1})
             plot_diff = args{1};
             recs_given = 'no';
             recs = NaN;
         else
-            plot_diff = 'yes';
+            plot_diff = 'yesdiff';
             recs_given = 'yes';
             recs = args{1};
         end
