@@ -27,8 +27,9 @@ path(path,'../tools/');
 % read input parameters from the input file
 input_parameters;
 
-nt=5*round(nt/5);   % to make sure nt is a multiple of 5 -- needed because
-                    % run_forward saves the forward field every 5 timesteps
+sfe = store_fw_every;
+nt=sfe*round(nt/sfe);   % to make sure nt is a multiple of sfe -- needed because
+                    % run_forward saves the forward field every sfe timesteps
                     % only, and thus we need to compare.
 
 % adaptations to input parameters:

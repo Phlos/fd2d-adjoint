@@ -194,12 +194,12 @@ for n=1:nrec
     
 %     %- write source time functions ----------------------------------------
 %     %  WITH time reversal!!!!!
-%     fn=[adjoint_source_path 'src_' num2str(n) direction];
-%     fid_src=fopen(fn,'w');
-%     for k=1:nt
-%         fprintf(fid_src,'%g\n',adstf_nonreversed(nt-k+1));
-%     end
-%     fclose(fid_src);
+    fn=[adjoint_source_path 'src_' num2str(n) direction];
+    fid_src=fopen(fn,'w');
+    for k=1:nt
+        fprintf(fid_src,'%g\n',adstf_nonreversed(nt-k+1));
+    end
+    fclose(fid_src);
     
     
     

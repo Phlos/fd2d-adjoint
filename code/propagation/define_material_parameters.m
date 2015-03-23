@@ -328,7 +328,7 @@ elseif (model_type==51) % PREM background model + 10 rand +&- rho2 anoms
                         % so don't make the model higher than 2891 km!!
                       
     [rho2, vs, vp] = load_PREM();
-    rho2 = add_10randanoms(rho2, 1e3);
+    rho2 = add_10randanoms(rho2, 1000);
    
     % recalculating to rho-mu-lambda
     rho     = rho2;
@@ -350,7 +350,7 @@ elseif (model_type==52) % PREM background model + 10 rand +&- vs anoms
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
     
-elseif (model_type==53) % PREM background model + 10 SMALL rand +&- vs anoms
+elseif (model_type==53) % PREM background model + 10 1% rand +&- vs anoms
                         % model values will be sampled at height above CMB!
                         % IMPORTANT: 
                         % so don't make the model higher than 2891 km!!
@@ -363,15 +363,41 @@ elseif (model_type==53) % PREM background model + 10 SMALL rand +&- vs anoms
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
-elseif (model_type==100) % layered: left = high velocity, right = low vel.
+    
+elseif (model_type==54) % PREM background model + 10 1% rand +&- rho2 anoms
+                        % Model values will be sampled at height above CMB!
+                        % IMPORTANT: 
+                        % so don't make the model higher than 2891 km!!
+
+    [rho2, vs, vp] = load_PREM();
+    rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)));
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+
+elseif (model_type==55) % PREM background model + 10 1000 kg/m3 rand +&- rho0 anoms
+                        % Model values will be sampled at height above CMB!
+                        % IMPORTANT: 
+                        % so don't make the model higher than 2891 km!!
+
+    [rho2, vs, vp] = load_PREM();
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+    
+    rho = add_10randanoms(rho, 1000);
+    
+elseif (model_type==100) % layered: left = high density, right = low density.
     
     rho=3000.0*ones(nx,nz);
-    mu=ones(nx,nz);
-%     lambda=3e10*ones(nx,nz);
-    
-    mu(1:330,:)=3.675e10;
-    mu(331:end,:)=2.7e10;
+    mu=4.8e10*ones(nx,nz);
     lambda=mu;
+    
+    rho(1:floor(nx/2),:) = 3500;
     
 elseif (model_type == 101) % test model with tiny rho anomaly
     

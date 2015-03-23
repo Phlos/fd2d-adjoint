@@ -27,13 +27,13 @@ switch outparam
                     outfields.vp = abs(sqrt((infields.lambda + 2*infields.mu) ...
                         ./ infields.rho));
                 otherwise
-                    warning('Unexpected output parametrisation.');
+                    warning('Unexpected input parametrisation.');
             end
         end
     case 'rhomulambda'
         
         if isfield(infields, 'mu') && isfield(infields, 'lambda')
-            warning('your infields already has the parametrisation you want');
+%             warning('your infields already has the parametrisation you want');
             outfields = infields;
             
         else
@@ -45,11 +45,11 @@ switch outparam
                     outfields.lambda = abs(infields.rho .* ...
                         ( infields.vp.^2 - 2* infields.vs.^2));
                 otherwise
-                    warning('Unexpected output parametrisation.');
+                    warning('Unexpected input parametrisation.');
             end
         end
     otherwise
-        warning('Unexpected input parametrisation.');
+        warning('Unexpected output parametrisation.');
 end
         
 

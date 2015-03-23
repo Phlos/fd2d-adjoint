@@ -27,7 +27,7 @@
 % function [Kernel, K] compute_kernels(vx, vy, vz, v_forward, ...)
 %==========================================================================
 
-
+sfe = store_fw_every;
 
 %% get necessary dynamic fields
 
@@ -93,8 +93,7 @@ end
 %   fields (mu and lambda) have to be corrected with an extra minus.
 %      --- Nienke Blom, 11-4-2014
 
-% if strcmp(kerneltype,'traveltime')
-    
+
     %% rho -- density               (calculated from velocities)
     
     % interaction
@@ -110,11 +109,11 @@ end
     % kernels
     
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-        K.rho.SH = K.rho.SH - interaction.rho.y*5*dt;   
+        K.rho.SH = K.rho.SH - interaction.rho.y*sfe*dt;   
     end
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-        K.rho.x   = K.rho.x - interaction.rho.x*5*dt;
-        K.rho.z   = K.rho.z - interaction.rho.z*5*dt;
+        K.rho.x   = K.rho.x - interaction.rho.x*sfe*dt;
+        K.rho.z   = K.rho.z - interaction.rho.z*sfe*dt;
         K.rho.PSV = K.rho.x+K.rho.z;
     end
     
@@ -123,7 +122,7 @@ end
     % kernel would be -v*v_fw (see Andreas' book for details).
     % Normally, v = (u(t+dt) - u(t)) / dt, but we've calculated the adjoint 
     % v backwards in time, so that the executed calculation instead becomes 
-    % v = (u(t) - u(t+dt)) / dt. Therefore we need another minus to 
+    % v_adj = (u(t) - u(t+dt)) / dt. Therefore we need another minus to 
     % compensate.
     % => doesn't this mean that the mu and lambda kernels should have an
     %    extra minus?!! because those are the quantities derived from the v
@@ -146,10 +145,10 @@ end
     
     % kernels
     if (strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-        K.mu.PSV = K.mu.PSV - interaction.mu.PSV*5*dt;
+        K.mu.PSV = K.mu.PSV - interaction.mu.PSV*sfe*dt;
     end
     if (strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both'))
-        K.mu.SH = K.mu.SH - interaction.mu.SH*5*dt;
+        K.mu.SH = K.mu.SH - interaction.mu.SH*sfe*dt;
     end
     
     
@@ -162,7 +161,7 @@ end
         interaction.lambda.PSV = (duxdx + duzdz) .* (duxdx_fw + duzdz_fw);
         
         % kernel
-        K.lambda.PSV = K.lambda.PSV - interaction.lambda.PSV*5*dt;
+        K.lambda.PSV = K.lambda.PSV - interaction.lambda.PSV*sfe*dt;
     end
     
 %% fill out the kernels which are not calculated but which one may want to plot
@@ -184,8 +183,3 @@ K.rho.total = K.rho.PSV + K.rho.SH;
 K.mu.total = K.mu.PSV + K.mu.SH;
 K.lambda.total = K.lambda.PSV;
 
-
-% else
-%     error('Sorry, you have to specify you want travel time kernels')
-%     
-% end

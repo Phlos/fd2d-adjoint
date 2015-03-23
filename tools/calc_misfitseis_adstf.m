@@ -1,4 +1,4 @@
-function [adstf, misfit] = calc_misfitseis_adstf(misfit_type, t, v_rec, varargin)
+function [adstf, misfit] = calc_misfitseis_adstf(misfit_tiep, t, v_rec, varargin)
 
 % function calculating the seismic misfit and the adjoint stf
 %
@@ -34,6 +34,16 @@ function [adstf, misfit] = calc_misfitseis_adstf(misfit_type, t, v_rec, varargin
 %- prepare 
 input_parameters; % should get nrec here, also nt and dt
 [~, ~, dx, dz] = define_computational_domain(Lx, Lz, nx, nz);
+misfit_type = misfit_tiep;
+
+switch misfit_type
+    case 'waveform_difference'
+        disp 'we''re doing waveform differences'
+    case 'cc_time_shift'
+        disp 'we''re doing cc time shifts'
+    otherwise
+        error('unknown misfit type!');
+end
 
 %- get v_obs from varargin
 [vobspresent, v_obs, picking_mode] = checkargs(varargin(:));
@@ -68,8 +78,6 @@ for irec = 1:nrec
             left = t(1);
             right = t(end);
         end
-% left
-% right
         
         %- taper vrec (and vobs)
         taper_width=t(end)/10;   % why divide by ten??
@@ -118,7 +126,7 @@ for irec = 1:nrec
             plot(t,adstf_temp,'k')
             xlabel('t [s]')
             title(['adjoint source after time reversal'])
-            pause(3.0);
+            pause(0.5);
         end
         
         % give the adstf the right magnitude so that the spatial integral
@@ -206,10 +214,10 @@ fprintf(1,'station number %d\n',n)
 figure(fig_manual);
 clf;
 subplot(3,1,1)
-plot(t,v_rec(n,:),'k')
+plot(t,v_rec(:),'k')
 hold on
-plot(t,v_obs(n,:),'r')
-plot(t,v_rec(n,:)-v_obs(n,:),'k--','LineWidth',2)
+plot(t,v_obs(:),'r')
+plot(t,v_rec(:)-v_obs(:),'k--','LineWidth',2)
 % hold off
 
 title(['receiver ' num2str(n) ' ,synth - black, obs - red, diff - dashed'])
@@ -259,6 +267,7 @@ else
 %     [cc,t_cc]=cross_correlation(v_0,v,t);
     [cc,t_cc] = xcorr(v_0,v);
     t_cc = t_cc*dt;
+%     figure; plot(t_cc,cc);
     T=t_cc(find(max(cc)==cc));
 end
 
@@ -270,7 +279,7 @@ end
 
 % v(1:nt-1)=diff(u)/dt;
 
-adstf=v/(sum(v.*v)*dt);
+adstf=T*v/(sum(v.*v)*dt);
 
 %- correction of adjoint source time function for velocity output -
 %  (because the signal is time-reversed, +velocity in the positive

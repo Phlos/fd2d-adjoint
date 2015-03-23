@@ -28,7 +28,8 @@ path(path,'../input/');
 
 input_parameters;
 
-nt=5*round(nt/5);
+sfe = store_fw_every;
+nt=sfe*round(nt/sfe);
 
 set_figure_properties_bothmachines;  % i.e. size of the figures & location on screen
 
@@ -54,7 +55,7 @@ end
 model.rho = rho;
 model.mu = mu;
 model.lambda = lambda;
-fig_mod = plot_model(model, parametrisation);
+fig_mod = plot_model(model, param_plot);
 
 
 %% source & receiver initialisation
@@ -73,7 +74,12 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     
     %- make and plot source time function ---------------------------------
 
-    stf = make_source_time_function(t,stf_type,simulation_mode,f_min,f_max,tauw_0,tauw,tee_0);
+    switch stf_type
+        case {'delta_bp', 'heaviside_bp'}
+            stf = make_source_time_function(t,stf_type,f_min,f_max);
+        case 'ricker'
+            stf = make_source_time_function(t,stf_type,tauw_0, tauw, tee_0);
+    end     
     fig_stf = plot_source_time_function(t,stf);
 
     % add the same source time function to all the sources.    

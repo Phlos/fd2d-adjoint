@@ -12,6 +12,7 @@ function fig_invres = plot_inversion_result(InvProps, imax)
 
 %% prepare
 
+input_parameters;
 set_figure_properties_bothmachines;
 
 % variables
@@ -22,7 +23,11 @@ modeldifn = InvProps.modeldifn;
 step = InvProps.step;
 angletot = InvProps.angle.Ktotal;
 angleseis = InvProps.angle.Kseis;
+if strcmp(use_grav,'yes')
 anglegrav = InvProps.angle.Kg;
+else
+    anglegrav = NaN*zeros(size(angleseis));
+end
 
 % some adaptations
 niter = length(misfit); % the actual total number of iters run

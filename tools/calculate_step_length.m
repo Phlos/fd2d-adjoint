@@ -16,7 +16,7 @@ input_parameters;
 set_figure_properties_bothmachines;
 
 %- plot starting model
-fig_mod_prev = plot_model(Model_prev, parametrisation);
+fig_mod_prev = plot_model(Model_prev, param_plot);
 
 
 %- determine the number of steps we'll try and divide teststep by that nr
@@ -29,6 +29,7 @@ else
 end
 
 %- determine the step lengths to be tested: 0, teststep, 2* teststep
+teststep = abs(teststep);
 steplnArray = 0: 2*teststep/(nsteps-1) : 2*teststep;
 disp(['number of step lengths we will investigate: ',num2str(nsteps), ...
       ' -- test step length ', num2str(teststep,'%3.1e')]);
@@ -126,22 +127,23 @@ while ( (p(1) < 0 || step < 0 || FitGoodness > 0.1) && nextra <= 5 )
     
     % determine new steplnarray and misfitarray
     if strcmp(errorreason,'neg_max')
-        steplnArray_new = [0 , steplnArray_prev(end), 2* steplnArray_prev(end)];
+%         max(steplnArray_prev(
+        steplnArray_new = [0 , max(steplnArray_prev(:)), 2*max(abs(steplnArray_prev(:))) ];
         misfitArray_new.total(1) = misfitArray_prev.total(1);
         misfitArray_new.total(2) = misfitArray_prev.total(end);
         idxEmpty = 3;
-    elseif ( nextra ==1 && steplnArray_prev(2) > 2*stepInit)
-        steplnArray_new = [0 , stepInit , steplnArray_prev(2)];
-        misfitArray_new.total(1) = misfitArray_prev.total(1);
-        misfitArray_new.total(3) = misfitArray_prev.total(2);
-        idxEmpty = 2;
+%     elseif ( nextra ==1 && steplnArray_prev(2) > 2*stepInit)
+%         steplnArray_new = [0 , stepInit , steplnArray_prev(2)];
+%         misfitArray_new.total(1) = misfitArray_prev.total(1);
+%         misfitArray_new.total(3) = misfitArray_prev.total(2);
+%         idxEmpty = 2;
     else
         steplnArray_new = [0 , (1.0/3)*steplnArray_prev(2) , steplnArray_prev(2)];
         misfitArray_new.total(1) = misfitArray_prev.total(1);
         misfitArray_new.total(3) = misfitArray_prev.total(2);
         idxEmpty = 2;
     end
-    teststep_new = steplnArray_new(2);
+    teststep_new = steplnArray_new(idxEmpty);
     
     disp ' ';
     disp(['Testing NEW step ',num2str(nextra), ...
@@ -170,9 +172,9 @@ close all
     print(fig_lnsrch,'-dpng','-r400',['../output/fig_linesearch.extra-',num2str(nextra),'.png']);
     
     disp ' ';
-    disp(['Found step:    ',num2str(nextra), ...
-        ' --- step length ', num2str(step,'%3.1e'), ...
-        ' --- misfit      ', num2str(minval,'%3.1e')]);
+    disp(['Found step: step length ', num2str(step,'%3.1e'), ...
+        ' --- misfit ', num2str(minval,'%3.1e')...
+        ' --- (diff ', num2str((currentMisfit-minval)/currentMisfit,'%3.1e'),')']);
 
     % if so, update step and p(1) (this will exit the loop)
     
@@ -216,7 +218,8 @@ disp ' ';
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 % disp '======================================';
 disp(['Step length found: ',num2str(step,'%3.2e'), ...
-      ' with misfit of ~', num2str(minval,'%3.2e')]);
+      ' with misfit of ~', num2str(minval,'%3.2e'), ...
+      ' (diff ', num2str((minval - currentMisfit) / currentMisfit ),')']);
 % disp '======================================';
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '----------------------------------------------------';
@@ -272,7 +275,7 @@ set_figure_properties_bothmachines;
 %       %- calculate gravity misfit:
       % NEW as of 18-3-2015
       [~, misf_g_test] = make_gravity_sources(g_try, g_obs);
-      disp(['misfit_g_test.total ', misf_g_test.total]);
+%       disp(['misfit_g_test.total ', misf_g_test.total]);
       misfit.grav = norm_misfit(misf_g_test.total, ...
                             misfit_grav(1).total, normalise_misfits);
     end
@@ -283,8 +286,8 @@ set_figure_properties_bothmachines;
     [v_try,t,~,~,~,~] = run_forward(Model_try);
     
     %- for each step, calculate the misfit
-    [~, misf_s_test] = calc_misfitseis_adstf('waveform_difference',t,v_try,v_obs);
-      disp(['misfit_s_test.total ', misf_s_test.total]);
+    [~, misf_s_test] = calc_misfitseis_adstf(misfit_type,t,v_try,v_obs);
+%       disp(['misfit_s_test.total ', misf_s_test.total]);
     % NEW AS OF 18-3-2015
     misfit.seis = norm_misfit(misf_s_test.total, ...
                                 misfit_seis{1}.total, normalise_misfits);
@@ -332,7 +335,7 @@ hold on;
 plot(steplnArray,misfitArraytotal,'-bo');
 
 % plot fitting polynomial
-minstep = min([steplnArray, 0]);
+minstep = min([steplnArray, 0, step]);
 maxstep = max(maxstep,step);
 iks = 0: maxstep/(20*(nsteps-1)) : maxstep;
 ei  = p(1)*iks.^2 + p(2)*iks + p(3);

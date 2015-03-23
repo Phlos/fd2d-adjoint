@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.initial-test.vs-anoms-1pct.8-source-hori.maxfreq0.1Hz';
+project_name='test-neg-step.003.waveform-difference.rho0-left-right';
 
 %==========================================================================
 % inversion properties
@@ -11,18 +11,19 @@ project_name='Mantle.initial-test.vs-anoms-1pct.8-source-hori.maxfreq0.1Hz';
 adjoint_source_path='../input/sources/adjoint/';
 
 % apply hard constraints?
-apply_hc = 'yes';   % 'yes' or 'no'
+apply_hc = 'no';   % 'yes' or 'no'
 % hard constraints
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'yes'; % 'yes' or 'no'
+use_grav = 'no'; % 'yes' or 'no'
 
 % what misfit functional are we using
 misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift'
 
 % inversion parametrisation
-parametrisation = 'rhovsvp';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
+parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
+param_plot = 'rhovsvp';
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both the s and g misfits by their first value, so that they're same magnitudes
@@ -36,7 +37,10 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both
 % ---------------- changed stf adstf: now divided by surface of cell to
 %                  make it a spatial delta function
 % stepInit = 5e9;         % KMP solved dd ~25 feb 2015
-stepInit = 7e7;         % PREM + 1% vs anomalies
+% stepInit = 7e7;         % PREM + 1% vs anomalies
+% stepInit = 1e4;         % PREM + 1% rho2 anomalies
+% stepInit = 1e8;     % cc time shift, truemod = 100, starting = 1;
+stepInit = 1e8;
 
 %- smoothing properties
 % smoothing (= filtering) seismograms before adstf
@@ -44,6 +48,9 @@ max_freq = 0.2; % Hz
 % smoothing kernels
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
+                
+% store forward wavefield every .. timesteps
+store_fw_every = 10; 
 
 
 %==========================================================================
@@ -69,7 +76,7 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % nt=700;      % number of iterations
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
-tmax = 1100;
+tmax = 200;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -78,7 +85,7 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % model type
 %==========================================================================
 
-model_type=50;
+model_type=1;
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -97,7 +104,7 @@ model_type=50;
 % 31= five 'rand' positive rho2 anomalies (rho2 = rho in rho-vs-vp)
 % 41= ten 'rand' rho2 anomalies: 5 pos 5 neg (rho2 = rho in rho-vs-vp)
 % 50= PREM background values model (will be selected at true height above cmb)
-% 100= layered: left = high velocity, right = low velocity (any difference with model 3???)
+% 100= layered: left = high rho0, right = low rho0
 % 101= homogeneous model (Tromp like) with tiny rho anomaly
 % 102= Ring shaped model (Evangelos): vp=5000, vs=3000, rho=2600 | outside: 5000,1,2600
 
@@ -117,7 +124,7 @@ model_type=50;
 % source-time function
 %==========================================================================
 
-stf_type = 'ricker';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed 
+stf_type = 'delta_bp';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed 
                         % delta function)
 % needed for 'ricker'
 tauw_0  = 2.628;      % seconds
@@ -125,8 +132,8 @@ tauw    = 10*4.0;        % source duration, seconds
 tee_0   = 10*2.5;        % source start time, seconds
 
 % needed for 'delta_bp'    
-f_min=0.2;          % minimum frequency [Hz]
-f_max=1.00;         % maximum frequency [Hz]
+f_min=0.006667;          % minimum frequency [Hz]
+f_max=0.1;         % maximum frequency [Hz]
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 

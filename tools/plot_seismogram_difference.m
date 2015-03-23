@@ -1,4 +1,4 @@
-function seisdif = plot_seismogram_difference(v_obs, v_rec, t)
+function seisdif = plot_seismogram_difference(v_obs, v_rec, t, varargin)
 
 % This function is (just like @ make_adjoint_sources) to plot the observed
 % and recorded seismograms, and the difference between them.
@@ -19,6 +19,8 @@ seisdif = figure;
 set_figure_properties_bothmachines;
 set(seisdif, 'OuterPosition', pos_seis);
 
+[recs_given, recs_in, plot_diff] = check_args(varargin(:));
+
 
 % number of receivers for which we have seismograms
 nrec = length(v_obs);
@@ -26,7 +28,16 @@ nrec = length(v_obs);
 % number of components (x,y,z) for which seismograms have been recorded
 ncomp = size(fieldnames(v_obs{1}), 1);
 
-for irec = 1:nrec
+switch recs_given
+    case 'yes'
+        recs = recs_in;
+    case 'no'
+        recs = 1:nrec;
+    otherwise
+        error('wrong recs');
+end
+
+for irec = recs
     comp = fieldnames(v_obs{irec});
     for icomp = 1:length(comp);
         
@@ -34,8 +45,10 @@ for irec = 1:nrec
 %         subplot(nrec,ncomp,(irec-1)*ncomp + icomp)
         hold on
         plot(t,v_rec{irec}.(comp{icomp}),'k', ...
-             t,v_obs{irec}.(comp{icomp}),'r--', ...
-             t,v_rec{irec}.(comp{icomp}) - v_obs{irec}.(comp{icomp}), 'b');
+             t,v_obs{irec}.(comp{icomp}),'r--');
+         if strcmp(plot_diff, 'yes')
+             plot(t,v_rec{irec}.(comp{icomp}) - v_obs{irec}.(comp{icomp}), 'b');
+         end
         %     plot(t,v_rec.(comp{1}) - v_obs.(comp{1}), 'b', 'LineWidth',2)
 %         hold off
         
@@ -52,5 +65,35 @@ for irec = 1:nrec
     end
 end
 
+
+end
+
+function [recs_given, recs, plot_diff] = check_args(args)
+
+nargs = length(args);
+
+switch nargs
+    case 0
+        recs_given = 'no';
+        rec_start = 1;
+        rec_end = NaN;
+        plot_diff = 'yes';
+    case 1
+        if ischar(args{1})
+            plot_diff = args{1};
+            recs_given = 'no';
+            recs = NaN;
+        else
+            plot_diff = 'yes';
+            recs_given = 'yes';
+            recs = args{1};
+        end
+    case 2
+        recs_given = 'yes';
+        recs = args{1};
+        plot_diff = args{2};
+    otherwise
+        error('unknown number of input args')
+end
 
 end

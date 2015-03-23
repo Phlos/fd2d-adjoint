@@ -40,7 +40,7 @@ switch outparam
         
         if isfield(Kin, 'rho2') && isfield(Kin, 'vs2') && isfield(Kin, 'vp2')
             warning('your infields already has the parametrisation you want');
-%             Kout = Kin;
+            Kout = Kin;
         end
         
 
@@ -86,36 +86,37 @@ switch outparam
         
         if isfield(Kin, 'mu') && isfield(Kin, 'lambda')
             warning('your infields already has the parametrisation you want');
-%             Kout = Kin;
-            
-        end
-        
-        switch inparam
-            case 'rhovsvp'
-                
-                if strcmp(absrel,'rel')
-                    Kin.rho2.total = Kin.rho2.total .* model.rho;
-                    Kin.vs2.total  = Kin.vs2.total .* model.vs;
-                    Kin.vp2.total  = Kin.vp2.total .* model.vp;
-                end
+            Kout = Kin;
+        else
+            switch inparam
+                case 'rhovsvp'
+
+                    if strcmp(absrel,'rel')
+                        Kin.rho2.total = Kin.rho2.total .* model.rho;
+                        Kin.vs2.total  = Kin.vs2.total .* model.vs;
+                        Kin.vp2.total  = Kin.vp2.total .* model.vp;
+                    end
                 
 %                 fig_knlin = plot_kernels(Kin);
 %                 titel = ['input kernel in rhovsvp'];
 %                 mtit(fig_knlin, titel);
 %                 pause(15);
-                Kout.rho.total = Kin.rho2.total ...
-                                 - 0.5 * model.vs ./ model.rho .* Kin.vs2.total ...
-                                 - 0.5 * model.vp ./ model.rho .* Kin.vp2.total;
-                Kout.mu.total = 0.5 ./ (model.rho .* model.vs) .* Kin.vs2.total ...
-                                + 1 ./ (model.rho .* model.vp) .* Kin.vp2.total;
-                Kout.lambda.total = 0.5 ./ (model.rho .* model.vp) .* Kin.vp2.total;
+                    Kout.rho.total = Kin.rho2.total ...
+                                     - 0.5 * model.vs ./ model.rho .* Kin.vs2.total ...
+                                     - 0.5 * model.vp ./ model.rho .* Kin.vp2.total;
+                    Kout.mu.total = 0.5 ./ (model.rho .* model.vs) .* Kin.vs2.total ...
+                                    + 1 ./ (model.rho .* model.vp) .* Kin.vp2.total;
+                    Kout.lambda.total = 0.5 ./ (model.rho .* model.vp) .* Kin.vp2.total;
 %                 fig_knlout = plot_kernels(Kout);
 %                 titel = ['output kernel in rhomulambda'];
 %                 mtit(fig_knlout, titel);
 %                 pause(15);
                 
-            otherwise
-                warning('Unexpected input parametrisation.');
+                otherwise
+                    warning('Unexpected input parametrisation.');
+            end
+        
+            
         end
         
         if strcmp(absrel,'rel')

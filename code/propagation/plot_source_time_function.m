@@ -25,7 +25,8 @@ Fs = 1/dt;
 f = Fs/2*linspace(0,1,NFFT/2+1);
 spectrum=2*abs(Y(1:NFFT/2+1));
 % figure;
-plot(f,spectrum);
+% plot(f,spectrum);
+semilogx(f,spectrum);
     xlabel('frequency [Hz]');
     title('... and its frequency (amp) spectrum');
     

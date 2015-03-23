@@ -187,7 +187,7 @@ for n=1:nt
         
         
         % store time-reversed history ----------------------------------------
-        store_fw_every = 10; % These params also defined below at calc knl
+%         store_fw_every = 10; % These params also defined below at calc knl
         sfe = store_fw_every;
         
         % save every 5th velocity&displacement field to the big-ass 3 direction matrix
@@ -229,7 +229,7 @@ for n=1:nt
     elseif(strcmp(simulation_mode,'adjoint'))
         
         % plot and compute kernel every 5th iteration -----------------------
-        store_fw_every = 10; % These params also defined above at save fwd
+%         store_fw_every = 10; % These params also defined above at save fwd
         sfe = store_fw_every;
         if (mod(n,sfe)==0)
                         
