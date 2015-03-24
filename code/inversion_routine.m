@@ -9,13 +9,16 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-InvProps.niter = 50;
-istart = 7;
+InvProps.niter = 10;
+istart = 1;
 
 niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
-[project_name, axrot, apply_hc, use_grav, parametrisation, param_plot, rec_g, X, Z, misfit_type, normalise_misfits, InvProps.stepInit] = get_input_info;
+[project_name, axrot, apply_hc, use_grav, ...
+    use_matfile_startingmodel, starting_model, ...
+    parametrisation, param_plot, rec_g, X, Z, misfit_type, ...
+    normalise_misfits, InvProps.stepInit] = get_input_info;
 
 
 
@@ -71,20 +74,33 @@ middle.rho    = mode(Model_start.rho(:));
 middle.mu     = mode(Model_start.mu(:));
 middle.lambda = mode(Model_start.lambda(:));
 
+
+
 % plot initial model
-fig_mod = plot_model(Model_start,middle,param_plot);
-set(fig_mod,'Renderer','painters');
-titel = [project_name,': model of iter 0'];
-mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-figname = ['../output/iter0.model.',param_plot,'.eps'];
-print(fig_mod,'-depsc','-r400',figname);
-close(fig_mod);
+if istart == 1
+    fig_mod = plot_model(Model_start,middle,param_plot);
+    set(fig_mod,'Renderer','painters');
+    titel = [project_name,': model of iter 0'];
+    mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
+    figname = ['../output/iter0.model.',param_plot,'.eps'];
+    print(fig_mod,'-depsc','-r400',figname);
+    close(fig_mod);
+end
+
+
+% if 1st iter model @ matfile, load matfile
+if strcmp(use_matfile_startingmodel,'yes')
+    load(starting_model)
+    Model(1) = Model_out;
+    clearvars Model_out;
+else
+    Model(1) = Model_start;
+end
 
 % apply hard constraints to initial model (if applicable)
 if(strcmp(apply_hc,'yes'))
     % -> no negative velocities
     % -> mass of the Earth and/or its moment of inertia
-    Model(1) = Model_start;
 %     [Model(1).rho, fig_hcupdate,~,~] = ...
 %                 apply_hard_constraints(props_obs, Model_start.rho,axrot);
     param_applyhc = 'rhovsvp';
@@ -108,7 +124,7 @@ if(strcmp(apply_hc,'yes'))
     clearvars fig_rhoupdate
 else
     %             disp 'model 1 is model start'
-    Model(1) = Model_start;
+    
 end
 
 %% start of iterations

@@ -2,13 +2,13 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='test-neg-step.003.waveform-difference.rho0-left-right';
+project_name='Mantle.test-003.True-51.rml.dbp-fmax-0.03.seis';
 
 %==========================================================================
 % inversion properties
 %==========================================================================
 
-adjoint_source_path='../input/sources/adjoint/';
+% adjoint_source_path='../input/sources/adjoint/';
 
 % apply hard constraints?
 apply_hc = 'no';   % 'yes' or 'no'
@@ -28,6 +28,10 @@ param_plot = 'rhovsvp';
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both the s and g misfits by their first value, so that they're same magnitudes
 
+% starting model from matfile
+use_matfile_startingmodel = 'yes';
+starting_model = '../output/Model_0.02Hz.mat';
+
 % initial step length;
 % stepInit = 3.5e14;    % good for circular configuration
 % stepInit = 5e15;        % good for circular src and rec @ top of domain
@@ -39,12 +43,12 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both
 % stepInit = 5e9;         % KMP solved dd ~25 feb 2015
 % stepInit = 7e7;         % PREM + 1% vs anomalies
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
-% stepInit = 1e8;     % cc time shift, truemod = 100, starting = 1;
-stepInit = 1e8;
+% stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
+stepInit = 1e8;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
 
 %- smoothing properties
-% smoothing (= filtering) seismograms before adstf
-max_freq = 0.2; % Hz
+% % smoothing (= filtering) seismograms before adstf
+% max_freq = 0.2; % Hz
 % smoothing kernels
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
@@ -76,7 +80,8 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % nt=700;      % number of iterations
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
-tmax = 200;
+tmax = 1100;    % should be enough for ScS.
+% tmax = 200;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -85,7 +90,7 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % model type
 %==========================================================================
 
-model_type=1;
+model_type=50;
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -132,8 +137,8 @@ tauw    = 10*4.0;        % source duration, seconds
 tee_0   = 10*2.5;        % source start time, seconds
 
 % needed for 'delta_bp'    
-f_min=0.006667;          % minimum frequency [Hz]
-f_max=0.1;         % maximum frequency [Hz]
+f_min=0.006667;     % minimum frequency [Hz]
+f_max=0.03;         % maximum frequency [Hz]
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 

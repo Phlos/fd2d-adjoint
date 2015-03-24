@@ -65,7 +65,11 @@ for irec = recs
 %         hold off
         
         if irec==1
-        title({[comp{icomp},' component:']; 'synth - black, obs - red, diff - blue'})
+            if strcmp(plot_diff, 'yesdiff')
+                title({[comp{icomp},' component:']; 'synth - black, obs - red, diff - blue'})
+            else
+                title({[comp{icomp},' component:']; 'synth - black, obs - red'})
+            end
         end
         if irec==nrec
         xlabel('t [s]')
@@ -86,10 +90,9 @@ nargs = length(args);
 
 switch nargs
     case 0
-        recs_given = 'no';
-        rec_start = 1;
-        rec_end = NaN;
         plot_diff = 'yesdiff';
+        recs_given = 'no';
+        recs = NaN;
     case 1
         if ischar(args{1})
             plot_diff = args{1};

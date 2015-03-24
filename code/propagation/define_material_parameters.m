@@ -377,7 +377,7 @@ elseif (model_type==54) % PREM background model + 10 1% rand +&- rho2 anoms
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
 
-elseif (model_type==55) % PREM background model + 10 1000 kg/m3 rand +&- rho0 anoms
+elseif (model_type==55) % PREM background model + 10 1000 kg/m3 rand +&- RHO0 anoms
                         % Model values will be sampled at height above CMB!
                         % IMPORTANT: 
                         % so don't make the model higher than 2891 km!!
