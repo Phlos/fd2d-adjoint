@@ -2,7 +2,7 @@
 
 function [step, fig_lnsrch , steplnArray_total, misfitArray_total ] = calculate_step_length(teststep, niter, ...
                                       currentMisfit, misfit_seis, misfit_grav, ...
-                                      Model_prev, K_abs, v_obs, g_obs)
+                                      Model_prev, K_abs, v_obs, g_obs, stf)
 %% == 1. Preparation ======================================================
 
 % % obtain useful parameters from input_parameters
@@ -55,7 +55,7 @@ for ntry = 2:nsteps
           ' --- step length ', num2str(steptry,'%3.1e')]);
 
     misfitArray.total(ntry) = calc_misfit_perstep(K_abs, steptry, Model_prev, ...
-        misfit_grav, misfit_seis, g_obs, v_obs);
+        misfit_grav, misfit_seis, g_obs, v_obs, stf);
 
     %- give step nr, step length and misfit
     disp(['Step ',num2str(ntry), ...
@@ -151,7 +151,7 @@ while ( (p(1) < 0 || step < 0 || FitGoodness > 0.1) && nextra <= 5 )
     
     % calculate misfit for the new teststep
     misfit_new = calc_misfit_perstep(K_abs, teststep_new, ...
-        Model_prev, misfit_grav, misfit_seis, g_obs, v_obs);
+        Model_prev, misfit_grav, misfit_seis, g_obs, v_obs, stf);
     disp ' ';
         %- give step nr, step length and misfit
     disp(['Extra step ',num2str(nextra), ...
@@ -174,7 +174,7 @@ close all
     disp ' ';
     disp(['Found step: step length ', num2str(step,'%3.1e'), ...
         ' --- misfit ', num2str(minval,'%3.1e')...
-        ' --- (diff ', num2str((currentMisfit-minval)/currentMisfit,'%3.1e'),')']);
+        ' --- (diff ', num2str((minval-currentMisfit)/currentMisfit,'%3.1e'),')']);
 
     % if so, update step and p(1) (this will exit the loop)
     
@@ -231,7 +231,7 @@ end
 
 %% subfunctions
 
-function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, misfit_grav, misfit_seis, g_obs, v_obs)
+function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, misfit_grav, misfit_seis, g_obs, v_obs, stf)
 
 % paths etc.
 
@@ -283,7 +283,13 @@ set_figure_properties_bothmachines;
     %% seismic misfit
     
     %- for each step, run forward update
-    [v_try,t,~,~,~,~] = run_forward(Model_try);
+    [v_try,t,~,~,~,~] = run_forward(Model_try, stf);
+    
+    % plot seismogram difference:
+    fig_seisdif = plot_seismogram_difference(v_obs, v_try, t);
+    figname = ['../output/iter.current.calcstepln.seisdif.',num2str(steptry),'.png'];
+    print(fig_seisdif,'-dpng','-r400',figname);
+    close(fig_seisdif);
     
     %- for each step, calculate the misfit
     [~, misf_s_test] = calc_misfitseis_adstf(misfit_type,t,v_try,v_obs);

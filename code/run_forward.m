@@ -16,7 +16,7 @@
 
 function [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward(varargin)
 
-[updateParams, updateable] = checkargs(varargin(:));
+[updateParams, updateable, stf_in] = checkargs(varargin(:));
 
 disp 'initialising...'
 %==========================================================================
@@ -72,14 +72,20 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     [src_x_id,src_z_id,ns] = compute_indices(src_x,src_z,Lx,Lz,dx,dz);
     [rec_x_id,rec_z_id,n_receivers] = compute_indices(rec_x,rec_z,Lx,Lz,dx,dz);
     
-    %- make and plot source time function ---------------------------------
+    %- (make and) plot source time function ---------------------------------
 
-    switch stf_type
-        case {'delta_bp', 'heaviside_bp'}
-            stf = make_source_time_function(t,stf_type,f_min,f_max);
-        case 'ricker'
-            stf = make_source_time_function(t,stf_type,tauw_0, tauw, tee_0);
-    end     
+    if isnan(stf_in);
+        switch stf_type
+            case {'delta_bp', 'heaviside_bp'}
+                stf = make_source_time_function(t,stf_type,f_min,f_max);
+            case 'ricker'
+                stf = make_source_time_function(t,stf_type,tauw_0, tauw, tee_0);
+        end
+    elseif isnumeric(stf_in);
+        stf = stf_in;
+    else
+        error('PANIC! stf type not recognised it seems');
+    end
     fig_stf = plot_source_time_function(t,stf);
 
     % add the same source time function to all the sources.    
@@ -129,24 +135,26 @@ run_wavefield_propagation;
 %==========================================================================
 
 
-disp 'saving output...'
+
 %- store time-reversed forward field --------------------------------------
 
 if(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-u_fw.x = ux_forward;
-u_fw.z = uz_forward;
-v_fw.x = vx_forward;
-v_fw.z = vz_forward;
+    u_fw.x = ux_forward;
+    u_fw.z = uz_forward;
+    v_fw.x = vx_forward;
+    v_fw.z = vz_forward;
 end
 if(strcmp(wave_propagation_type,'SH') || strcmp(wave_propagation_type,'both') )
-u_fw.y = uy_forward;
-v_fw.y = vy_forward;
+    u_fw.y = uy_forward;
+    v_fw.y = vy_forward;
 end
 
 
 
 % % This is taking way too long. Only compute if explicitly asked
-
+if (strcmp(save_u_fw,'yes') || (strcmp(save_v_fw,'yes')) )
+    disp 'saving u_fw, v_fw output to file...'
+end
 if strcmp(simulation_mode,'forward')
     if(strcmp(wave_propagation_type,'SH'))
         if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
@@ -195,18 +203,29 @@ end
 
 
 
-function [updateParams, updateable] = checkargs(arg)
+function [useGivenModel, GivenModel, stf] = checkargs(arg)
 
 narg = length(arg);
 
-if narg == 1;
+if narg == 2;
+    useGivenModel = 'yes';
+    GivenModel = arg{1};
+    stf = arg{2};
+elseif narg == 1;
     % extract the updateable parameters
-    updateParams = 'yes';
-    updateable = arg{1};
+    if isstruct(arg{1})
+        useGivenModel = 'yes';
+        GivenModel = arg{1};
+        stf = NaN;
+    elseif iscell(arg{1})
+        stf = arg{1};
+        useGivenModel = 'no';
+        GivenModel = NaN;
+    end
 %     updatables = fieldnames(updateInput);
 else
-    updateParams = 'no';
-    updateable = 0;
+    useGivenModel = 'no';
+    GivenModel = 0;
 %     disp(['number of input arguments to run_forward: ', num2str(narg)]);
     return
     

@@ -66,7 +66,7 @@ for irec = recs
         
         if irec==1
             if strcmp(plot_diff, 'yesdiff')
-                title({[comp{icomp},' component:']; 'synth - black, obs - red, diff - blue'})
+                title({[comp{icomp},' component:']; 'synth - black, obs - red, (synth-obs) - blue'})
             else
                 title({[comp{icomp},' component:']; 'synth - black, obs - red'})
             end

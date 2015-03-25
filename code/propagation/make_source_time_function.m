@@ -1,7 +1,14 @@
 
 % function stf = make_source_time_function(t,stf_type,simulation_mode,f_min,f_max,tauw_0,tauw,tee_0)
 function stf = make_source_time_function(t,stf_type,varargin)
+
 % compute source-time function 
+%
+% SYNTAX:
+% stf = make_source_time_function(t,'delta_bp',f_min, f_max)
+% stf = make_source_time_function(t,'ricker', tauw_0, tauw, tee_0)
+%
+
 % adapted on 20-3-2015, Nienke Blom
 
 [f_min, f_max, tauw_0, tauw, tee_0] = checkargs(stf_type, varargin(:));

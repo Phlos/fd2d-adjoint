@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-003.True-51.rml.dbp-fmax-0.03.seis';
+project_name='Mantle.test-005.True-51.rml.dbp-increasing-fmax-7freqs';
 
 %==========================================================================
 % inversion properties
@@ -29,8 +29,9 @@ param_plot = 'rhovsvp';
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both the s and g misfits by their first value, so that they're same magnitudes
 
 % starting model from matfile
-use_matfile_startingmodel = 'yes';
-starting_model = '../output/Model_0.02Hz.mat';
+use_matfile_startingmodel = 'no';
+% starting_model = '../output/Model_0.03Hz.mat';
+starting_model = '';
 
 % initial step length;
 % stepInit = 3.5e14;    % good for circular configuration
@@ -80,8 +81,8 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % nt=700;      % number of iterations
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
-tmax = 1100;    % should be enough for ScS.
-% tmax = 200;
+% tmax = 1100;    % should be enough for ScS.
+tmax = 1100;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -90,6 +91,7 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % model type
 %==========================================================================
 
+true_model_type = 51;
 model_type=50;
 
 % 1=homogeneous 
@@ -138,7 +140,9 @@ tee_0   = 10*2.5;        % source start time, seconds
 
 % needed for 'delta_bp'    
 f_min=0.006667;     % minimum frequency [Hz]
-f_max=0.03;         % maximum frequency [Hz]
+% f_max=0.03;         % maximum frequency [Hz]
+f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.04183];
+% f_maxlist = [0.006667 0.008667 ];
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 
@@ -275,6 +279,7 @@ absorb_bottom=0;% absorb waves on the bottom boundary
 plot_every=100000; % value larger than nt, so that no plotting takes place
 % plot_every = 40;
 % plot_every = 100;
+% plot_every = 10;
 
 plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation

@@ -17,32 +17,12 @@ niter = InvProps.niter;
 % obtain useful parameters from input_parameters
 [project_name, axrot, apply_hc, use_grav, ...
     use_matfile_startingmodel, starting_model, ...
+    true_model_type, f_maxlist, ...
     parametrisation, param_plot, rec_g, X, Z, misfit_type, ...
     normalise_misfits, InvProps.stepInit] = get_input_info;
 
 
-
-%% OBS
-
-% MAKE SURE V_OBS IS PRESENT!!! AND SAVED!!!
-%[Model_real, v_obs, t_obs, props_obs, g_obs] = prepare_obs(modelnr);
- 
-
-
-% saving the observed variables
-if istart == 1
-    disp 'saving obs variables to matfile...'
-    savename = ['../output/',project_name,'.obs.all-vars.mat'];
-    save(savename, 'v_obs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
-else
-    if ~exist('v_obs','var') || ~exist('t_obs','var') || ...
-            ~exist('Model_real','var') || ~exist('props_obs','var') || ...
-            ~exist('g_obs','var')
-        error('There are no observed properties!')
-    end
-end
-
-%% Inversion preparation
+%% welcome
 
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '======================================';
@@ -62,9 +42,30 @@ disp '======================================';
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 
 
+%% OBS
+
+% freq consists of freqs.v_obs and freqs.frequency
+if istart == 1
+disp 'preparing obs...';
+[Model_real, freqs, t_obs, props_obs, g_obs] = prepare_obs(true_model_type);
+end
+
+% saving the observed variables
+if istart == 1
+    disp 'saving obs variables to matfile...'
+    savename = ['../output/',project_name,'.obs.all-vars.mat'];
+    save(savename, 'freqs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
+else
+    if ~exist('freqs','var') || ~exist('t_obs','var') || ...
+            ~exist('Model_real','var') || ~exist('props_obs','var') || ...
+            ~exist('g_obs','var')
+        error('There are no observed properties!')
+    end
+end
+
 %=========================================================================
 
-
+%% Inversion preparation
 
 % save initial model (from input_parameters)
 Model_start = update_model();
@@ -82,8 +83,8 @@ if istart == 1
     set(fig_mod,'Renderer','painters');
     titel = [project_name,': model of iter 0'];
     mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-    figname = ['../output/iter0.model.',param_plot,'.eps'];
-    print(fig_mod,'-depsc','-r400',figname);
+    figname = ['../output/iter0.model.',param_plot,'.png'];
+    print(fig_mod,'-dpng','-r400',figname);
     close(fig_mod);
 end
 
@@ -141,6 +142,26 @@ for iter = istart : InvProps.niter;
         disp(['STARTING ITER ', num2str(iter), ' OUT OF ', num2str(InvProps.niter)]);
         disp '======================================';
         disp ' ';
+        
+        %% SOURCE FREQUENCY --> could change this to source ID at some pt
+        %                       (to make it adaptable to diff. earthquakes
+        %                       and all kinds of different things @ inv)
+        if iter <= length(f_maxlist);
+            freqmax(iter) = f_maxlist(iter);
+            vobs = freqs(iter).v_obs;
+            stf{iter} = freqs(iter).stf;
+        else
+            freqmax(iter) = f_maxlist(end);
+            vobs = freqs(end).v_obs;
+            stf{iter} = freqs(end).stf;
+        end
+%         if iter <= length(f_maxlist)
+%             freqmax(iter) = f_maxlist(iter);
+%         else
+%             freqmax(iter) = f_maxlist(end);
+%         end
+        
+
         
         %% MODEL
         
@@ -213,13 +234,17 @@ for iter = istart : InvProps.niter;
         disp ' ';
         disp(['iter ',num2str(iter),': calculating forward wave propagation']);
 %         clearvars u_fw v_fw;
-        [v_iter{iter},t,u_fw,v_fw,rec_x,rec_z]=run_forward(Model(iter));
+
+        % NEW as of 24-3-2015
+%         source_time_fn{iter} = make_stf_wrapperscript(freqmax(iter));
+        [v_iter{iter},t,u_fw,v_fw,rec_x,rec_z]=run_forward(Model(iter), stf{iter});
         close(clf);
         close(clf);
         close(clf);
         
         % plot seismogram difference
-        fig_seisdif = plot_seismogram_difference(v_obs,v_iter{iter},t);
+
+        fig_seisdif = plot_seismogram_difference(vobs,v_iter{iter},t);
         titel = [project_name,': difference between seismograms iter ', num2str(iter), ' and obs'];
         mtit(fig_seisdif, titel, 'xoff', 0.001, 'yoff', 0.02);
         figname = ['../output/iter',num2str(iter),'.seisdif.png'];
@@ -230,7 +255,7 @@ for iter = istart : InvProps.niter;
         cd ../tools
         disp ' '; disp(['iter ',num2str(iter),': calculating adjoint stf']);
         
-        [adstf{iter}, InvProps.misfit_seis{iter}] = calc_misfitseis_adstf(misfit_type,t,v_iter{iter},v_obs);
+        [adstf{iter}, InvProps.misfit_seis{iter}] = calc_misfitseis_adstf(misfit_type,t,v_iter{iter},vobs);
         % NEW AS OF 17-3-2015
             InvProps.misfit_seis{iter}.normd = ...
                 norm_misfit(InvProps.misfit_seis{iter}.total, ...
@@ -256,7 +281,7 @@ for iter = istart : InvProps.niter;
         % gravity misfit
         if strcmp(use_grav,'yes')
             sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
-            div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
+            div_by_gobs = InvProcalc_misfit_perstepps.misfit_g(iter).total / sumgobs;
             disp(['GRAVITY misfit FOR ITER ',num2str(iter),': ', ...
                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
             disp(['   fraction of g_obs:       ', ...
@@ -268,10 +293,10 @@ for iter = istart : InvProps.niter;
         
         % seismic misfit
         sumvobs = 0;
-        for ii = 1:length(v_obs)
-            comp = fieldnames(v_obs{ii});
+        for ii = 1:length(vobs)
+            comp = fieldnames(vobs{ii});
             for icomp = 1:length(comp)
-            sumvobs = sumvobs + sum(v_obs{ii}.(comp{icomp}) .^2);
+            sumvobs = sumvobs + sum(vobs{ii}.(comp{icomp}) .^2);
             end
         end
         div_by_vobs = InvProps.misfit_seis{iter}.total / sumvobs;
@@ -468,7 +493,7 @@ for iter = istart : InvProps.niter;
         [InvProps.step(iter), fig_lnsrch,  InvProps.steplnArray{iter}, InvProps.misfitArray{iter} ] = ...
                 calculate_step_length(stapje,iter, ...
                 InvProps.misfit(iter), InvProps.misfit_seis, InvProps.misfit_g, ...
-                Model(iter),K_total(iter),v_obs, g_obs);
+                Model(iter),K_total(iter),vobs, g_obs, stf{iter} );
         clearvars stapje;     
 
         % save linesearch figure
