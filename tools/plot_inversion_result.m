@@ -109,8 +109,8 @@ title('angle between consecutive kernels (degrees)');
 
 % step size
 subplot(9,2,[15 17])
-% istepmax = min(length(step),imax-1);
-Lstep = semilogy(iters(1:imax), step(1:imax),'k');
+istepmax = min(length(step),imax-1);
+Lstep = semilogy(iters(1:istepmax), step(1:istepmax),'k');
 xlim([min(iters), iters(imax)]);
 grid on
 set(Lstep, 'LineWidth', 1)

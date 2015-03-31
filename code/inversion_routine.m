@@ -9,15 +9,15 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-InvProps.niter = 10;
-istart = 1;
+InvProps.niter = 9;
+istart = 9;
 
 niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
-[project_name, axrot, apply_hc, use_grav, ...
+[project_name, axrot, apply_hc, use_grav, fix_velocities, ...
     use_matfile_startingmodel, starting_model, ...
-    true_model_type, f_maxlist, ...
+    true_model_type, f_maxlist, change_src_every, ...
     parametrisation, param_plot, rec_g, X, Z, misfit_type, ...
     normalise_misfits, InvProps.stepInit] = get_input_info;
 
@@ -44,23 +44,24 @@ disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 
 %% OBS
 
-% freq consists of freqs.v_obs and freqs.frequency
-if istart == 1
-disp 'preparing obs...';
-[Model_real, freqs, t_obs, props_obs, g_obs] = prepare_obs(true_model_type);
+% freq consists of sources.v_obs and sources.frequency
+if ~exist('sources','var') || ~exist('t_obs','var') || ...
+        ~exist('Model_real','var') || ~exist('props_obs','var') || ...
+        ~exist('g_obs','var')
+    if istart == 1
+        disp 'no OBS present, preparing obs...';
+        [Model_real, sources, t_obs, props_obs, g_obs] = prepare_obs(true_model_type);
+    else
+        error('There are no observed properties!')
+    end
+else
+    disp 'obs properties all present... proceeding...'
 end
 
-% saving the observed variables
 if istart == 1
     disp 'saving obs variables to matfile...'
     savename = ['../output/',project_name,'.obs.all-vars.mat'];
-    save(savename, 'freqs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
-else
-    if ~exist('freqs','var') || ~exist('t_obs','var') || ...
-            ~exist('Model_real','var') || ~exist('props_obs','var') || ...
-            ~exist('g_obs','var')
-        error('There are no observed properties!')
-    end
+    save(savename, 'sources', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
 end
 
 %=========================================================================
@@ -86,45 +87,46 @@ if istart == 1
     figname = ['../output/iter0.model.',param_plot,'.png'];
     print(fig_mod,'-dpng','-r400',figname);
     close(fig_mod);
-end
-
-
-% if 1st iter model @ matfile, load matfile
-if strcmp(use_matfile_startingmodel,'yes')
-    load(starting_model)
-    Model(1) = Model_out;
-    clearvars Model_out;
-else
-    Model(1) = Model_start;
-end
-
-% apply hard constraints to initial model (if applicable)
-if(strcmp(apply_hc,'yes'))
-    % -> no negative velocities
-    % -> mass of the Earth and/or its moment of inertia
-%     [Model(1).rho, fig_hcupdate,~,~] = ...
-%                 apply_hard_constraints(props_obs, Model_start.rho,axrot);
-    param_applyhc = 'rhovsvp';
-    switch param_applyhc;
-        case 'rhomulambda'
-            [Model(1).rho, fig_hcupdate,~,~] = ...
-                apply_hard_constraints(props_obs, Model_start.rho,axrot);
-        case 'rhovsvp'
-            Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_start);
-            [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
-                apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
-            Model(1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
-        otherwise
-            error('the parametrisation of the inversion was not recognised')
+    
+    
+    % if 1st iter model @ matfile, load matfile
+    if strcmp(use_matfile_startingmodel,'yes')
+        load(starting_model)
+        Model(1) = Model_out;
+        clearvars Model_out;
+    else
+        Model(1) = Model_start;
     end
-    figname = ['../output/iter0.hard-constraints-rhoupdate.png'];
-    titel = [project_name,': hc update of model 0'];
-    mtit(fig_hcupdate, titel, 'xoff', 0.001, 'yoff', 0.05);
-    print(fig_hcupdate,'-dpng','-r400',figname);
-    close(fig_hcupdate);
-    clearvars fig_rhoupdate
-else
-    %             disp 'model 1 is model start'
+    
+    % apply hard constraints to initial model (if applicable)
+    if(strcmp(apply_hc,'yes'))
+        % -> no negative velocities
+        % -> mass of the Earth and/or its moment of inertia
+        %     [Model(1).rho, fig_hcupdate,~,~] = ...
+        %                 apply_hard_constraints(props_obs, Model_start.rho,axrot);
+        param_applyhc = 'rhovsvp';
+        switch param_applyhc;
+            case 'rhomulambda'
+                [Model(1).rho, fig_hcupdate,~,~] = ...
+                    apply_hard_constraints(props_obs, Model_start.rho,axrot);
+            case 'rhovsvp'
+                Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_start);
+                [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
+                    apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
+                Model(1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
+            otherwise
+                error('the parametrisation of the inversion was not recognised')
+        end
+        figname = ['../output/iter0.hard-constraints-rhoupdate.png'];
+        titel = [project_name,': hc update of model 0'];
+        mtit(fig_hcupdate, titel, 'xoff', 0.001, 'yoff', 0.05);
+        print(fig_hcupdate,'-dpng','-r400',figname);
+        close(fig_hcupdate);
+        clearvars fig_rhoupdate
+    else
+        %             disp 'model 1 is model start'
+        
+    end
     
 end
 
@@ -143,22 +145,26 @@ for iter = istart : InvProps.niter;
         disp '======================================';
         disp ' ';
         
-        %% SOURCE FREQUENCY --> could change this to source ID at some pt
-        %                       (to make it adaptable to diff. earthquakes
-        %                       and all kinds of different things @ inv)
-        if iter <= length(f_maxlist);
-            freqmax(iter) = f_maxlist(iter);
-            vobs = freqs(iter).v_obs;
-            stf{iter} = freqs(iter).stf;
-        else
-            freqmax(iter) = f_maxlist(end);
-            vobs = freqs(end).v_obs;
-            stf{iter} = freqs(end).stf;
+        %% DIFF SOURCES USED 
+
+%         change_src_every = 10;       % how many iterations with the same src?
+        cse = change_src_every;
+        which_src = floor((iter-1)/cse)+1;
+        if which_src > length(sources)
+            which_src = length(sources);
         end
-%         if iter <= length(f_maxlist)
-%             freqmax(iter) = f_maxlist(iter);
+        freqmax(iter) = sources(which_src).frequency;
+        vobs = sources(which_src).v_obs;
+        stf{iter} = sources(which_src).stf;
+
+%         if iter <= length(sources);
+%             freqmax(iter) = sources(iter).frequency;
+%             vobs = sources(iter).v_obs;
+%             stf{iter} = sources(iter).stf;
 %         else
 %             freqmax(iter) = f_maxlist(end);
+%             vobs = sources(end).v_obs;
+%             stf{iter} = sources(end).stf;
 %         end
         
 
@@ -206,19 +212,20 @@ for iter = istart : InvProps.niter;
             %- calculate gravity misfit:
             [g_src, InvProps.misfit_g(iter)] = make_gravity_sources(g(iter), g_obs);
             
-            % NEW AS OF 17-3-2015
+            % NEW AS OF 17-3-2015 - changed as of 25-3-2015
             InvProps.misfit_g(iter).normd = ...
                 norm_misfit(InvProps.misfit_g(iter).total, ...
-                            InvProps.misfit_g(1).total, normalise_misfits);
+                            normalise_misfits, InvProps.misfit_g(1).total, ...
+                            g_obs);
             clearvars norm_misf;
             
             % output for gravity misfit
-            sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
+            sumgobs = sum(g_obs.mag(:) .^2);
             div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
             disp ' ';
             disp(['gravity misfit for iter ',num2str(iter),': ', ...
                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
-            disp(['   fraction of g_obs ',num2str(iter),': ', ...
+            disp(['   fraction of g_obs: ', ...
                 num2str(div_by_gobs,'%3.2e')])
             disp(['   normalised ',normalise_misfits, ': ', ...
                 num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
@@ -232,11 +239,10 @@ for iter = istart : InvProps.niter;
         
         % run forward wave propagation
         disp ' ';
-        disp(['iter ',num2str(iter),': calculating forward wave propagation']);
+        disp(['iter ',num2str(iter),', src ',num2str(which_src),': calculating forward wave propagation']);
 %         clearvars u_fw v_fw;
 
         % NEW as of 24-3-2015
-%         source_time_fn{iter} = make_stf_wrapperscript(freqmax(iter));
         [v_iter{iter},t,u_fw,v_fw,rec_x,rec_z]=run_forward(Model(iter), stf{iter});
         close(clf);
         close(clf);
@@ -245,7 +251,7 @@ for iter = istart : InvProps.niter;
         % plot seismogram difference
 
         fig_seisdif = plot_seismogram_difference(vobs,v_iter{iter},t);
-        titel = [project_name,': difference between seismograms iter ', num2str(iter), ' and obs'];
+        titel = [project_name,'difference between seismograms iter ', num2str(iter), ' and obs (source ',num2str(which_src),')'];
         mtit(fig_seisdif, titel, 'xoff', 0.001, 'yoff', 0.02);
         figname = ['../output/iter',num2str(iter),'.seisdif.png'];
         print(fig_seisdif,'-dpng','-r400',figname);
@@ -259,7 +265,8 @@ for iter = istart : InvProps.niter;
         % NEW AS OF 17-3-2015
             InvProps.misfit_seis{iter}.normd = ...
                 norm_misfit(InvProps.misfit_seis{iter}.total, ...
-                            InvProps.misfit_seis{1}.total, normalise_misfits);
+                            normalise_misfits, ...
+                            InvProps.misfit_seis{1}.total, vobs);
         
         
 %         % plot stf to adstf for one station
@@ -281,7 +288,7 @@ for iter = istart : InvProps.niter;
         % gravity misfit
         if strcmp(use_grav,'yes')
             sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
-            div_by_gobs = InvProcalc_misfit_perstepps.misfit_g(iter).total / sumgobs;
+            div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
             disp(['GRAVITY misfit FOR ITER ',num2str(iter),': ', ...
                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
             disp(['   fraction of g_obs:       ', ...
@@ -300,7 +307,7 @@ for iter = istart : InvProps.niter;
             end
         end
         div_by_vobs = InvProps.misfit_seis{iter}.total / sumvobs;
-%         disp ' ';
+        disp ' ';
         disp(['SEISMIC misfit FOR ITER ',num2str(iter),': ', ...
             num2str(InvProps.misfit_seis{iter}.total,'%3.2e')])
         disp(['   fraction of v_obs:       ', ...
@@ -356,13 +363,14 @@ for iter = istart : InvProps.niter;
                 end
                 
                 % normalising the gravity kernel
-                Kg{iter} = norm_kernel(Kg_temp, InvProps.misfit_g(1).total, normalise_misfits);
+                Kg{iter} = norm_kernel(Kg_temp, normalise_misfits, ...
+                    InvProps.misfit_g(1).total, g_obs);
                 clearvars Kg_temp;
                 
                 
                 %  plot gravity kernel
                 figname = ['../output/iter',num2str(iter),'.kernel_grav.rho.png'];
-                titel = [project_name,': gravity kernel for iter ',num2str(iter)];
+                titel = [project_name, '- Gravity kernel for iter ',num2str(iter)];
                 mtit(fig_Kg,titel, 'xoff', 0.001, 'yoff', 0.00001);
                 print(fig_Kg,'-dpng','-r400',figname);
                 close(fig_Kg);
@@ -383,7 +391,8 @@ for iter = istart : InvProps.niter;
             Kseis_temp = run_adjoint(u_fw,v_fw,adstf{iter},Model(iter));
             
             % normalise kernels
-            Kseis(iter) = norm_kernel(Kseis_temp, InvProps.misfit_seis{1}.total, normalise_misfits);
+            Kseis(iter) = norm_kernel(Kseis_temp, normalise_misfits, ...
+                InvProps.misfit_seis{1}.total, vobs);
 %             clearvars Kseis_temp;
             
             
@@ -397,14 +406,14 @@ for iter = istart : InvProps.niter;
                     [~, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
                     fig_knl = plot_kernels_rho_mu_lambda_relative(K_reltemp);
                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-mu-lambda.png'];
-                    titel = [project_name,': seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
+                    titel = [project_name,' - seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     print(fig_knl,'-dpng','-r400',figname);
                     close(fig_knl);
                     [Kabs, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
                     %                 K_reltemp = change_parametrisation_kernels('rhomulambda','rhovsvp',K_rel, Model(i));
                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
-                    titel = [project_name,': seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
+                    titel = [project_name,' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
                     print(fig_knl,'-dpng','-r400',figname);
@@ -413,13 +422,13 @@ for iter = istart : InvProps.niter;
                     [Kabs, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
                     %                 K_reltemp = change_parametrisation_kernels('rhomulambda','rhovsvp',K_rel, Model(i));
                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
-                    titel = [project_name,': seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
+                    titel = [project_name, ' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
                     print(fig_knl,'-dpng','-r400',figname);
                     close(fig_knl);
                     fig_knl = plot_kernels_rho_vs_vp(Kabs);
-                    titel = [project_name,': seismic kernels (absolute rhovsvp) for iter ',num2str(iter)];
+                    titel = [project_name,' - seismic kernels (absolute rhovsvp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.abs.rho-vs-vp.png'];
                     print(fig_knl,'-dpng','-r400',figname);
@@ -471,6 +480,8 @@ for iter = istart : InvProps.niter;
                     Ktest.rho.total = w_Kseis * Ktest.rho.total + w_Kg * Kg{iter};
                 case 'rhovsvp'
                     Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg{iter};
+                otherwise
+                    error('the parametrisation in which kernels are added was unknown');
             end
             Ktest1 = change_parametrisation_kernels(param_addknls,'rhomulambda', Ktest,Model(iter));
             K_total(iter).rho.total    = Ktest1.rho.total;
@@ -497,11 +508,11 @@ for iter = istart : InvProps.niter;
         clearvars stapje;     
 
         % save linesearch figure
-%         figname = ['../output/iter',num2str(i),'.step-linesearch.png'];
-%         titel = [project_name,': linesearch for iter ',num2str(i)];
-%         mtit(fig_lnsrch,titel, 'xoff', 0.001, 'yoff', 0.00001);
-%         print(fig_lnsrch,'-dpng','-r400',figname);
-%         close(fig_lnsrch);
+        figname = ['../output/iter',num2str(iter),'.step-linesearch.png'];
+        titel = [project_name,': linesearch for iter ',num2str(iter)];
+        mtit(fig_lnsrch,titel)%, 'xoff', 0.001, 'yoff', 0.00001);
+        print(fig_lnsrch,'-dpng','-r400',figname);
+        close(fig_lnsrch);
         clearvars fig_lnsrc;
 
         % actual model update
@@ -525,7 +536,7 @@ for iter = istart : InvProps.niter;
                     Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_prehc(iter+1));
                     [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
                         apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
-                    Model(iter+1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
+                    Model_prevfix = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
                 otherwise
                     error('the parametrisation of the inversion was not recognised')
             end
@@ -536,9 +547,15 @@ for iter = istart : InvProps.niter;
             close(fig_hcupdate);
             clearvars fig_rhoupdate
         else
-            Model(iter+1) = Model_prehc(iter+1);
+            Model_prevfix = Model_prehc(iter+1);
         end
         
+        if(strcmp(fix_velocities,'yes'))
+            Model(iter+1) = fix_vs_vp(Model_prevfix, Model_start);
+        else
+            Model(iter+1) = Model_prevfix;
+        end
+%         clearvars Model_prevfix Model_prehc;
 
     end
     
@@ -566,7 +583,6 @@ for iter = istart : InvProps.niter;
     figname = ['../output/inversion_result.',project_name,'.eps'];
     print(fig_invres,'-deps','-r400',figname);
     close(fig_invres)
-    
     end
     
     
@@ -598,6 +614,18 @@ disp '======================================';
 disp '|         ...FINISHING UP...         |';
 % disp '======================================';
 
+fig_end = plot_model_diff(Model(niter), Model_start, 'rhovsvp');
+clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);
+for ii = 2:2:6; 
+%     clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);
+    fig_end.Children(ii).CLim = [-clim_rounded clim_rounded]; 
+end
+titel = [project_name, ' - Final - starting model'];
+mtit(fig_end, titel); %, 'xoff', 0.001, 'yoff', 0.02);
+figname = ['../output/out.model-diff-final-starting.',param_plot,'.png'];
+print(fig_end,'-dpng','-r600',figname);
+close(fig_end);
+
 
 % % plot nice vector plot of misfit evolution + real, start, end model
 % disp 'plotting nice vector figures of models and misfit evo'
@@ -614,7 +642,6 @@ disp '|         ...FINISHING UP...         |';
 % disp ' ';
 % disp ' ';
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
-% disp '======================================';
 disp '|               DONE!                |'
 disp '======================================';
 disp ' ';

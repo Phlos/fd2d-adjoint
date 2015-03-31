@@ -23,7 +23,7 @@ kernels_together = [K_rel.rho2.PSV; K_rel.rho2.SH; ...
 fig_knl = figure;
 set(fig_knl,'OuterPosition',pos_knl)
                 
-scale = prctile(abs(kernels_together(:)),99.97);
+scale = prctile(abs(kernels_together(:)),99.8);
 
 % actual plotting
 subplot (3,2,1);

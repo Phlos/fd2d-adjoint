@@ -203,6 +203,8 @@ hold on; echtefit = plot(iks,ei,'-r', 'LineWidth', 1); %echtefit.LineWidth = 2;
 % calculate extremum value and plot
 echtestap = plot(step,minval,'kx', 'LineWidth', 2); %echtestap.LineWidth = 2;
 
+
+
 %% == 6. If linesearch still sucks, quit ==================================
     
 %- check if extremum is a minimum, else error and quit
@@ -242,8 +244,13 @@ set_figure_properties_bothmachines;
 
     %% calculate updated model using steptry
     disp 'now updating model in calc_misfit_perstep'
-    Model_try = update_model(K_abs, steptry, Model_prev, parametrisation);
-    
+    Model_prevfix = update_model(K_abs, steptry, Model_prev, parametrisation);
+    if(strcmp(fix_velocities,'yes'))
+        Model_try = fix_vs_vp(Model_prevfix, Model_prevfix);
+    else
+        Model_try = Model_prevfix;
+    end
+
     % no negative density
     min_rh = min(Model_try.rho(:));
     if min_rh < 0
@@ -276,8 +283,8 @@ set_figure_properties_bothmachines;
       % NEW as of 18-3-2015
       [~, misf_g_test] = make_gravity_sources(g_try, g_obs);
 %       disp(['misfit_g_test.total ', misf_g_test.total]);
-      misfit.grav = norm_misfit(misf_g_test.total, ...
-                            misfit_grav(1).total, normalise_misfits);
+      misfit.grav = norm_misfit(misf_g_test.total, normalise_misfits, ...
+                            misfit_grav(1).total, g_obs);
     end
     
     %% seismic misfit
@@ -285,18 +292,18 @@ set_figure_properties_bothmachines;
     %- for each step, run forward update
     [v_try,t,~,~,~,~] = run_forward(Model_try, stf);
     
-    % plot seismogram difference:
-    fig_seisdif = plot_seismogram_difference(v_obs, v_try, t);
-    figname = ['../output/iter.current.calcstepln.seisdif.',num2str(steptry),'.png'];
-    print(fig_seisdif,'-dpng','-r400',figname);
-    close(fig_seisdif);
+%     % plot seismogram difference:
+%     fig_seisdif = plot_seismogram_difference(v_obs, v_try, t);
+%     figname = ['../output/iter.current.calcstepln.seisdif.',num2str(steptry),'.png'];
+%     print(fig_seisdif,'-dpng','-r400',figname);
+%     close(fig_seisdif);
     
     %- for each step, calculate the misfit
     [~, misf_s_test] = calc_misfitseis_adstf(misfit_type,t,v_try,v_obs);
 %       disp(['misfit_s_test.total ', misf_s_test.total]);
     % NEW AS OF 18-3-2015
-    misfit.seis = norm_misfit(misf_s_test.total, ...
-                                misfit_seis{1}.total, normalise_misfits);
+    misfit.seis = norm_misfit(misf_s_test.total, normalise_misfits, ...
+                                misfit_seis{1}.total, v_obs);
 
 
 

@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-005.True-51.rml.dbp-increasing-fmax-7freqs';
+project_name='Mantle.test-011.like-008-010-but-use-grav';
 
 %==========================================================================
 % inversion properties
@@ -16,7 +16,7 @@ apply_hc = 'no';   % 'yes' or 'no'
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'no'; % 'yes' or 'no'
+use_grav = 'yes'; % 'yes' or 'no'
 
 % what misfit functional are we using
 misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift'
@@ -25,8 +25,18 @@ misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift'
 parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 param_plot = 'rhovsvp';
 
+% fix velocities?
+fix_velocities = 'yes'; % 'yes' or 'no'
+
 % normalise misfits:
-normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'no' % normalises both the s and g misfits by their first value, so that they're same magnitudes
+normalise_misfits = 'div_by_obs'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
+                                  % 'byfirstmisfit':
+                                  % normalises both the s and g misfits by 
+                                  % their first value, so that they're same
+                                  % order of magnitude
+                                  % 'div_by_obs':
+                                  % divides L2 norm by obs values so that
+                                  % you get percent wise misfit
 
 % starting model from matfile
 use_matfile_startingmodel = 'no';
@@ -139,10 +149,14 @@ tauw    = 10*4.0;        % source duration, seconds
 tee_0   = 10*2.5;        % source start time, seconds
 
 % needed for 'delta_bp'    
-f_min=0.006667;     % minimum frequency [Hz]
-% f_max=0.03;         % maximum frequency [Hz]
-f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.04183];
-% f_maxlist = [0.006667 0.008667 ];
+f_min=0.006667;                 % minimum frequency [Hz]
+% f_max=0.03;                   % maximum frequency [Hz]
+
+% source filtering
+% f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
+f_maxlist = [0.006667 0.008667 0.01267 0.01465];
+% how many iterations with the same source?
+change_src_every = 10;          % how many iterations with the same src?
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 

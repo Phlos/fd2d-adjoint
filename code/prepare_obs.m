@@ -1,4 +1,4 @@
-function [Model_real, freq, t_obs, props_obs, g_obs] = prepare_obs(varargin)
+function [Model_real, sources, t_obs, props_obs, g_obs] = prepare_obs(varargin)
 
 input_parameters;
 
@@ -44,16 +44,16 @@ close(fig_grav_obs);
 for ii = 1:length(f_maxlist)
     
     % make source-time function per frequency
-    freq(ii).frequency = f_maxlist(ii);
-    freq(ii).stf = make_stf_wrapperscript(freq(ii).frequency);
-    [freq(ii).v_obs,t_obs,~,~,~,~] = run_forward(Model_real, freq(ii).stf);
+    sources(ii).frequency = f_maxlist(ii);
+    sources(ii).stf = make_stf_wrapperscript(sources(ii).frequency);
+    [sources(ii).v_obs,t_obs,~,~,~,~] = run_forward(Model_real, sources(ii).stf);
 
     % run wave propagation per frequency
-    v_0 = make_seismogram_zeros(freq(ii).v_obs);
-    fig_seis = plot_seismogram_difference(freq(ii).v_obs,v_0,t_obs,'nodiff');
-    titel = [project_name,': observed seismograms f_max = ', num2str(freq(ii).frequency), ' Hz'];
+    v_0 = make_seismogram_zeros(sources(ii).v_obs);
+    fig_seis = plot_seismogram_difference(sources(ii).v_obs,v_0,t_obs,'nodiff');
+    titel = [project_name,': observed seismograms f_max = ', num2str(sources(ii).frequency), ' Hz'];
     mtit(fig_seis, titel, 'xoff', 0.001, 'yoff', -0.05);
-    figname = ['../output/obs.seis.fmax-',num2str(freq(ii).frequency,'%.2e'),'.png'];
+    figname = ['../output/obs.seis.fmax-',num2str(sources(ii).frequency,'%.2e'),'.png'];
     print(fig_seis,'-dpng','-r400',figname);
     close(fig_seis);
 end
@@ -61,7 +61,7 @@ end
 % saving the obs variables
 disp 'saving obs variables to matfile...'
 savename = ['../output/obs.all-vars.mat'];
-save(savename, 'freq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
+save(savename, 'sources', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
 
 close all;
 

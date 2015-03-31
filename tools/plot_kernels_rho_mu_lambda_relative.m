@@ -19,7 +19,7 @@ kernels_together = [K_rel.rho.PSV; K_rel.rho.SH; ...
 fig_knl = figure;
 set(fig_knl,'OuterPosition',pos_knl)
 
-scale = prctile(abs(kernels_together(:)),99.97);
+scale = prctile(abs(kernels_together(:)),99.8);
 
 subplot (3,2,1);
 plot_kernel(X,Z,K_rel.rho.PSV,'relative density PSV','fixed',scale,stf_PSV);
