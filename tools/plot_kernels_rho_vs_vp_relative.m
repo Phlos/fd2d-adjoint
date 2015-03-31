@@ -42,4 +42,5 @@ plot_kernel(X,Z,zeros(size(X')),'relative v_p SH','perc',100,stf_PSV);
 
 caxis([-scale scale]);
 h = colorbar('horiz');
+set(h,'Xticklabel',{'-max','0', 'max'})
 set(h,'Position',[0.3 0.05 0.4 0.02])

@@ -401,38 +401,50 @@ for iter = istart : InvProps.niter;
             disp(['iter ',num2str(iter),': plotting kernels']);
             cd ../tools/
             
+            [Kabs, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
             switch parametrisation
                 case 'rhomulambda'
-                    [~, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
-                    fig_knl = plot_kernels_rho_mu_lambda_relative(K_reltemp);
+
+                    % relative rho-mu-lambda
+%                     fig_knl = plot_kernels_rho_mu_lambda_relative(K_reltemp);
+                    fig_knl = plot_kernels(K_reltemp, 'rhomulambda',Model(iter), 'total', 'same', 99.9); 
                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-mu-lambda.png'];
                     titel = [project_name,' - seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                    print(fig_knl,'-dpng','-r400',figname);
-                    close(fig_knl);
-                    [Kabs, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
-                    %                 K_reltemp = change_parametrisation_kernels('rhomulambda','rhovsvp',K_rel, Model(i));
-                    fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
+                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+
+                    % absolute rho-mu-lambda
+%                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
+                    fig_knl = plot_kernels(Kabs, 'rhomulambda',Model(iter), 'total', 'own', 99.9);
                     titel = [project_name,' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+                    figname = ['../output/iter',num2str(iter),'.kernels.absolute.rho-mu-lambda.png'];
+                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+
+                    % relative rho-vs-vp
+%                     fig_knl = plot_kernels_rho_mu_lambda(Kseis(iter));
+                    fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.9);
                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
-                    print(fig_knl,'-dpng','-r400',figname);
-                    close(fig_knl);
+                    titel = [project_name,' - seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
+                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+
                 case 'rhovsvp'
-                    [Kabs, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
-                    %                 K_reltemp = change_parametrisation_kernels('rhomulambda','rhovsvp',K_rel, Model(i));
-                    fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
+                    % relative rho-vs-vp
+%                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
+                    fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.9);
                     titel = [project_name, ' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
-                    print(fig_knl,'-dpng','-r400',figname);
-                    close(fig_knl);
-                    fig_knl = plot_kernels_rho_vs_vp(Kabs);
+                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+
+                    % absolute rho-vs-vp
+%                     fig_knl = plot_kernels_rho_vs_vp(Kabs);
+                    fig_knl = plot_kernels(Kabs, 'rhomulambda',Model(iter), 'total', 'own', 99.9);
                     titel = [project_name,' - seismic kernels (absolute rhovsvp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.abs.rho-vs-vp.png'];
-                    print(fig_knl,'-dpng','-r400',figname);
-                    close(fig_knl);
+                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
                 otherwise
                     error('unrecognised parametrisation for kernel plot');
             end

@@ -7,7 +7,7 @@ path(path,'../input');
 
 input_parameters;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
-[mu,rho,lambda]=define_material_parameters(nx,nz,11);
+% [mu,rho,lambda]=define_material_parameters(nx,nz,11);
 set_figure_properties_bothmachines;
 
 
