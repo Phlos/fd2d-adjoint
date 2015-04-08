@@ -10,9 +10,9 @@ close(fig_inv)
 
 % real model
 if(exist('Model_real','var'))
-    fig_mod = plot_model(Model_real, middle, parametrisation);
+    fig_mod = plot_model_diff(Model_real, Model_start, param_plot);
     set(fig_mod,'Renderer','painters')
-    figname = ['../output/obs.',parametrisation,'.eps'];
+    figname = ['../output/obs.',param_plot,'.eps'];
     print(fig_mod,'-depsc','-r400',figname);
     close(fig_mod)
 else
@@ -20,19 +20,19 @@ else
 end
 
 % model(1)
-fig_mod = plot_model(Model(1),middle,parametrisation);
+fig_mod = plot_model_diff(Model(1),Model_start,param_plot);
 set(fig_mod,'Renderer','painters');
 titel = [project_name,': model of iter 1'];
 mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-figname = ['../output/iter001.model.',parametrisation,'.eps'];
+figname = ['../output/iter001.model.',param_plot,'.eps'];
 print(fig_mod,'-depsc','-r400',figname);
 close(fig_mod);
 
 % model(end)
-fig_mod = plot_model(Model(niter),middle,parametrisation);
+fig_mod = plot_model_diff(Model(niter),Model_start,param_plot);
 set(fig_mod,'Renderer','painters');
-titel = [project_name,': model of iter 1'];
+titel = [project_name,': final model'];
 mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-figname = ['../output/iter',num2str(niter),'.model.',parametrisation,'.eps'];
+figname = ['../output/iter',num2str(niter),'.model.',param_plot,'.eps'];
 print(fig_mod,'-depsc','-r400',figname);
 close(fig_mod);

@@ -9,8 +9,8 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-InvProps.niter = 9;
-istart = 9;
+InvProps.niter = 100;
+istart = 10;
 
 niter = InvProps.niter;
 
@@ -190,6 +190,7 @@ for iter = istart : InvProps.niter;
         
         %% misfit
         
+        % gravity misfit
 %         if strcmp(use_grav,'yes')
             % gravity field of current model
             [g(iter), fig_grav] = calculate_gravity_field(Model(iter).rho, rec_g);
@@ -235,14 +236,14 @@ for iter = istart : InvProps.niter;
         
 
         
-        %% SEISMIC misfit
+        % seismic misfit
         
         % run forward wave propagation
         disp ' ';
         disp(['iter ',num2str(iter),', src ',num2str(which_src),': calculating forward wave propagation']);
 %         clearvars u_fw v_fw;
 
-        % NEW as of 24-3-2015
+        % NEW as of 24-3-2015 (that stf{iter} is now supplied)
         [v_iter{iter},t,u_fw,v_fw,rec_x,rec_z]=run_forward(Model(iter), stf{iter});
         close(clf);
         close(clf);
@@ -407,7 +408,7 @@ for iter = istart : InvProps.niter;
 
                     % relative rho-mu-lambda
 %                     fig_knl = plot_kernels_rho_mu_lambda_relative(K_reltemp);
-                    fig_knl = plot_kernels(K_reltemp, 'rhomulambda',Model(iter), 'total', 'same', 99.9); 
+                    fig_knl = plot_kernels(K_reltemp, 'rhomulambda',Model(iter), 'total', 'same', 99.8); 
                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-mu-lambda.png'];
                     titel = [project_name,' - seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
@@ -415,7 +416,7 @@ for iter = istart : InvProps.niter;
 
                     % absolute rho-mu-lambda
 %                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
-                    fig_knl = plot_kernels(Kabs, 'rhomulambda',Model(iter), 'total', 'own', 99.9);
+                    fig_knl = plot_kernels(Kabs, 'rhomulambda',Model(iter), 'total', 'own', 99.8);
                     titel = [project_name,' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.absolute.rho-mu-lambda.png'];
@@ -423,9 +424,9 @@ for iter = istart : InvProps.niter;
 
                     % relative rho-vs-vp
 %                     fig_knl = plot_kernels_rho_mu_lambda(Kseis(iter));
-                    fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.9);
+                    fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.8);
                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
-                    titel = [project_name,' - seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
+                    titel = [project_name,' - seismic kernels (relative rho-vs-vp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 
@@ -586,14 +587,16 @@ for iter = istart : InvProps.niter;
     figname = ['../output/inversion_development.',project_name,'.misfit-landscape.png'];
     print(fig_inv2,'-dpng','-r400',figname);
     figname = ['../output/inversion_development.',project_name,'.misfit-landscape.eps'];
-    print(fig_inv2,'-deps','-r400',figname);
+    print(fig_inv2,'-depsc','-r400',figname);
     close(fig_inv2)
     
     fig_invres = plot_inversion_result(InvProps, iter);
+    titel = [project_name,': inversion results'];
+    mtit(fig_invres,titel, 'xoff', 0.0000001, 'yoff', 0.03);
     figname = ['../output/inversion_result.',project_name,'.png'];
     print(fig_invres,'-dpng','-r400',figname);
     figname = ['../output/inversion_result.',project_name,'.eps'];
-    print(fig_invres,'-deps','-r400',figname);
+    print(fig_invres,'-depsc','-r400',figname);
     close(fig_invres)
     end
     

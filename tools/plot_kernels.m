@@ -68,6 +68,8 @@ function fig_knl = plot_kernels(K, varargin)
 %             if ( ~exist(K2.(params{1}).(veldje{1})) && ...
 %                ~exist(K2.(params{2}).(veldje{1})) && ...
 %                ~exist(K2.(params{3}).(veldje{1})) ); error('wavefield not existing'); end
+        otherwise
+            error('wavefields input not recognised');
     end
 
     switch sameorownpercentile % determines whether every kernel is plotted 
@@ -101,17 +103,14 @@ function fig_knl = plot_kernels(K, varargin)
     for ii = 1:length(params); % loop over rows = parameters
         for jj = 1:ncols % loop over columns = which_waves fields ('PSV', 'SH', 'total')
             if isfield(K2.(params{ii}), veldje{jj})
-% ii
-% jj
-% volgnummer = (ii-1)*ncols + jj
-            subplot(3,ncols,(ii-1)*ncols + jj)
-            plot_kernel(X,Z,K2.(params{ii}).(veldje{jj}), ...
-            [params{ii}, ' - ', veldje{jj}],cmaxtype,scale,stf_PSV);
-%                                                             'rho - P-SV','perc',99.95,stf_PSV);
+                subplot(3,ncols,(ii-1)*ncols + jj)
+                plot_kernel(X,Z,K2.(params{ii}).(veldje{jj}), ...
+                    [params{ii}, ' - ', veldje{jj}],cmaxtype,scale,stf_PSV);
             end
         end
     end
     
+    % plotting the colorbar from -max to max
     h = colorbar('horiz');
     lmt = get(h, 'Limits');
     set(h,'XTick',[lmt(1) 0 lmt(2)])

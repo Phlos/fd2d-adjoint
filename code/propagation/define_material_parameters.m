@@ -184,7 +184,8 @@ elseif (model_type==18) % gaussian off-central mu anomaly
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
-    dxz=0.15;
+    anom.dx=0.15;
+    anom.dz=0.15;
     
     % make anomaly
     gwid = round(0.05 * max([nx nz])); % size of the anomaly
@@ -221,7 +222,7 @@ elseif (model_type==21) % gaussian off-central rho_v anomaly
     % location of the centre of the anomaly
     anom.dxperc=0.40; % anomaly x distance from the lower left corner
                   % as a fraction of the X length
-    anom.dzperc=0.42; % same for z distance
+    anom.dzperc=0.60; % same for z distance
     % height & width of the anomaly
     anom.dx = round(anom.dxperc*nx);
     anom.dz  = round(anom.dzperc*nz);

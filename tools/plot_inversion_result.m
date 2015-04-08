@@ -17,8 +17,8 @@ set_figure_properties_bothmachines;
 
 % variables
 misfit = InvProps.misfit;
-misfit_seis = InvProps.misfit_seis;
-misfit_g = InvProps.misfit_g;
+% misfit_seis = InvProps.misfit_seis;
+% misfit_g = InvProps.misfit_g;
 modeldifn = InvProps.modeldifn;
 step = InvProps.step;
 angletot = InvProps.angle.Ktotal;
@@ -34,10 +34,12 @@ niter = length(misfit); % the actual total number of iters run
 imax = min(imax,niter);
 iters = 1:niter;
 
-for ii = 1:imax
-    misfitseis(ii) = misfit_seis{ii}.normd;
-    misfitgrav(ii) = misfit_g(ii).normd;
-end
+% for ii = 1:imax
+%     misfitseis(ii) = misfit_seis{ii}.normd;
+%     misfitgrav(ii) = misfit_g(ii).normd;
+% end
+misfitseis = InvProps.misfitseis;
+misfitgrav = InvProps.misfitgrav;
 
 stepcumsum = [0, cumsum(abs(step(1:imax-1)))];
 
@@ -151,7 +153,7 @@ Rangle = plot(stepcumsum(2:imax-1), angletot(2:imax-1) ./ pi .* 180, '--ko',...
     set(Rangle(3), 'LineWidth',1)
 end
 xlim([min(stepcumsum), stepcumsum(imax)]);
-ylim([0 90]);
+ylim([0 180]);
 grid on
 % set(Lmdifn, 'LineWidth', 1)
 title('angle between consecutive kernels (degrees)');

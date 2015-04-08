@@ -19,6 +19,8 @@ function [adstf, misfit] = calc_misfitseis_adstf(misfit_tiep, t, v_rec, varargin
 % - misfit_type:    which misfit functional you're using
 %                   waveform_difference:    L2 norm of velocity seismograms
 %                   cc_time_shift:          cross-correlation time shift
+%                   cc_time_shift_x:        x component picking
+%                   cc_time_shift_z:        z component picking
 % - t:              time axis, needed if displacement needs to be calc'd 
 %                   from vel or the other way around
 % - v_obs:          observed seismograms (not always needed)
@@ -34,13 +36,24 @@ function [adstf, misfit] = calc_misfitseis_adstf(misfit_tiep, t, v_rec, varargin
 %- prepare 
 input_parameters; % should get nrec here, also nt and dt
 [~, ~, dx, dz] = define_computational_domain(Lx, Lz, nx, nz);
-misfit_type = misfit_tiep;
+
+switch misfit_tiep
+    case 'cc_time_shift_x'
+        misfit_type = 'cc_time_shift';
+        compwel = 'x';
+    case 'cc_time_shift_z'
+        misfit_type = 'cc_time_shift';
+        compwel = 'z';
+    otherwise
+        misfit_type = misfit_tiep;
+        compwel = {'x', 'y', 'z'};
+end
 
 switch misfit_type
     case 'waveform_difference'
-        disp 'we''re doing waveform differences'
+%         disp 'we''re doing waveform differences'
     case 'cc_time_shift'
-        disp 'we''re doing cc time shifts'
+%         disp 'we''re doing cc time shifts'
     otherwise
         error('unknown misfit type!');
 end
@@ -62,82 +75,88 @@ nrec = size(v_rec,2);
 for irec = 1:nrec
     comp = fieldnames(v_rec{irec});
     for icomp = 1:length(comp)
-        
-        % make temporary 1d arrays of currently used recording
-        vrec = v_rec{irec}.(comp{icomp});
-        if strcmp(vobspresent,'yes')
-            vobs = v_obs{irec}.(comp{icomp});
-        else
-            vobs = zeros(size(t));
-        end
-        
-        %- pick left and right manual or auto
-        if strcmp(picking_mode, 'manual')
-            [left, right] = pick_adstf_manual(t, vrec, vobs, irec, fig_manual,misfit_type);
-        else
-            left = t(1);
-            right = t(end);
-        end
-        
-        %- taper vrec (and vobs)
-        taper_width=t(end)/10;   % why divide by ten??
-        lmax = taper_width;
-        rmax = t(end) - taper_width;
-        if (left < taper_width) || (right > t(end) - taper_width)
-            left = max(left,lmax);
-            right = min(right,rmax);
-        end
-        
-        vrec=taper(vrec,t,left,right,taper_width);
-        vobs=taper(vobs,t,left,right,taper_width);
-        
-%         bips = figure;
-%         subplot(3,1,1); plot(t,vrec,t,vobs);
+        if find(strcmp(comp{icomp},compwel))
+            disp(['deze component wel: ',comp{icomp}]);
+            % make temporary 1d arrays of currently used recording
+            vrec = v_rec{irec}.(comp{icomp});
+            if strcmp(vobspresent,'yes')
+                vobs = v_obs{irec}.(comp{icomp});
+            else
+                vobs = zeros(size(t));
+            end
             
-        %- the actual adstf creation
-        
-        % first get the adstf_nonreversed
-        if strcmp(misfit_type,'waveform_difference')
-            [misfit_n,adstf_temp] = misfit_wavef_L2(vrec,vobs,t);
-        elseif strcmp(misfit_type,'cc_time_shift')
-            [misfit_n,adstf_temp] = misfit_cc_tshft(vrec,vobs,t);
-        end
-        
-%         figure(bips)
-%         subplot(3,1,2); plot(t,adstf_temp); title('adstf');
-        
-        % taper adstf_temp
-%         leftadj = t(end)-right;
-%         rightadj = t(end)-left;
-        adstf_temp = taper(adstf_temp,t,lmax,rmax,taper_width);
-        
-%         figure(bips)
-%         subplot(3,1,3); plot(t,adstf_temp); title('tapered'),
-        
-        % if manual: plot temp adstf before & after time reversal
-        if strcmp(picking_mode, 'manual')
-            figure(fig_manual);
-            subplot(3,1,2);
-            plot(t,fliplr(adstf_temp),'k')
-            xlabel('t [s]')
-            title(['adjoint source before time reversal'])
+            %- pick left and right manual or auto
+            if strcmp(picking_mode, 'manual')
+                [left, right] = pick_adstf_manual(t, vrec, vobs, irec, fig_manual,misfit_type);
+            else
+                left = t(1);
+                right = t(end);
+            end
             
-            subplot(3,1,3);
-            plot(t,adstf_temp,'k')
-            xlabel('t [s]')
-            title(['adjoint source after time reversal'])
-            pause(0.5);
+            %- taper vrec (and vobs)
+            taper_width=t(end)/10;   % why divide by ten??
+            lmax = taper_width;
+            rmax = t(end) - taper_width;
+            if (left < taper_width) || (right > t(end) - taper_width)
+                left = max(left,lmax);
+                right = min(right,rmax);
+            end
+            
+            vrec=taper(vrec,t,left,right,taper_width);
+            vobs=taper(vobs,t,left,right,taper_width);
+            
+    %         bips = figure;
+    %         subplot(3,1,1); plot(t,vrec,t,vobs);
+            
+            %- the actual adstf creation
+            
+            % first get the adstf_nonreversed
+            if strcmp(misfit_type,'waveform_difference')
+                [misfit_n,adstf_temp] = misfit_wavef_L2(vrec,vobs,t);
+            elseif strcmp(misfit_type,'cc_time_shift')
+                [misfit_n,adstf_temp] = misfit_cc_tshft(vrec,vobs,t);
+            end
+            
+    %         figure(bips)
+    %         subplot(3,1,2); plot(t,adstf_temp); title('adstf');
+            
+            % taper adstf_temp
+    %         leftadj = t(end)-right;
+    %         rightadj = t(end)-left;
+            adstf_temp = taper(adstf_temp,t,lmax,rmax,taper_width);
+            
+    %         figure(bips)
+    %         subplot(3,1,3); plot(t,adstf_temp); title('tapered'),
+            
+            % if manual: plot temp adstf before & after time reversal
+            if strcmp(picking_mode, 'manual')
+                figure(fig_manual);
+                subplot(3,1,2);
+                plot(t,fliplr(adstf_temp),'k')
+                xlabel('t [s]')
+                title(['adjoint source before time reversal'])
+                
+                subplot(3,1,3);
+                plot(t,adstf_temp,'k')
+                xlabel('t [s]')
+                title(['adjoint source after time reversal'])
+                pause(0.5);
+            end
+            
+            % give the adstf the right magnitude so that the spatial integral
+            % is 1 (because the stf/adstf are spatial delta functions)
+            adstf_temp = adstf_temp / dx / dz;
+            
+            adstf{irec}.(comp{icomp}) = adstf_temp;
+            
+            % misfit
+            misfit.(comp{icomp})(irec) = misfit_n;
+            
+        else
+            adstf{irec}.(comp{icomp}) = zeros(size(v_rec{irec}.(comp{icomp})));
+            misfit.(comp{icomp})(irec) = 0;
+            
         end
-        
-        % give the adstf the right magnitude so that the spatial integral
-        % is 1 (because the stf/adstf are spatial delta functions)
-        adstf_temp = adstf_temp / dx / dz;
-        
-        adstf{irec}.(comp{icomp}) = adstf_temp;
-        
-        % misfit
-        misfit.(comp{icomp})(irec) = misfit_n;
-        
     end
     
 

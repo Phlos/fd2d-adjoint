@@ -7,7 +7,7 @@
 
 %% dynamic fields
 
-
+sfe = store_fw_every;
 % velocity fields (for one timestep)
 
 if(strcmp(wave_propagation_type,'SH'))
@@ -31,16 +31,16 @@ elseif(strcmp(wave_propagation_type,'both'))
 end
 
 if(strcmp(simulation_mode,'forward'))
-    % stored velocity fields (a nt/5 by nx by nz matrix)
+    % stored velocity fields (a nt/sfe by nx by nz matrix)
     if(strcmp(wave_propagation_type,'SH'))
-        vy_forward=zeros(nt/5,nx,nz);
+        vy_forward=zeros(nt/sfe,nx,nz);
     elseif(strcmp(wave_propagation_type,'PSV'))
-        vx_forward=zeros(nt/5,nx,nz);
-        vz_forward=zeros(nt/5,nx,nz);
+        vx_forward=zeros(nt/sfe,nx,nz);
+        vz_forward=zeros(nt/sfe,nx,nz);
     elseif(strcmp(wave_propagation_type,'both'))
-        vy_forward=zeros(nt/5,nx,nz);
-        vx_forward=zeros(nt/5,nx,nz);
-        vz_forward=zeros(nt/5,nx,nz);
+        vy_forward=zeros(nt/sfe,nx,nz);
+        vx_forward=zeros(nt/sfe,nx,nz);
+        vz_forward=zeros(nt/sfe,nx,nz);
     end
 end
 
