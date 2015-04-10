@@ -2,28 +2,31 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='testing-Tromp.P-SV-SH.tt-kernels';
+project_name='Mantle.test-014.like-012-but-param-rhovsvp';
 
 %==========================================================================
 % inversion properties
 %==========================================================================
 
-adjoint_source_path='../input/sources/adjoint/';
+% adjoint_source_path='../input/sources/adjoint/';
 
 % apply hard constraints?
-apply_hc = 'yes';   % 'yes' or 'no'
+apply_hc = 'no';   % 'yes' or 'no'
 % hard constraints
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
 use_grav = 'yes'; % 'yes' or 'no'
 
+% what misfit functional are we using
+misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift'
+
 % inversion parametrisation
 parametrisation = 'rhovsvp';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'no'; 
+fix_velocities = 'yes'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -46,14 +49,23 @@ starting_model = '';
 % stepInit = 5e14;        % good for src @ bottom, rec @ top of domain (2-12-2014)
 % stepInit = 1e-1;        % kernels normalised by 1st misfit size. (20-11-2014)
 % stepInit = 1e-8;        % normalised misfit, TINY rho anomaly (model 101) (24-11-2014)
+% ---------------- changed stf adstf: now divided by surface of cell to
+%                  make it a spatial delta function
+% stepInit = 5e9;         % KMP solved dd ~25 feb 2015
+% stepInit = 7e7;         % PREM + 1% vs anomalies
+% stepInit = 1e4;         % PREM + 1% rho2 anomalies
+% stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
 stepInit = 1e8;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
 
-% smoothing properties
-% smoothnp = 15;  % size of the smoothing filter
+%- smoothing properties
+% % smoothing (= filtering) seismograms before adstf
+% max_freq = 0.2; % Hz
+% smoothing kernels
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
-
-store_fw_every = 10;
+                
+% store forward wavefield every .. timesteps
+store_fw_every = 10; 
 
 
 %==========================================================================
@@ -62,19 +74,25 @@ store_fw_every = 10;
 
 wave_propagation_type='PSV';   % can be 'PSV' or 'SH' or 'both'
 
-Lx=2.50e5;     % model extension in x-direction [m]
-Lz=1e5;     % model extension in z-direction [m]
+Lx=6000e3;     % model extension in x-direction [m]
+Lz=2890e3;     % model extension in z-direction [m] ! PREM: don't exceed 2891
 
-nx=750;     % grid points in x-direction
-nz=300;     % grid points in z-direction
+% nx=901;     % grid points in x-direction
+% nz=430;     % grid points in z-direction
+nx = 601;
+nz = 291;
+% nx = 1201;
+% nz = 581;
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
-% dt=0.33;     % time step [s] fine for SH in a grid   dx=dz=3.34e3 m
-% dt=0.1;      % time step [s] fine for P-SV in a grid dx=dz=3.34e3 m
-dt=0.01;      % time step [s]
-% nt=6000;      % number of iterations
-tmax = 60;
+dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
+% dt=0.1;       % time step [s] 0.4 suffices @PREM dx=dz=10km
+% nt=700;      % number of iterations
+% tmax = 1400;  % final time [s]
+% tmax = 580;     % PcP = 510 s, ScS = 935 s
+% tmax = 1100;    % should be enough for ScS.
+tmax = 1100;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -83,8 +101,8 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % model type
 %==========================================================================
 
-true_model_type = 10;
-model_type=10;
+true_model_type = 51;
+model_type=50;
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -102,7 +120,10 @@ model_type=10;
 % 21= gaussian off-central rho2 anomaly (rho2 = rho in rho-vs-vp)
 % 31= five 'rand' positive rho2 anomalies (rho2 = rho in rho-vs-vp)
 % 41= ten 'rand' rho2 anomalies: 5 pos 5 neg (rho2 = rho in rho-vs-vp)
-% 100= layered: left = high velocity, right = low velocity (any difference with model 3???)
+% 50= PREM background values model (will be selected at true height above cmb)
+% 100= layered: left = high rho0, right = low rho0
+% 101= homogeneous model (Tromp like) with tiny rho anomaly
+% 102= Ring shaped model (Evangelos): vp=5000, vs=3000, rho=2600 | outside: 5000,1,2600
 
 % 'initial'= read initial model for waveform inversion (mu_initial, rho_initial)
 
@@ -124,15 +145,18 @@ stf_type = 'delta_bp';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed
                         % delta function)
 % needed for 'ricker'
 tauw_0  = 2.628;      % seconds
-% tauw    = 4.0;        % source duration, seconds
-% tee_0   = 2.5;        % source start time, seconds
-tauw = 4.0;
-tee_0 = 4.0;
+tauw    = 10*4.0;        % source duration, seconds
+tee_0   = 10*2.5;        % source start time, seconds
 
 % needed for 'delta_bp'    
-f_min=0.2;          % minimum frequency [Hz]
-f_maxlist=[0.2 1.00];         % maximum frequency [Hz]
-f_max = 1.00;
+f_min=0.006667;                 % minimum frequency [Hz]
+% f_max=0.03;                   % maximum frequency [Hz]
+
+% source filtering
+% f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
+f_maxlist = [0.006667 0.008667 0.01267 0.01465];
+% how many iterations with the same source?
+change_src_every = 15;          % how many iterations with the same src?
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 
@@ -156,10 +180,15 @@ simulation_mode='forward';
 
 % %- line of sources at the bottom of the domain -- use with absbound bottom?
 % nsrc = 8;
-% % nsrc = 1;
 % src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
 % dz = 1/16 * Lz;
 % src_z=ones(size(src_x)) * (0 + 2*dz); % -2*dz necessary as a result of b.c.)
+
+%- line of sources near top of the domain
+nsrc = 8;
+src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
+dz = 1/16 * Lz;
+src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
 
 % %- 'random' source positions, 8x
 % src_x = Lx *   [ 0.2769    0.0462    0.0971    0.8235    0.6948    0.3171    0.9502    0.0344];
@@ -181,9 +210,6 @@ simulation_mode='forward';
 %     n=n+1;
 % end
 
-% % a single source
-src_x = 0.5e5;
-src_z = 0.6e5;
 % src_x=[0.6e5];
 % src_z=[0.7e5];
 
@@ -191,12 +217,12 @@ src_z = 0.6e5;
 % receiver positions
 %==========================================================================
 
-% %- a line of receivers just below the top boundary
-% nrec = 16;
-% % nrec = 1;
-% rec_x= (1: 1: nrec) * (Lx/(nrec+1));
-% dz = Lz/(nz-1);
-% rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)
+%- a line of receivers just below the top boundary
+nrec = 16;
+% nrec = 1;
+rec_x= (1: 1: nrec) * (Lx/(nrec+1));
+dz = Lz/(nz-1);
+rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)
 
 % %- a circle of receivers with the centre at centre
 % centre=[Lx/2 Lz/2];
@@ -230,8 +256,6 @@ src_z = 0.6e5;
 %- just one receiver
 % rec_x=[1.6e5];
 % rec_z=[0.7e5];
-rec_x = 1.5e5;
-rec_z = 0.6e5;
 
 %- a large number of receivers in a closed rectangular configuration
 %rec_x=[50.0  50.0  50.0  50.0  50.0   50.0    70.0  90.0 110.0 130.0   70.0  90.0 110.0 130.0  150.0 150.0 150.0 150.0 150.0  150.0];
@@ -254,12 +278,12 @@ rec_g.z=ones(size(rec_g.x)) * (Lz + rec_height);
 % absorbing boundaries
 %==========================================================================
 
-width=25000.0;     % width of the boundary layer in m
+width=250000.0;     % width of the boundary layer in m
 
-absorb_left   =1;  % absorb waves on the left boundary
-absorb_right  =1;  % absorb waves on the right boundary
-absorb_top    =0;  % absorb waves on the top boundary
-absorb_bottom =1;  % absorb waves on the bottom boundary
+absorb_left=1;  % absorb waves on the left boundary
+absorb_right=1; % absorb waves on the right boundary
+absorb_top=0;   % absorb waves on the top boundary
+absorb_bottom=0;% absorb waves on the bottom boundary
 
 %==========================================================================
 % plotting
@@ -267,9 +291,11 @@ absorb_bottom =1;  % absorb waves on the bottom boundary
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
 plot_every=100000; % value larger than nt, so that no plotting takes place
-% plot_every = 25;
+% plot_every = 40;
+% plot_every = 100;
+% plot_every = 10;
 
-plot_forward_frames='SH';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
+plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation
 % some test about plotting the frames differently
 % plot_frame.PSV='no';

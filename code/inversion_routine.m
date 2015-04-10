@@ -9,7 +9,7 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-InvProps.niter = 100;
+InvProps.niter = 15;
 istart = 10;
 
 niter = InvProps.niter;
@@ -27,16 +27,22 @@ niter = InvProps.niter;
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '======================================';
 disp(['INVERSION RUN ', project_name]);
-disp '-- using seis? ... YES!!'
+disp(['-- parametrisation:  ', parametrisation]);
+disp '-- using seis? ..... YES!!'
 if strcmp(use_grav , 'yes')
-    disp '-- using grav? ... YES!!'
+    disp '-- using grav? ..... YES!!'
 else
-    disp '-- using grav? ... no'
+    disp '-- using grav? ..... no'
 end
 if strcmp(apply_hc , 'yes')
-    disp '-- using h.c.? ... YES!!'
+    disp '-- using h.c.? ..... YES!!'
 else
-    disp '-- using h.c.? ... no'
+    disp '-- using h.c.? ..... no'
+end
+if strcmp(fix_velocities , 'yes')
+    disp '-- fixing vels? .... YES!!'
+else
+    disp '-- fixing vels? .... no'
 end
 disp '======================================';
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
@@ -172,14 +178,13 @@ for iter = istart : InvProps.niter;
         %% MODEL
         
         % plot model
-        fig_mod = plot_model(Model(iter),middle,param_plot);
-        titel = [project_name,': model of iter ', num2str(iter)];
-        mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-        figname = ['../output/iter',num2str(iter),'.model.',param_plot,'.png'];
-        print(fig_mod,'-dpng','-r400',figname);
-        close(fig_mod);
-        clearvars('fig_mod');
-        
+%         fig_mod = plot_model(Model(iter),middle,param_plot);
+%         titel = [project_name,': model of iter ', num2str(iter)];
+%         mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
+%         figname = ['../output/iter',num2str(iter),'.model.',param_plot,'.png'];
+%         print(fig_mod,'-dpng','-r400',figname);
+%         close(fig_mod);
+%         clearvars('fig_mod');
         fig_mod = plot_model_diff(Model(iter),Model_start,param_plot);
         titel = [project_name,': model diff of iter ', num2str(iter), ' and starting model'];
         mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
@@ -402,47 +407,62 @@ for iter = istart : InvProps.niter;
             disp(['iter ',num2str(iter),': plotting kernels']);
             cd ../tools/
             
-            [Kabs, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
+%             [Kabs, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
             switch parametrisation
                 case 'rhomulambda'
 
-                    % relative rho-mu-lambda
-%                     fig_knl = plot_kernels_rho_mu_lambda_relative(K_reltemp);
-                    fig_knl = plot_kernels(K_reltemp, 'rhomulambda',Model(iter), 'total', 'same', 99.8); 
-                    figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-mu-lambda.png'];
-                    titel = [project_name,' - seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
-                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+%                     % relative rho-mu-lambda
+% %                     fig_knl = plot_kernels_rho_mu_lambda_relative(K_reltemp);
+%                     fig_knl = plot_kernels(K_reltemp, 'rhomulambda',Model(iter), 'total', 'same', 99.8); 
+%                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-mu-lambda.png'];
+%                     titel = [project_name,' - seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
+%                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+%                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 
                     % absolute rho-mu-lambda
 %                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
-                    fig_knl = plot_kernels(Kabs, 'rhomulambda',Model(iter), 'total', 'own', 99.8);
-                    titel = [project_name,' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
+                    fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
+                    titel = [project_name,' - seismic kernels (absolute rho-mu-lambda) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.absolute.rho-mu-lambda.png'];
                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 
-                    % relative rho-vs-vp
-%                     fig_knl = plot_kernels_rho_mu_lambda(Kseis(iter));
-                    fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.8);
-                    figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
-                    titel = [project_name,' - seismic kernels (relative rho-vs-vp) for iter ',num2str(iter)];
+%                     % relative rho-vs-vp
+% %                     fig_knl = plot_kernels_rho_mu_lambda(Kseis(iter));
+%                     fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.8);
+%                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
+%                     titel = [project_name,' - seismic kernels (relative rho-vs-vp) for iter ',num2str(iter)];
+%                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+%                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+                    
+                    % absolute rho-vs-vp
+%                     fig_knl = plot_kernels_rho_vs_vp(Kabs);
+                    fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
+                    titel = [project_name,' - seismic kernels (absolute rho-vs-vp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+                    figname = ['../output/iter',num2str(iter),'.kernels.abs.rho-vs-vp.png'];
                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 
                 case 'rhovsvp'
-                    % relative rho-vs-vp
+%                     % relative rho-vs-vp
+% %                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
+%                     fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.9);
+%                     titel = [project_name, ' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
+%                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+%                     figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
+%                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+                    % absolute rho-mu-lambda
 %                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
-                    fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.9);
-                    titel = [project_name, ' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
+                    fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
+                    titel = [project_name,' - seismic kernels (absolute rho-mu-lambda) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                    figname = ['../output/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
+                    figname = ['../output/iter',num2str(iter),'.kernels.absolute.rho-mu-lambda.png'];
                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 
                     % absolute rho-vs-vp
 %                     fig_knl = plot_kernels_rho_vs_vp(Kabs);
-                    fig_knl = plot_kernels(Kabs, 'rhomulambda',Model(iter), 'total', 'own', 99.9);
-                    titel = [project_name,' - seismic kernels (absolute rhovsvp) for iter ',num2str(iter)];
+                    fig_knl = plot_kernels(Kseis(iter), 'rhovsvp',Model(iter), 'total', 'own', 99.95);
+                    titel = [project_name,' - seismic kernels (absolute rho-vs-vp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.abs.rho-vs-vp.png'];
                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
@@ -517,7 +537,7 @@ for iter = istart : InvProps.niter;
         [InvProps.step(iter), fig_lnsrch,  InvProps.steplnArray{iter}, InvProps.misfitArray{iter} ] = ...
                 calculate_step_length(stapje,iter, ...
                 InvProps.misfit(iter), InvProps.misfit_seis, InvProps.misfit_g, ...
-                Model(iter),K_total(iter),vobs, g_obs, stf{iter} );
+                Model(iter),K_total(iter),vobs, g_obs, stf{iter}, Model_start);
         clearvars stapje;     
 
         % save linesearch figure
@@ -528,7 +548,7 @@ for iter = istart : InvProps.niter;
         close(fig_lnsrch);
         clearvars fig_lnsrc;
 
-        % actual model update
+        % initial model update (pre hc, pre fix velocities)
         disp ' ';
         disp(['iter ',num2str(iter),': updating model']);
         Model_prehc(iter+1) = update_model(K_total(iter),InvProps.step(iter),Model(iter),parametrisation);
@@ -582,35 +602,37 @@ for iter = istart : InvProps.niter;
     InvProps = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model);
 
     if (iter > 1)
-    % inversion results with inversion landscape plot
-    fig_inv2 = plot_inversion_development_landscapeshape(InvProps, iter);
-    figname = ['../output/inversion_development.',project_name,'.misfit-landscape.png'];
-    print(fig_inv2,'-dpng','-r400',figname);
-    figname = ['../output/inversion_development.',project_name,'.misfit-landscape.eps'];
-    print(fig_inv2,'-depsc','-r400',figname);
-    close(fig_inv2)
-    
-    fig_invres = plot_inversion_result(InvProps, iter);
-    titel = [project_name,': inversion results'];
-    mtit(fig_invres,titel, 'xoff', 0.0000001, 'yoff', 0.03);
-    figname = ['../output/inversion_result.',project_name,'.png'];
-    print(fig_invres,'-dpng','-r400',figname);
-    figname = ['../output/inversion_result.',project_name,'.eps'];
-    print(fig_invres,'-depsc','-r400',figname);
-    close(fig_invres)
+        % inversion results with inversion landscape plot
+        fig_inv2 = plot_inversion_development_landscapeshape(InvProps, iter);
+        figname = ['../output/inversion_development.',project_name,'.misfit-landscape.png'];
+        print(fig_inv2,'-dpng','-r400',figname);
+        figname = ['../output/inversion_development.',project_name,'.misfit-landscape.eps'];
+        print(fig_inv2,'-depsc','-r400',figname);
+        close(fig_inv2)
+        
+        fig_invres = plot_inversion_result(InvProps, iter);
+        titel = [project_name,': inversion results'];
+        mtit(fig_invres,titel, 'xoff', 0.0000001, 'yoff', 0.03);
+        figname = ['../output/inversion_result.',project_name,'.png'];
+        print(fig_invres,'-dpng','-r400',figname);
+        figname = ['../output/inversion_result.',project_name,'.eps'];
+        print(fig_invres,'-depsc','-r400',figname);
+        close(fig_invres)
     end
     
     
     
     %% safety
-    % saving current variables to file (crash safeguard)
-    disp 'saving all current variables...'
-    close all;
-    clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
-        'filenm_old', 'filenm_new', 'fig_knl');
-%     exclude_vars = {'u_fw', 'v_fw'};
-    savename = ['../output/',project_name,'.all-vars.mat'];
-    save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
+    if mod(iter,10) == 0
+        % saving current variables to file (crash safeguard)
+        disp 'saving all current variables...'
+        close all;
+        clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
+            'filenm_old', 'filenm_new', 'fig_knl');
+        %     exclude_vars = {'u_fw', 'v_fw'};
+        savename = ['../output/',project_name,'.all-vars.mat'];
+        save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
+    end
     
 end
 

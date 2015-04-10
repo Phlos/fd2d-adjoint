@@ -8,7 +8,7 @@ input_parameters;
     %- calculate angles between model updates:
 %     angle between gravity kernels
 if strcmp(use_grav,'yes')
-    if (length(Kg) > 1 && iter < InvProps.niter)
+    if (length(Kg) > 1 && iter > 1 && iter < InvProps.niter)
         kernelskeerelkaar = Kg{iter-1}(:)'*Kg{iter}(:);
         normz = norm(Kg{iter-1}(:))*norm(Kg{iter}(:));
         InvProps.angle.Kg(iter) = acos(kernelskeerelkaar / normz);
@@ -18,7 +18,7 @@ if strcmp(use_grav,'yes')
 end
     
 %    angle between seismic kernels
-    if (length(Kseis) > 1 && iter < InvProps.niter)
+    if (length(Kseis) > 1 && iter > 1 && iter < InvProps.niter)
         
         Ktransf{iter} = change_parametrisation_kernels('rhomulambda','rhovsvp',Kseis(iter),Model(iter));
         Ktransf{iter-1} = change_parametrisation_kernels('rhomulambda','rhovsvp',Kseis(iter-1),Model(iter-1));
@@ -33,7 +33,7 @@ end
     end
     
     % angle between total kernels
-    if (length(K_total) > 1 && iter < InvProps.niter)
+    if (length(K_total) > 1 && iter > 1 && iter < InvProps.niter)
         Ktransf{iter} = change_parametrisation_kernels('rhomulambda','rhovsvp',K_total(iter),Model(iter));
         totaalkernel{iter} = [Ktransf{iter}.rho2.total Ktransf{iter}.vs2.total Ktransf{iter}.vp2.total];
 

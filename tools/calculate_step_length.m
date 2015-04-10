@@ -2,7 +2,7 @@
 
 function [step, fig_lnsrch , steplnArray_total, misfitArray_total ] = calculate_step_length(teststep, niter, ...
                                       currentMisfit, misfit_seis, misfit_grav, ...
-                                      Model_prev, K_abs, v_obs, g_obs, stf)
+                                      Model_prev, K_abs, v_obs, g_obs, stf, Model_start)
 %% == 1. Preparation ======================================================
 
 % % obtain useful parameters from input_parameters
@@ -55,7 +55,7 @@ for ntry = 2:nsteps
           ' --- step length ', num2str(steptry,'%3.1e')]);
 
     misfitArray.total(ntry) = calc_misfit_perstep(K_abs, steptry, Model_prev, ...
-        misfit_grav, misfit_seis, g_obs, v_obs, stf);
+        misfit_grav, misfit_seis, g_obs, v_obs, stf, Model_start);
 
     %- give step nr, step length and misfit
     disp(['Step ',num2str(ntry), ...
@@ -151,7 +151,7 @@ while ( (p(1) < 0 || step < 0 || FitGoodness > 0.1) && nextra <= 5 )
     
     % calculate misfit for the new teststep
     misfit_new = calc_misfit_perstep(K_abs, teststep_new, ...
-        Model_prev, misfit_grav, misfit_seis, g_obs, v_obs, stf);
+        Model_prev, misfit_grav, misfit_seis, g_obs, v_obs, stf, Model_start);
     disp ' ';
         %- give step nr, step length and misfit
     disp(['Extra step ',num2str(nextra), ...
@@ -233,7 +233,7 @@ end
 
 %% subfunctions
 
-function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, misfit_grav, misfit_seis, g_obs, v_obs, stf)
+function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, misfit_grav, misfit_seis, g_obs, v_obs, stf, Model_start)
 
 % paths etc.
 
@@ -246,7 +246,7 @@ set_figure_properties_bothmachines;
     disp 'now updating model in calc_misfit_perstep'
     Model_prevfix = update_model(K_abs, steptry, Model_prev, parametrisation);
     if(strcmp(fix_velocities,'yes'))
-        Model_try = fix_vs_vp(Model_prevfix, Model_prevfix);
+        Model_try = fix_vs_vp(Model_prevfix, Model_start);
     else
         Model_try = Model_prevfix;
     end

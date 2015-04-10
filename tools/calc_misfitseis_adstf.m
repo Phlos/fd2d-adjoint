@@ -76,7 +76,7 @@ for irec = 1:nrec
     comp = fieldnames(v_rec{irec});
     for icomp = 1:length(comp)
         if find(strcmp(comp{icomp},compwel))
-            disp(['deze component wel: ',comp{icomp}]);
+%             disp(['deze component wel: ',comp{icomp}]);
             % make temporary 1d arrays of currently used recording
             vrec = v_rec{irec}.(comp{icomp});
             if strcmp(vobspresent,'yes')
