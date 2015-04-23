@@ -76,7 +76,6 @@ for irec = 1:nrec
     comp = fieldnames(v_rec{irec});
     for icomp = 1:length(comp)
         if find(strcmp(comp{icomp},compwel))
-%             disp(['deze component wel: ',comp{icomp}]);
             % make temporary 1d arrays of currently used recording
             vrec = v_rec{irec}.(comp{icomp});
             if strcmp(vobspresent,'yes')
@@ -88,22 +87,17 @@ for irec = 1:nrec
             %- pick left and right manual or auto
             if strcmp(picking_mode, 'manual')
                 [left, right] = pick_adstf_manual(t, vrec, vobs, irec, fig_manual,misfit_type);
+                disp(['left: ',num2str(left),'   right: ',num2str(right)]);
             else
                 left = t(1);
                 right = t(end);
             end
             
-            %- taper vrec (and vobs)
-            taper_width=t(end)/10;   % why divide by ten??
-            lmax = taper_width;
-            rmax = t(end) - taper_width;
-            if (left < taper_width) || (right > t(end) - taper_width)
-                left = max(left,lmax);
-                right = min(right,rmax);
-            end
-            
-            vrec=taper(vrec,t,left,right,taper_width);
-            vobs=taper(vobs,t,left,right,taper_width);
+            % %- taper vrec (and vobs)
+            % no, v_rec & v_obs should not be tapered, since that'll result
+            % in weirdness when, after tapering, the recordings are changed
+            % from velocity to displacement (needed for example @ waveform
+            % difference misfit functionals)
             
     %         bips = figure;
     %         subplot(3,1,1); plot(t,vrec,t,vobs);
@@ -121,10 +115,16 @@ for irec = 1:nrec
     %         subplot(3,1,2); plot(t,adstf_temp); title('adstf');
             
             % taper adstf_temp
-    %         leftadj = t(end)-right;
-    %         rightadj = t(end)-left;
-            adstf_temp = taper(adstf_temp,t,lmax,rmax,taper_width);
-            
+            taper_width=t(end)/10;   % why divide by ten??
+            lmax = taper_width;
+            rmax = t(end) - taper_width;
+            if (left < taper_width) || (right > t(end) - taper_width)
+                left = max(left,lmax);
+                right = min(right,rmax);
+            end
+
+            adstf_temp = taper(fliplr(adstf_temp),t,left,right,taper_width);
+            adstf_temp = fliplr(adstf_temp);
     %         figure(bips)
     %         subplot(3,1,3); plot(t,adstf_temp); title('tapered'),
             
@@ -140,7 +140,7 @@ for irec = 1:nrec
                 plot(t,adstf_temp,'k')
                 xlabel('t [s]')
                 title(['adjoint source after time reversal'])
-                pause(0.5);
+                pause(10.5);
             end
             
             % give the adstf the right magnitude so that the spatial integral
