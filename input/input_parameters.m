@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-014.like-012-but-param-rhovsvp';
+project_name='MTZ_deflections.test001.670up30';
 
 %==========================================================================
 % inversion properties
@@ -16,7 +16,7 @@ apply_hc = 'no';   % 'yes' or 'no'
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'yes'; % 'yes' or 'no'
+use_grav = 'no'; % 'yes' or 'no'
 
 % what misfit functional are we using
 misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift'
@@ -26,7 +26,7 @@ parametrisation = 'rhovsvp';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomuk
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'yes'; % 'yes' or 'no'
+fix_velocities = 'no'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -92,7 +92,7 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
 % tmax = 1100;    % should be enough for ScS.
-tmax = 1100;
+tmax = 600;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -101,7 +101,7 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % model type
 %==========================================================================
 
-true_model_type = 51;
+true_model_type = 61;
 model_type=50;
 
 % 1=homogeneous 
@@ -154,9 +154,10 @@ f_min=0.006667;                 % minimum frequency [Hz]
 
 % source filtering
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667 0.01267 0.01465];
+f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475];
+% f_maxlist = [0.006667 0.008667 0.01267 0.01465];
 % how many iterations with the same source?
-change_src_every = 15;          % how many iterations with the same src?
+change_src_every = 10;          % how many iterations with the same src?
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 

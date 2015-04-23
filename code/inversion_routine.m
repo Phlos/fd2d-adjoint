@@ -9,8 +9,8 @@ path(path,'../quivers');
 path(path,'../mtit');
 
 % number of iterations
-InvProps.niter = 15;
-istart = 10;
+InvProps.niter = 60;
+istart = 1;
 
 niter = InvProps.niter;
 
@@ -437,7 +437,7 @@ for iter = istart : InvProps.niter;
                     
                     % absolute rho-vs-vp
 %                     fig_knl = plot_kernels_rho_vs_vp(Kabs);
-                    fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
+                    fig_knl = plot_kernels(Kseis(iter), 'rhovsvp',Model(iter), 'total', 'own', 99.95);
                     titel = [project_name,' - seismic kernels (absolute rho-vs-vp) for iter ',num2str(iter)];
                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
                     figname = ['../output/iter',num2str(iter),'.kernels.abs.rho-vs-vp.png'];

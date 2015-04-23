@@ -243,7 +243,7 @@ input_parameters;
 set_figure_properties_bothmachines;
 
     %% calculate updated model using steptry
-    disp 'now updating model in calc_misfit_perstep'
+%     disp 'now updating model in calc_misfit_perstep'
     Model_prevfix = update_model(K_abs, steptry, Model_prev, parametrisation);
     if(strcmp(fix_velocities,'yes'))
         Model_try = fix_vs_vp(Model_prevfix, Model_start);

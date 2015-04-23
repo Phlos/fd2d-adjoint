@@ -28,7 +28,12 @@ init_absbound;
 % iterate
 %==========================================================================
 
-disp 'iterating...'
+if exist('prevmsg') reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
+else reverseStr = '';
+end
+prevmsg = sprintf('iterating...');
+fprintf([reverseStr, prevmsg]); 
+% disp 'iterating...'
 
 position_figures;
 
@@ -38,8 +43,12 @@ position_figures;
 %     max(stf{is}.y)
 %     min(stf{is}.y)
 % end
-
-fprintf(1,'Percentage completed :       ');
+if exist('prevmsg') reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
+else reverseStr = '';
+end
+prevmsg = sprintf('iterating... Percentage completed :       ');
+fprintf(1, [reverseStr, prevmsg]); 
+% fprintf(1,'Percentage completed :       ');
 %%
 for n=1:nt
     % little trick to change the 'Percentage completed' inline

@@ -18,7 +18,12 @@ function [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward(varargin)
 
 [updateParams, updateable, stf_in] = checkargs(varargin(:));
 
-disp 'initialising...'
+if exist('prevmsg') reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
+else reverseStr = '';
+end
+prevmsg = sprintf('initialising...');
+fprintf([reverseStr, prevmsg]); 
+% disp 'initialising...'
 %==========================================================================
 %% set paths and read input
 %==========================================================================
@@ -44,7 +49,12 @@ set_figure_properties_bothmachines;  % i.e. size of the figures & location on sc
 if strcmp(updateParams,'no')
     [mu,rho,lambda]=define_material_parameters(nx,nz,model_type);
 elseif strcmp(updateParams,'yes')
-    disp 'updating parameters...'
+    if exist('prevmsg') reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
+    else reverseStr = '';
+    end
+    prevmsg = sprintf('updating parameters...');
+    fprintf([reverseStr, prevmsg]);
+%     disp 'updating parameters...'
     rho = updateable.rho;
     mu = updateable.mu;
     lambda = updateable.lambda;

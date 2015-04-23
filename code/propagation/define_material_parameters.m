@@ -310,8 +310,8 @@ elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
     
     
 elseif (model_type==50) % PREM background model
-                        % model values will be sampled at height above CMB!
                         % IMPORTANT: 
+                        % model values will be sampled at height above CMB!
                         % so don't make the model higher than 2891 km!!
                         
     [rho_new, vs_new, vp_new] = load_PREM();    
@@ -324,8 +324,8 @@ elseif (model_type==50) % PREM background model
     
     
 elseif (model_type==51) % PREM background model + 10 rand +&- rho2 anoms
-                        % model values will be sampled at height above CMB!
                         % IMPORTANT: 
+                        % model values will be sampled at height above CMB!
                         % so don't make the model higher than 2891 km!!
                       
     [rho2, vs, vp] = load_PREM();
@@ -337,9 +337,9 @@ elseif (model_type==51) % PREM background model + 10 rand +&- rho2 anoms
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
     
-elseif (model_type==52) % PREM background model + 10 rand +&- vs anoms
-                        % model values will be sampled at height above CMB!
+elseif (model_type==52) % PREM background model + 10 rand +&-1000 m/s vs anoms
                         % IMPORTANT: 
+                        % model values will be sampled at height above CMB!
                         % so don't make the model higher than 2891 km!!
                         
     [rho2, vs, vp] = load_PREM();
@@ -352,8 +352,8 @@ elseif (model_type==52) % PREM background model + 10 rand +&- vs anoms
     
     
 elseif (model_type==53) % PREM background model + 10 1% rand +&- vs anoms
-                        % model values will be sampled at height above CMB!
                         % IMPORTANT: 
+                        % model values will be sampled at height above CMB!
                         % so don't make the model higher than 2891 km!!
 
     [rho2, vs, vp] = load_PREM();
@@ -366,8 +366,8 @@ elseif (model_type==53) % PREM background model + 10 1% rand +&- vs anoms
     
     
 elseif (model_type==54) % PREM background model + 10 1% rand +&- rho2 anoms
-                        % Model values will be sampled at height above CMB!
                         % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
                         % so don't make the model higher than 2891 km!!
 
     [rho2, vs, vp] = load_PREM();
@@ -379,8 +379,8 @@ elseif (model_type==54) % PREM background model + 10 1% rand +&- rho2 anoms
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
 
 elseif (model_type==55) % PREM background model + 10 1000 kg/m3 rand +&- RHO0 anoms
-                        % Model values will be sampled at height above CMB!
                         % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
                         % so don't make the model higher than 2891 km!!
 
     [rho2, vs, vp] = load_PREM();
@@ -391,6 +391,49 @@ elseif (model_type==55) % PREM background model + 10 1000 kg/m3 rand +&- RHO0 an
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
     rho = add_10randanoms(rho, 1000);
+    
+elseif (model_type==61) % PREM background model + raised 670 (by 30 km)
+                        % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
+                        % so don't make the model higher than 2891 km!!
+
+    [rho2, vs, vp] = load_PREM();
+    
+    % how big is the deflection?
+    input_parameters;
+    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
+    width_defl = nx / 4;
+    deflect670 = 30e3;
+    low = min(deflect670, 0);
+    high = max(deflect670,0);
+        
+    % do something to find the indices corresponding to the extent of the
+    % 660 deflection
+    left = floor(nx/2 - 0.5 * width_defl);
+    right = ceil(nx/2 + 0.5 * width_defl);
+    bips = Z(:,1);
+    lo = find(bips >= (Lz - 670e3 + low));                 
+    hi = find(bips <= (Lz - 670e3 + high));    
+    bot = min(lo(1), hi(end));
+    top = max(lo(1), hi(end));
+    
+    % do something to find the sub-660 values for rho2, vs, vp
+    if deflect670 < 0
+        s660rho = 3.992e3; s660vs = 5.570e3; s660vp = 10.266e3;
+    else
+        s660rho = 4.38074e3; s660vs = 5.94513e3; s660vp = 10.75132e3;
+    end
+    
+    % adapt parameters within these boundaries to sub-660 values
+    rho2(left:right, bot:top) = s660rho;
+    vs(left:right, bot:top) = s660vs;
+    vp(left:right, bot:top) = s660vp;
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+    
     
 elseif (model_type==100) % layered: left = high density, right = low density.
     
@@ -493,7 +536,7 @@ function [rho2, vs, vp] = load_PREM()
     [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
     
     %- load PREM data from file
-    PREM = csvread('~/Dropbox/DensityInversion/PREM-reference-model/PREM_1s_nowater.csv');
+    PREM = csvread('../models/PREM-reference-model/PREM_1s_nowater.csv');
     
     %- depth coordinate manipulation
     depth = PREM(:,2);      % in km
