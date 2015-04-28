@@ -1,4 +1,4 @@
-function [Model_real, sources, t_obs, props_obs, g_obs] = prepare_obs(varargin)
+function [Model_real, sources, t_obs, props_obs, g_obs] = prepare_obs(output_path, varargin)
 
 input_parameters;
 
@@ -17,15 +17,15 @@ Model_real = checkargs(varargin(:));
 % plotting the real model
 fig_mod_real = plot_model(Model_real, 'rhovsvp');
 mtit(fig_mod_real, 'real model -- rho-vs-vp parametrisation');
-figname = ['../output/obs.model.rhovsvp.png'];
+figname = [output_path,'/obs.model.rhovsvp.png'];
 print(fig_mod_real, '-dpng', '-r400', figname);
 close(fig_mod_real);
 
 % real - starting model
-Mstart = update_model(model_type);
-fig_mod_diff = plot_model_diff(Model_real, Mstart, 'rhovsvp');
-mtit(fig_mod_diff, 'real - starting model -- rho-vs-vp parametrisation');
-figname = ['../output/obs.model-real-diff-starting.rhovsvp.png'];
+Mbg = update_model(bg_model_type);
+fig_mod_diff = plot_model_diff(Model_real, Mbg, 'rhovsvp');
+mtit(fig_mod_diff, 'real - bg model -- rho-vs-vp parametrisation');
+figname = [output_path,'/obs.model-real-diff-bg.rhovsvp.png'];
 print(fig_mod_diff, '-dpng', '-r400', figname);
 close(fig_mod_diff);
 
@@ -34,7 +34,7 @@ props_obs = calculate_model_properties(Model_real.rho, 'x');
 
 % gravity field of real model
 [g_obs, fig_grav_obs] = calculate_gravity_field(Model_real.rho, rec_g);
-figname = ['../output/obs.gravityrecordings.png'];
+figname = [output_path,'/obs.gravityrecordings.png'];
 mtit(fig_grav_obs, 'gravity field of real model');
 print(fig_grav_obs, '-dpng', '-r400', figname);
 close(fig_grav_obs);
@@ -53,14 +53,14 @@ for ii = 1:length(f_maxlist)
     fig_seis = plot_seismogram_difference(sources(ii).v_obs,v_0,t_obs,'nodiff');
     titel = [project_name,': observed seismograms f_max = ', num2str(sources(ii).frequency), ' Hz'];
     mtit(fig_seis, titel, 'xoff', 0.001, 'yoff', -0.05);
-    figname = ['../output/obs.seis.fmax-',num2str(sources(ii).frequency,'%.2e'),'.png'];
+    figname = [output_path,'/obs.seis.fmax-',num2str(sources(ii).frequency,'%.2e'),'.png'];
     print(fig_seis,'-dpng','-r400',figname);
     close(fig_seis);
 end
 
 % saving the obs variables
 disp 'saving obs variables to matfile...'
-savename = ['../output/obs.all-vars.mat'];
+savename = [output_path,'/obs.all-vars.mat'];
 save(savename, 'sources', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
 
 close all;

@@ -80,7 +80,7 @@ end
 close all;
 [step, minval, p, RSS, fig_lnsrch] = fit_polynomial(steplnArray, misfitArray.total);
 FitGoodness = RSS / (max(misfitArray.total) - min(misfitArray.total));
-print(fig_lnsrch,'-dpng','-r400','../output/fig_linesearch.initial.png');
+% print(fig_lnsrch,'-dpng','-r400','../output/fig_linesearch.initial.png');
 disp ' ';
 disp(['Resulting step: step length ', num2str(step,'%3.1e'), ...
     ' --- misfit      ', num2str(minval,'%3.1e')]);
@@ -169,7 +169,7 @@ while ( (p(1) < 0 || step < 0 || FitGoodness > 0.1) && nextra <= 5 )
 close all
     [step, minval, p, RSS, fig_lnsrch] = fit_polynomial(steplnArray_new, misfitArray_new.total);
     FitGoodness = RSS / (max(misfitArray.total) - min(misfitArray.total));
-    print(fig_lnsrch,'-dpng','-r400',['../output/fig_linesearch.extra-',num2str(nextra),'.png']);
+%     print(fig_lnsrch,'-dpng','-r400',['../output/fig_linesearch.extra-',num2str(nextra),'.png']);
     
     disp ' ';
     disp(['Found step: step length ', num2str(step,'%3.1e'), ...

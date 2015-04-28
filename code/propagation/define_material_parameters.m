@@ -301,14 +301,14 @@ elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
     % => vp = 5797.87759 m/s
     % => vs = 3198.55736 m/s
     
-    rho2 = add_10randanoms(rho2, 1e3);
+    rho2 = add_10randanoms(rho2, 1e3, 1);
     
     % recalculating to rho-mu-lambda
     rho     = rho2;
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
-    
+%% PREM bg models    
 elseif (model_type==50) % PREM background model
                         % IMPORTANT: 
                         % model values will be sampled at height above CMB!
@@ -329,7 +329,7 @@ elseif (model_type==51) % PREM background model + 10 rand +&- rho2 anoms
                         % so don't make the model higher than 2891 km!!
                       
     [rho2, vs, vp] = load_PREM();
-    rho2 = add_10randanoms(rho2, 1000);
+    rho2 = add_10randanoms(rho2, 1000,1);
    
     % recalculating to rho-mu-lambda
     rho     = rho2;
@@ -343,7 +343,7 @@ elseif (model_type==52) % PREM background model + 10 rand +&-1000 m/s vs anoms
                         % so don't make the model higher than 2891 km!!
                         
     [rho2, vs, vp] = load_PREM();
-    vs = add_10randanoms(vs, 1e3);
+    vs = add_10randanoms(vs, 1e3,1);
   
     % recalculating to rho-mu-lambda
     rho     = rho2;
@@ -357,7 +357,7 @@ elseif (model_type==53) % PREM background model + 10 1% rand +&- vs anoms
                         % so don't make the model higher than 2891 km!!
 
     [rho2, vs, vp] = load_PREM();
-    vs = add_10randanoms(vs, 0.01*max(vs(:)));
+    vs = add_10randanoms(vs, 0.01*max(vs(:)),1);
     
     % recalculating to rho-mu-lambda
     rho     = rho2;
@@ -371,7 +371,7 @@ elseif (model_type==54) % PREM background model + 10 1% rand +&- rho2 anoms
                         % so don't make the model higher than 2891 km!!
 
     [rho2, vs, vp] = load_PREM();
-    rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)));
+    rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)),1);
     
     % recalculating to rho-mu-lambda
     rho     = rho2;
@@ -390,44 +390,64 @@ elseif (model_type==55) % PREM background model + 10 1000 kg/m3 rand +&- RHO0 an
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
-    rho = add_10randanoms(rho, 1000);
+    rho = add_10randanoms(rho, 1000,1);
     
-elseif (model_type==61) % PREM background model + raised 670 (by 30 km)
+
+
+    
+elseif (model_type==60) % PREM background model + random rho2 AND vs AND vp
+                        % (anomaly strength = 1% of largest amount)
                         % IMPORTANT: 
                         % Model values will be sampled at height above CMB!
                         % so don't make the model higher than 2891 km!!
-
+                        
     [rho2, vs, vp] = load_PREM();
+    rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)),1);
+    vs = add_10randanoms(vs, 0.01*max(vs(:)),2);
+    vp = add_10randanoms(vp, 0.01*max(vp(:)),3);
     
-    % how big is the deflection?
-    input_parameters;
-    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
-    width_defl = nx / 4;
-    deflect670 = 30e3;
-    low = min(deflect670, 0);
-    high = max(deflect670,0);
-        
-    % do something to find the indices corresponding to the extent of the
-    % 660 deflection
-    left = floor(nx/2 - 0.5 * width_defl);
-    right = ceil(nx/2 + 0.5 * width_defl);
-    bips = Z(:,1);
-    lo = find(bips >= (Lz - 670e3 + low));                 
-    hi = find(bips <= (Lz - 670e3 + high));    
-    bot = min(lo(1), hi(end));
-    top = max(lo(1), hi(end));
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+
     
-    % do something to find the sub-660 values for rho2, vs, vp
-    if deflect670 < 0
-        s660rho = 3.992e3; s660vs = 5.570e3; s660vp = 10.266e3;
-    else
-        s660rho = 4.38074e3; s660vs = 5.94513e3; s660vp = 10.75132e3;
-    end
     
-    % adapt parameters within these boundaries to sub-660 values
-    rho2(left:right, bot:top) = s660rho;
-    vs(left:right, bot:top) = s660vs;
-    vp(left:right, bot:top) = s660vp;
+elseif (model_type==61) % PREM background model + random ONLY vs & vp
+                        % (anomaly strength = 1% of largest amount)
+                        % NOTE: 
+                        % this model can be used as a starting model agains
+                        % true model 60, with varying rho2 vs vp.
+                        % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
+                        % so don't make the model higher than 2891 km!!
+                        
+    anom_strength = 0.01;
+    [rho2, vs, vp] = load_PREM();
+%     rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)),1);
+    vs = add_10randanoms(vs, anom_strength*max(vs(:)),2);
+    vp = add_10randanoms(vp, anom_strength*max(vp(:)),3);
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+
+    
+elseif (model_type==62) % PREM background model + random ONLY vs & vp
+                        % (anomaly strength = 0.5% of largest amount)
+                        % NOTE: 
+                        % this model can be used as a starting model agains
+                        % true model 60, with varying rho2 vs vp.
+                        % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
+                        % so don't make the model higher than 2891 km!!
+     
+    anom_strength = 0.005;
+    [rho2, vs, vp] = load_PREM();
+%     rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)),1);
+    vs = add_10randanoms(vs, anom_strength*max(vs(:)),2);
+    vp = add_10randanoms(vp, anom_strength*max(vp(:)),3);
     
     % recalculating to rho-mu-lambda
     rho     = rho2;
@@ -435,6 +455,9 @@ elseif (model_type==61) % PREM background model + raised 670 (by 30 km)
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
     
+    
+    
+%% misc models    
 elseif (model_type==100) % layered: left = high density, right = low density.
     
     rho=3000.0*ones(nx,nz);
@@ -515,6 +538,49 @@ elseif (model_type == 102) % Evangelos: ring shaped model
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
     
+elseif (model_type==103) % PREM background model + raised 670 (by 30 km)
+                        % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
+                        % so don't make the model higher than 2891 km!!
+
+    [rho2, vs, vp] = load_PREM();
+    
+    % how big is the deflection?
+    input_parameters;
+    [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
+    width_defl = nx / 4;
+    deflect670 = 30e3;
+    low = min(deflect670, 0);
+    high = max(deflect670,0);
+        
+    % do something to find the indices corresponding to the extent of the
+    % 660 deflection
+    left = floor(nx/2 - 0.5 * width_defl);
+    right = ceil(nx/2 + 0.5 * width_defl);
+    bips = Z(:,1);
+    lo = find(bips >= (Lz - 670e3 + low));                 
+    hi = find(bips <= (Lz - 670e3 + high));    
+    bot = min(lo(1), hi(end));
+    top = max(lo(1), hi(end));
+    
+    % do something to find the sub-660 values for rho2, vs, vp
+    if deflect670 < 0
+        s660rho = 3.992e3; s660vs = 5.570e3; s660vp = 10.266e3;
+    else
+        s660rho = 4.38074e3; s660vs = 5.94513e3; s660vp = 10.75132e3;
+    end
+    
+    % adapt parameters within these boundaries to sub-660 values
+    rho2(left:right, bot:top) = s660rho;
+    vs(left:right, bot:top) = s660vs;
+    vp(left:right, bot:top) = s660vp;
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+    
+%% no model has been given    
 else
     
     load(['models/mu_' model_type]);
@@ -564,25 +630,47 @@ function [rho2, vs, vp] = load_PREM()
     
 end
 
-function mod_out = add_10randanoms(mod, anommax)
+function mod_out = add_10randanoms(mod, anommax, whichrandmod)
 
 nx = size(mod,1);
 nz = size(mod,2);
 
 % random locations of anomalies
-    willekeurig.x = [0.906812, 0.493549, 0.499576, 0.175434, 0.441924, ...
+    willekeurig(1).x = [0.906812, 0.493549, 0.499576, 0.175434, 0.441924, ...
                      0.668359, 0.541729, 0.444079, 0.348643, 0.927618];
-    willekeurig.z = [0.261980, 0.930472, 0.645794, 0.534028, 0.907064, ...
+    willekeurig(1).z = [0.261980, 0.930472, 0.645794, 0.534028, 0.907064, ...
                      0.631545, 0.039304, 0.194939, 0.657794, 0.749388];
-    
+    willekeurig(2).x = [0.814723686393179,0.905791937075619,...
+                       0.126986816293506,0.913375856139019,...
+                       0.632359246225410,0.0975404049994095,...
+                       0.278498218867048,0.546881519204984,...
+                       0.957506835434298,0.964888535199277];
+    willekeurig(2).z = [0.157613081677548,0.970592781760616,...
+                        0.957166948242946,0.485375648722841,...
+                        0.800280468888800,0.141886338627215,...
+                        0.421761282626275,0.915735525189067,...
+                        0.792207329559554,0.959492426392903];
+    willekeurig(3).x = [0.655740699156587,0.0357116785741896,...
+                        0.849129305868777,0.933993247757551,...
+                        0.678735154857774,0.757740130578333,...
+                        0.743132468124916,0.392227019534168,...
+                        0.655477890177557,0.171186687811562];
+    willekeurig(3).z = [0.706046088019609,0.0318328463774207,...
+                        0.276922984960890,0.0461713906311539,...
+                        0.0971317812358475,0.823457828327293,...
+                        0.694828622975817,0.317099480060861,...
+                        0.950222048838355,0.0344460805029088];
+                
+
+wrm = whichrandmod;                 
     % add random anomalies to model
-    for ii = 1:size(willekeurig.x,2)
+    for ii = 1:size(willekeurig(wrm).x,2)
         % anomaly strength
 %         anom{i}.strength = 0.10 * 2600;
         anom{ii}.strength = anommax;
         
-        anom{ii}.dxperc = willekeurig.x(ii);
-        anom{ii}.dzperc = willekeurig.z(ii);
+        anom{ii}.dxperc = willekeurig(wrm).x(ii);
+        anom{ii}.dzperc = willekeurig(wrm).z(ii);
        
         % x and z location of the anomaly
         anom{ii}.dx = round(anom{ii}.dxperc*nx);

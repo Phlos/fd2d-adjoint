@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='MTZ_deflections.test001.670up30';
+project_name='Mantle.test-018.like-017-but-startingmod-vs-vp-strength-0.5';
 
 %==========================================================================
 % inversion properties
@@ -16,17 +16,17 @@ apply_hc = 'no';   % 'yes' or 'no'
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'no'; % 'yes' or 'no'
+use_grav = 'yes'; % 'yes' or 'no'
 
 % what misfit functional are we using
 misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift'
 
 % inversion parametrisation
-parametrisation = 'rhovsvp';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
+parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'no'; % 'yes' or 'no'
+fix_velocities = 'yes'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -92,7 +92,7 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
 % tmax = 1100;    % should be enough for ScS.
-tmax = 600;
+tmax = 1100;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -101,8 +101,9 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % model type
 %==========================================================================
 
-true_model_type = 61;
-model_type=50;
+bg_model_type = 50;     % PREM (for plotting)
+true_model_type = 60;   % PREM + vs, vp, rho2 anoms
+model_type=62;          % PREM + vs, vp anoms (starting model)
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -121,6 +122,8 @@ model_type=50;
 % 31= five 'rand' positive rho2 anomalies (rho2 = rho in rho-vs-vp)
 % 41= ten 'rand' rho2 anomalies: 5 pos 5 neg (rho2 = rho in rho-vs-vp)
 % 50= PREM background values model (will be selected at true height above cmb)
+% 60 = PREM bg + random rho2 AND vs AND vp, 1% anomalies
+% 61 = PREM bg + ONLY random vs & vp anomalies, 1%
 % 100= layered: left = high rho0, right = low rho0
 % 101= homogeneous model (Tromp like) with tiny rho anomaly
 % 102= Ring shaped model (Evangelos): vp=5000, vs=3000, rho=2600 | outside: 5000,1,2600
@@ -154,10 +157,9 @@ f_min=0.006667;                 % minimum frequency [Hz]
 
 % source filtering
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475];
-% f_maxlist = [0.006667 0.008667 0.01267 0.01465];
+f_maxlist = [0.006667 0.008667 0.01267 0.01465];
 % how many iterations with the same source?
-change_src_every = 10;          % how many iterations with the same src?
+change_src_every = 15;          % how many iterations with the same src?
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 
