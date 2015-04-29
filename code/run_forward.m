@@ -191,8 +191,7 @@ end
 % savename = ['../output/',project_name,'.v_rec.mat'];
 % save(savename, 'v_rec', '-v7.3');
 
-savename = ['../output/',project_name,'.input_parameters.m'];
-copyfile('../input/input_parameters.m',savename)
+
 
 
 

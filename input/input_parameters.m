@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-018.like-017-but-startingmod-vs-vp-strength-0.5';
+project_name='test.div-by-1st-misfit-for-own-freq';
 
 %==========================================================================
 % inversion properties
@@ -92,7 +92,7 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
 % tmax = 1100;    % should be enough for ScS.
-tmax = 1100;
+tmax = 200;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -159,7 +159,7 @@ f_min=0.006667;                 % minimum frequency [Hz]
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
 f_maxlist = [0.006667 0.008667 0.01267 0.01465];
 % how many iterations with the same source?
-change_src_every = 15;          % how many iterations with the same src?
+change_src_every = 4;          % how many iterations with the same src?
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 

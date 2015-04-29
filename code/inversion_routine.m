@@ -11,8 +11,8 @@ path(path,'../mtit');
 
 
 % number of iterations
-InvProps.niter = 60;
-istart = 11;
+InvProps.niter = 15;
+istart = 15;
 
 niter = InvProps.niter;
 
@@ -27,6 +27,10 @@ niter = InvProps.niter;
 % project folder
 output_path = ['../output/',project_name,'/'];
 mkdir('../output/',project_name)
+
+% save input_parameters to this path
+savename = [output_path,project_name,'.input_parameters.m'];
+copyfile('../input/input_parameters.m',savename)
 
 %% welcome
 
@@ -164,6 +168,7 @@ for iter = istart : InvProps.niter;
 
 %         change_src_every = 10;       % how many iterations with the same src?
         cse = change_src_every;
+        if iter > 1; which_src_prev = which_src; end
         which_src = floor((iter-1)/cse)+1;
         if which_src > length(sources)
             which_src = length(sources);
@@ -172,6 +177,13 @@ for iter = istart : InvProps.niter;
         vobs = sources(which_src).v_obs;
         stf{iter} = sources(which_src).stf;
 
+        if (~exist('which_src_prev','var') || ~(which_src == which_src_prev))
+            % do somethin with calculate seis misfit for that source @mod1
+            [misfit_int.total, misfit_int.seis, misfit_int.grav] = ...
+                calc_misfits(Model(1), g_obs, 0, stf{iter}, vobs, 0);
+            misfit_init(which_src) = misfit_int;
+        end
+        
 %         if iter <= length(sources);
 %             freqmax(iter) = sources(iter).frequency;
 %             vobs = sources(iter).v_obs;
@@ -230,7 +242,7 @@ for iter = istart : InvProps.niter;
             % NEW AS OF 17-3-2015 - changed as of 25-3-2015
             InvProps.misfit_g(iter).normd = ...
                 norm_misfit(InvProps.misfit_g(iter).total, ...
-                            normalise_misfits, InvProps.misfit_g(1).total, ...
+                            normalise_misfits, misfit_init(which_src).grav, ...
                             g_obs);
             clearvars norm_misf;
             
@@ -238,9 +250,9 @@ for iter = istart : InvProps.niter;
             sumgobs = sum(g_obs.mag(:) .^2);
             div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
             disp ' ';
-            disp(['gravity misfit for iter ',num2str(iter),': ', ...
+            disp(['gravity misfit for iter ',num2str(iter),':    ', ...
                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
-            disp(['   fraction of g_obs: ', ...
+            disp(['   fraction of g_obs:   ', ...
                 num2str(div_by_gobs,'%3.2e')])
             disp(['   normalised ',normalise_misfits, ': ', ...
                 num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
@@ -281,7 +293,7 @@ for iter = istart : InvProps.niter;
             InvProps.misfit_seis{iter}.normd = ...
                 norm_misfit(InvProps.misfit_seis{iter}.total, ...
                             normalise_misfits, ...
-                            InvProps.misfit_seis{1}.total, vobs);
+                            misfit_init(which_src).seis, vobs);
         
         
 %         % plot stf to adstf for one station
@@ -304,9 +316,9 @@ for iter = istart : InvProps.niter;
         if strcmp(use_grav,'yes')
             sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
             div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
-            disp(['GRAVITY misfit FOR ITER ',num2str(iter),': ', ...
+            disp(['GRAVITY misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
-            disp(['   fraction of g_obs:       ', ...
+            disp(['   fraction of g_obs:         ', ...
                 num2str(div_by_gobs,'%3.2e')])
             disp(['   normalised ',normalise_misfits,':  ', ...
                 num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
@@ -323,13 +335,13 @@ for iter = istart : InvProps.niter;
         end
         div_by_vobs = InvProps.misfit_seis{iter}.total / sumvobs;
         disp ' ';
-        disp(['SEISMIC misfit FOR ITER ',num2str(iter),': ', ...
+        disp(['SEISMIC misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
             num2str(InvProps.misfit_seis{iter}.total,'%3.2e')])
-        disp(['   fraction of v_obs:       ', ...
+        disp(['   fraction of v_obs:         ', ...
             num2str(div_by_vobs,'%3.2e')])
 %         if strcmp(normalise_misfits,'byfirstmisfit')
         disp(['   normalised ',normalise_misfits,':  ', ...
-            num2str(InvProps.misfit_seis{iter}.normd,'%3.2e')])
+            num2str(InvProps.misfit_seis{iter}.normd,'%3.2e'),])
 %         end
         disp ' ';
         
@@ -339,7 +351,7 @@ for iter = istart : InvProps.niter;
             InvProps.misfit(iter) = InvProps.misfit_seis{iter}.normd;
         end
         
-        disp(['TOTAL misfit FOR ITER ',num2str(iter),': ', ...
+        disp(['TOTAL misfit FOR ITER ',num2str(iter,'%2u'),':     ', ...
             num2str(InvProps.misfit(iter),'%3.2e')])
 %         disp ' ';
         disp '=========================================='
@@ -379,7 +391,7 @@ for iter = istart : InvProps.niter;
                 
                 % normalising the gravity kernel
                 Kg{iter} = norm_kernel(Kg_temp, normalise_misfits, ...
-                    InvProps.misfit_g(1).total, g_obs);
+                    misfit_init(which_src).grav, g_obs);
                 clearvars Kg_temp;
                 
                 
@@ -407,7 +419,7 @@ for iter = istart : InvProps.niter;
             
             % normalise kernels
             Kseis(iter) = norm_kernel(Kseis_temp, normalise_misfits, ...
-                InvProps.misfit_seis{1}.total, vobs);
+                misfit_init(which_src).seis, vobs);
 %             clearvars Kseis_temp;
             
             
@@ -545,7 +557,7 @@ for iter = istart : InvProps.niter;
         end
         [InvProps.step(iter), fig_lnsrch,  InvProps.steplnArray{iter}, InvProps.misfitArray{iter} ] = ...
                 calculate_step_length(stapje,iter, ...
-                InvProps.misfit(iter), InvProps.misfit_seis, InvProps.misfit_g, ...
+                InvProps.misfit(iter), misfit_init(which_src), ...
                 Model(iter),K_total(iter),vobs, g_obs, stf{iter}, Model_start);
         clearvars stapje;     
 

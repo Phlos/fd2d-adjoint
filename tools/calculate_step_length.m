@@ -1,7 +1,7 @@
 % calculate the step length
 
 function [step, fig_lnsrch , steplnArray_total, misfitArray_total ] = calculate_step_length(teststep, niter, ...
-                                      currentMisfit, misfit_seis, misfit_grav, ...
+                                      currentMisfit, misfit_init, ...
                                       Model_prev, K_abs, v_obs, g_obs, stf, Model_start)
 %% == 1. Preparation ======================================================
 
@@ -55,7 +55,7 @@ for ntry = 2:nsteps
           ' --- step length ', num2str(steptry,'%3.1e')]);
 
     misfitArray.total(ntry) = calc_misfit_perstep(K_abs, steptry, Model_prev, ...
-        misfit_grav, misfit_seis, g_obs, v_obs, stf, Model_start);
+        misfit_init, g_obs, v_obs, stf, Model_start);
 
     %- give step nr, step length and misfit
     disp(['Step ',num2str(ntry), ...
@@ -151,7 +151,7 @@ while ( (p(1) < 0 || step < 0 || FitGoodness > 0.1) && nextra <= 5 )
     
     % calculate misfit for the new teststep
     misfit_new = calc_misfit_perstep(K_abs, teststep_new, ...
-        Model_prev, misfit_grav, misfit_seis, g_obs, v_obs, stf, Model_start);
+        Model_prev, misfit_init, g_obs, v_obs, stf, Model_start);
     disp ' ';
         %- give step nr, step length and misfit
     disp(['Extra step ',num2str(nextra), ...
@@ -233,7 +233,7 @@ end
 
 %% subfunctions
 
-function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, misfit_grav, misfit_seis, g_obs, v_obs, stf, Model_start)
+function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, misfit_init, g_obs, v_obs, stf, Model_start)
 
 % paths etc.
 
@@ -273,54 +273,58 @@ set_figure_properties_bothmachines;
     
     fig_mod = plot_model(Model_try);
 
-      
-    %% gravity misfit
-    
-    if strcmp(use_grav,'yes')
-      [g_try, fig_grav] = calculate_gravity_field(Model_try.rho, rec_g);
-      
-%       %- calculate gravity misfit:
-      % NEW as of 18-3-2015
-      [~, misf_g_test] = make_gravity_sources(g_try, g_obs);
-%       disp(['misfit_g_test.total ', misf_g_test.total]);
-      misfit.grav = norm_misfit(misf_g_test.total, normalise_misfits, ...
-                            misfit_grav(1).total, g_obs);
-    end
-    
-    %% seismic misfit
-    
-    %- for each step, run forward update
-    [v_try,t,~,~,~,~] = run_forward(Model_try, stf);
-    
-%     % plot seismogram difference:
-%     fig_seisdif = plot_seismogram_difference(v_obs, v_try, t);
-%     figname = ['../output/iter.current.calcstepln.seisdif.',num2str(steptry),'.png'];
-%     print(fig_seisdif,'-dpng','-r400',figname);
-%     close(fig_seisdif);
-    
-    %- for each step, calculate the misfit
-    [~, misf_s_test] = calc_misfitseis_adstf(misfit_type,t,v_try,v_obs);
-%       disp(['misfit_s_test.total ', misf_s_test.total]);
-    % NEW AS OF 18-3-2015
-    misfit.seis = norm_misfit(misf_s_test.total, normalise_misfits, ...
-                                misfit_seis{1}.total, v_obs);
-
-
-
-    %% combine the misfits
-    if strcmp(use_grav,'yes')
-        misfit.total = misfit.seis + misfit.grav;
-    else
-        misfit.total =  misfit.seis;
-    end
+    % NEW as of 29-4-2015
+    [misfit.total, misfit.seis, misfit.grav] = calc_misfits(Model_try, ...
+        g_obs, misfit_init.grav, stf, v_obs, misfit_init.seis);
     misfittotal = misfit.total;
     
-    if strcmp(use_grav,'yes')
-        disp(['seismic misfit:  ', ...
-            num2str(misfit.seis,'%3.2e')])
-        disp(['gravity misfit:  ', ...
-            num2str(misfit.grav,'%3.2e')])
-    end
+%     %% gravity misfit
+%     
+%     if strcmp(use_grav,'yes')
+%       [g_try, fig_grav] = calculate_gravity_field(Model_try.rho, rec_g);
+%       
+% %       %- calculate gravity misfit:
+%       % NEW as of 18-3-2015
+%       [~, misf_g_test] = make_gravity_sources(g_try, g_obs);
+% %       disp(['misfit_g_test.total ', misf_g_test.total]);
+%       misfit.grav = norm_misfit(misf_g_test.total, normalise_misfits, ...
+%                             misfit_grav(1).total, g_obs);
+%     end
+%     
+%     %% seismic misfit
+%     
+%     %- for each step, run forward update
+%     [v_try,t,~,~,~,~] = run_forward(Model_try, stf);
+%     
+% %     % plot seismogram difference:
+% %     fig_seisdif = plot_seismogram_difference(v_obs, v_try, t);
+% %     figname = ['../output/iter.current.calcstepln.seisdif.',num2str(steptry),'.png'];
+% %     print(fig_seisdif,'-dpng','-r400',figname);
+% %     close(fig_seisdif);
+%     
+%     %- for each step, calculate the misfit
+%     [~, misf_s_test] = calc_misfitseis_adstf(misfit_type,t,v_try,v_obs);
+% %       disp(['misfit_s_test.total ', misf_s_test.total]);
+%     % NEW AS OF 18-3-2015
+%     misfit.seis = norm_misfit(misf_s_test.total, normalise_misfits, ...
+%                                 misfit_seis{1}.total, v_obs);
+% 
+% 
+% 
+%     %% combine the misfits
+%     if strcmp(use_grav,'yes')
+%         misfit.total = misfit.seis + misfit.grav;
+%     else
+%         misfit.total =  misfit.seis;
+%     end
+%     misfittotal = misfit.total;
+%     
+%     if strcmp(use_grav,'yes')
+%         disp(['seismic misfit:  ', ...
+%             num2str(misfit.seis,'%3.2e')])
+%         disp(['gravity misfit:  ', ...
+%             num2str(misfit.grav,'%3.2e')])
+%     end
 
 end
 
