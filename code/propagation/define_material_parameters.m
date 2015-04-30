@@ -454,7 +454,49 @@ elseif (model_type==62) % PREM background model + random ONLY vs & vp
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
+
+
+elseif (model_type==63) % PREM background model + random ONLY vs & vp
+                        % (anomaly strength = 0.5% of largest amount)
+                        % NOTE: 
+                        % this model can be used as a starting model agains
+                        % true model 60, with varying rho2 vs vp.
+                        % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
+                        % so don't make the model higher than 2891 km!!
+     
+    anom_strength = 0.009;
+    [rho2, vs, vp] = load_PREM();
+%     rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)),1);
+    vs = add_10randanoms(vs, anom_strength*max(vs(:)),2);
+    vp = add_10randanoms(vp, anom_strength*max(vp(:)),3);
     
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);    
+    
+
+elseif (model_type==64) % PREM background model + random ONLY vs & vp
+                        % (anomaly strength = 0.5% of largest amount)
+                        % NOTE: 
+                        % this model can be used as a starting model agains
+                        % true model 60, with varying rho2 vs vp.
+                        % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
+                        % so don't make the model higher than 2891 km!!
+     
+    anom_strength = 0.0095;
+    [rho2, vs, vp] = load_PREM();
+%     rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)),1);
+    vs = add_10randanoms(vs, anom_strength*max(vs(:)),2);
+    vp = add_10randanoms(vp, anom_strength*max(vp(:)),3);
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);    
+        
     
     
 %% misc models    

@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='test.div-by-1st-misfit-for-own-freq';
+project_name='Mantle.test-020.like-017-but-1st-misfit-per-freq';
 
 %==========================================================================
 % inversion properties
@@ -55,7 +55,7 @@ starting_model = '';
 % stepInit = 7e7;         % PREM + 1% vs anomalies
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
-stepInit = 1e8;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
+stepInit = 1e7;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -92,7 +92,7 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
 % tmax = 1100;    % should be enough for ScS.
-tmax = 200;
+tmax = 1100;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -103,7 +103,7 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
 bg_model_type = 50;     % PREM (for plotting)
 true_model_type = 60;   % PREM + vs, vp, rho2 anoms
-model_type=62;          % PREM + vs, vp anoms (starting model)
+model_type=61;          % PREM + vs, vp anoms (starting model)
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -159,7 +159,7 @@ f_min=0.006667;                 % minimum frequency [Hz]
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
 f_maxlist = [0.006667 0.008667 0.01267 0.01465];
 % how many iterations with the same source?
-change_src_every = 4;          % how many iterations with the same src?
+change_src_every = 15;          % how many iterations with the same src?
 
 stf_PSV = [1 0];    % [x z]
                     % direction of the source-time-function in P-SV wave 

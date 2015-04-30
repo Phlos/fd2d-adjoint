@@ -11,8 +11,8 @@ path(path,'../mtit');
 
 
 % number of iterations
-InvProps.niter = 15;
-istart = 15;
+InvProps.niter = 60;
+istart = 1;
 
 niter = InvProps.niter;
 
@@ -321,7 +321,8 @@ for iter = istart : InvProps.niter;
             disp(['   fraction of g_obs:         ', ...
                 num2str(div_by_gobs,'%3.2e')])
             disp(['   normalised ',normalise_misfits,':  ', ...
-                num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
+                num2str(InvProps.misfit_g(iter).normd,'%3.2e'),...
+            ' (1st misfit = ',num2str(misfit_init(which_src).grav,'%3.2e'),')'])
             disp ' ';
         end
         
@@ -341,7 +342,8 @@ for iter = istart : InvProps.niter;
             num2str(div_by_vobs,'%3.2e')])
 %         if strcmp(normalise_misfits,'byfirstmisfit')
         disp(['   normalised ',normalise_misfits,':  ', ...
-            num2str(InvProps.misfit_seis{iter}.normd,'%3.2e'),])
+            num2str(InvProps.misfit_seis{iter}.normd,'%3.2e'),...
+            ' (1st misfit = ',num2str(misfit_init(which_src).seis,'%3.2e'),')'])
 %         end
         disp ' ';
         

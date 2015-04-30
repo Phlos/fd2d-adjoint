@@ -5,6 +5,11 @@
 path(path,'../externaltools');
 %% preparation
 HostName = gethostname;
+known_machines = {'D-13-L-2', 'doffer.geo.uu.nl', 'DOFFER.GEO.UU.NL'};
+
+if ~any(strcmp(HostName,known_machines))
+    HostName = 'D-13-L-2';
+end
 
 % % testing the host we're in
 % if strcmp(HostName,'D-13-L-2')
