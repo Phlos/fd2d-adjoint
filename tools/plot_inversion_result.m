@@ -23,6 +23,9 @@ modeldifn = InvProps.modeldifn;
 step = InvProps.step;
 angletot = InvProps.angle.Ktotal;
 angleseis = InvProps.angle.Kseis;
+if(isfield(InvProps,'modeldifnFromTrue'))
+    normL2 = InvProps.modeldifnFromTrue;
+end
 if strcmp(use_grav,'yes')
 anglegrav = InvProps.angle.Kg;
 else
@@ -121,7 +124,7 @@ title('step size');
 % label for all plots, really, though technically belonging to Lstep
 xlabel('iteration no.');
 
-%% - right column
+%% - right column: vs cumulative steplength
 
 % misfit development
 subplot(9,2,[2,6])
@@ -134,9 +137,19 @@ Rmisfit = semilogy(stepcumsum(1:imax), misfit(1:imax), 'k',...
 %     h(1).LineWidth = 2;
 xlim([min(stepcumsum), stepcumsum(imax)]);
 grid on
-xlabel('distance travelled in misfit landscape');
+% xlabel('distance travelled in misfit landscape');
 title('misfit (normalised)');
 % legend('total (used) misfit', 'seismic misfit', 'gravity misfit', 'Location', 'Northeast');
+
+% model diff with real model
+if(exist('normL2','var'))
+    subplot(9,2,[8 10]);
+    LmdifReal = semilogy(stepcumsum(1:imax), normL2(1:imax),'k');
+    xlim([min(stepcumsum), stepcumsum(imax)]);
+    grid on
+    set(LmdifReal, 'LineWidth', 1)
+    title('|current - real| / |real - bg|');
+end
 
 % angle between consecutive descent directions vs. path
 subplot(9,2,[12 14])
@@ -160,7 +173,7 @@ title('angle between consecutive kernels (degrees)');
 xlabel('distance travelled in misfit landscape');
 % yt=get(gca,'ytick')
 % for k=1:numel(yt);
-% yt1{k}=sprintf('%4.1f°',yt(k));
+% yt1{k}=sprintf('%4.1fï¿½',yt(k));
 % end
 % set(gca,'yticklabel',yt1);
 

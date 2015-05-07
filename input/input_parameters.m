@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-020.like-017-but-1st-misfit-per-freq';
+project_name='Mantle.test-023.like-021-but-no-fix-vel';
 
 %==========================================================================
 % inversion properties
@@ -26,7 +26,7 @@ parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rh
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'yes'; % 'yes' or 'no'
+fix_velocities = 'no'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -103,7 +103,7 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
 bg_model_type = 50;     % PREM (for plotting)
 true_model_type = 60;   % PREM + vs, vp, rho2 anoms
-model_type=61;          % PREM + vs, vp anoms (starting model)
+model_type=63;          % PREM + vs, vp anoms (starting model*0.9)
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation

@@ -168,7 +168,7 @@ for iter = istart : InvProps.niter;
 
 %         change_src_every = 10;       % how many iterations with the same src?
         cse = change_src_every;
-        if iter > 1; which_src_prev = which_src; end
+%         if iter > 1; which_src_prev = which_src; end
         which_src = floor((iter-1)/cse)+1;
         if which_src > length(sources)
             which_src = length(sources);
@@ -177,7 +177,8 @@ for iter = istart : InvProps.niter;
         vobs = sources(which_src).v_obs;
         stf{iter} = sources(which_src).stf;
 
-        if (~exist('which_src_prev','var') || ~(which_src == which_src_prev))
+%         if (~exist('which_src_prev','var') || ~(which_src == which_src_prev))
+        if(length(misfit_init) < which_src || misfit_init(which_src) ==0 )
             % do somethin with calculate seis misfit for that source @mod1
             [misfit_int.total, misfit_int.seis, misfit_int.grav] = ...
                 calc_misfits(Model(1), g_obs, 0, stf{iter}, vobs, 0);
@@ -359,11 +360,21 @@ for iter = istart : InvProps.niter;
         disp '=========================================='
         
         if iter>1
-        InvProps.modeldifn(iter) =   norm( (Model(iter).rho(:) - Model(iter-1).rho(:)) ./ Model(1).rho(:) ) ...
-                          + norm( (Model(iter).mu(:)  - Model(iter-1).mu(:))  ./ Model(1).mu(:) ) ...
-                          + norm( (Model(iter).lambda(:) - Model(iter-1).lambda(:)) ./ Model(1).lambda(:) );
+            % L2 norm( [model(i) - model(i-1)] / model(1) )
+            InvProps.modeldifn(iter) =   norm( (Model(iter).rho(:) - Model(iter-1).rho(:)) ./ Model(1).rho(:) ) ...
+                              + norm( (Model(iter).mu(:)  - Model(iter-1).mu(:))  ./ Model(1).mu(:) ) ...
+                              + norm( (Model(iter).lambda(:) - Model(iter-1).lambda(:)) ./ Model(1).lambda(:) );
+            % L2 norm( [model(i) - model_real] / model_real )
+            if(exist('Model_real','var'))
+                InvProps.modeldifnFromTrue(iter) = norm( (Model(iter).rho(:) - Model_real.rho(:)) ./ Model_real.rho(:) ) ...
+                              + norm( (Model(iter).mu(:)  - Model_real.mu(:))  ./ Model_real.mu(:) ) ...
+                              + norm( (Model(iter).lambda(:) - Model_real.lambda(:)) ./ Model_real.lambda(:) );
+            else
+                InvProps.modeldifnFromTrue(iter) = NaN;
+            end
         else
             InvProps.modeldifn(iter) = NaN;
+            InvProps.modeldifnFromTrue(iter) = NaN;
         end 
         % plot misfit evolution
         fig_misfit = plot_misfit_evolution(InvProps);
@@ -636,10 +647,10 @@ for iter = istart : InvProps.niter;
         fig_invres = plot_inversion_result(InvProps, iter);
         titel = [project_name,': inversion results'];
         mtit(fig_invres,titel, 'xoff', 0.0000001, 'yoff', 0.03);
-        figname = [output_path,'/inversion_result.',project_name,'.png'];
-        print(fig_invres,'-dpng','-r400',figname);
-        figname = [output_path,'/inversion_result.',project_name,'.eps'];
-        print(fig_invres,'-depsc','-r400',figname);
+        figname = [output_path,'/inversion_result.',project_name];
+        print(fig_invres,'-dpng','-r400',[figname,'.png']);
+%         figname = [output_path,'/inversion_result.',project_name,'.eps'];
+        print(fig_invres,'-depsc','-r400',[figname,'.eps']);
         close(fig_invres)
     end
     
