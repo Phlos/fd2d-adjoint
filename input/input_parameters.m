@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-023.like-021-but-no-fix-vel';
+project_name='test.different-sources';
 
 %==========================================================================
 % inversion properties
@@ -92,7 +92,7 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
 % tmax = 1100;    % should be enough for ScS.
-tmax = 1100;
+tmax = 100;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -140,81 +140,55 @@ model_type=63;          % PREM + vs, vp anoms (starting model*0.9)
 % end
 
 
-%==========================================================================
-% source-time function
-%==========================================================================
 
-stf_type = 'delta_bp';    % 'ricker' or 'delta_bp' (twice butterworth bandpassed 
-                        % delta function)
-% needed for 'ricker'
-tauw_0  = 2.628;      % seconds
-tauw    = 10*4.0;        % source duration, seconds
-tee_0   = 10*2.5;        % source start time, seconds
 
-% needed for 'delta_bp'    
-f_min=0.006667;                 % minimum frequency [Hz]
-% f_max=0.03;                   % maximum frequency [Hz]
-
-% source filtering
-% f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667 0.01267 0.01465];
-% how many iterations with the same source?
-change_src_every = 15;          % how many iterations with the same src?
-
-stf_PSV = [1 0];    % [x z]
-                    % direction of the source-time-function in P-SV wave 
-                    % propagation. The final stf will be normalised with
-                    % such that its original amplitude is preserved.
 
 %==========================================================================
-% simulation mode
+% sources -- positions & directions
 %==========================================================================
 
-simulation_mode='forward';
-
-% 'forward'                 regular forward simulation
-% 'forward_green'           forward simulation where Fourier transform of the Greens function is computed on-the-fly (preparation to compute correlation function)
-% 'correlation'             compute correlation functions as output, requires Fourier-transformed Green function to be present
-% 'noise_source_kernel'     compute sensitivity kernel for the noise source power-spectral density distribution
-
-%==========================================================================
-% source positions
-%==========================================================================
-
-% %- line of sources at the bottom of the domain -- use with absbound bottom?
-% nsrc = 8;
-% src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
-% dz = 1/16 * Lz;
-% src_z=ones(size(src_x)) * (0 + 2*dz); % -2*dz necessary as a result of b.c.)
+nsrc = 8;
 
 %- line of sources near top of the domain
-nsrc = 8;
 src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
 dz = 1/16 * Lz;
 src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
 
-% %- 'random' source positions, 8x
-% src_x = Lx *   [ 0.2769    0.0462    0.0971    0.8235    0.6948    0.3171    0.9502    0.0344];
-% src_z = Lz * (1-[0.4387    0.3816    0.7655    0.7952    0.1869    0.8981    0.4456    0.6463]);
+for ii = 1:nsrc
 
-% %- circle around the middle of the domain
-% centre=[Lx/2 Lz/2];
-% numrec=8;
-% circlesize = 0.25*min(Lx,Lz);
-% dphi = 2*pi/(numrec);
-% 
-% src_x=zeros(1,numrec);
-% src_z=zeros(1,numrec);
-% 
-% n=1;
-% for phi = -pi : dphi : pi-dphi ;
-%     src_x(n)=centre(1) + circlesize*cos(phi);
-%     src_z(n)=centre(2) + circlesize*sin(phi);
-%     n=n+1;
-% end
+end
 
-% src_x=[0.6e5];
-% src_z=[0.7e5];
+%==========================================================================
+% sources -- source-time functions
+%==========================================================================
+
+for ii = 1:nsrc
+    sources(ii).stf_type = 'delta_bp';   % 'ricker' or 'delta_bp' (twice butterworth bandpassed 
+                                         % delta function)
+    % needed for 'ricker'
+    sources(ii).tauw_0  = 2.628;         % seconds
+    sources(ii).tauw    = 10*4.0;        % source duration, seconds
+    sources(ii).tee_0   = 10*2.5;        % source start time, seconds
+    
+    % needed for 'delta_bp'    
+    sources(ii).f_min=0.006667;          % minimum stf frequency [Hz]
+    sources(ii).f_max=0.03;              % maximum stf frequency [Hz]
+
+    sources{ii}.stf_PSV = [1 0];% [x z]
+                        % direction of the source-time-function in P-SV wave 
+                        % propagation. The final stf will be normalised
+                        % such that its original amplitude is preserved.
+end
+                    
+                    
+%- source filtering
+f_minlist = [0.006667];
+% f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
+f_maxlist = [0.006667 0.008667 0.01267 0.01465];
+% how many iterations with the same source?
+change_freq_every = 15;          % how many iterations with the same freq?
+
+
 
 %==========================================================================
 % receiver positions
@@ -275,7 +249,16 @@ nrec_g = 50;
 rec_g.x= (0: 1: nrec_g) * (Lx/nrec_g);
 rec_g.z=ones(size(rec_g.x)) * (Lz + rec_height);
 
+%==========================================================================
+% simulation mode
+%==========================================================================
 
+simulation_mode='forward';
+
+% 'forward'                 regular forward simulation
+% 'forward_green'           forward simulation where Fourier transform of the Greens function is computed on-the-fly (preparation to compute correlation function)
+% 'correlation'             compute correlation functions as output, requires Fourier-transformed Green function to be present
+% 'noise_source_kernel'     compute sensitivity kernel for the noise source power-spectral density distribution
 
 %==========================================================================
 % absorbing boundaries

@@ -11,7 +11,7 @@ path(path,'../mtit');
 
 
 % number of iterations
-InvProps.niter = 60;
+InvProps.niter = 3;
 istart = 1;
 
 niter = InvProps.niter;
@@ -19,7 +19,7 @@ niter = InvProps.niter;
 % obtain useful parameters from input_parameters
 [project_name, axrot, apply_hc, use_grav, fix_velocities, ...
     use_matfile_startingmodel, starting_model, bg_model_type,...
-    true_model_type, f_maxlist, change_src_every, ...
+    true_model_type, f_maxlist, change_freq_every, ...
     parametrisation, param_plot, rec_g, X, Z, misfit_type, ...
     normalise_misfits, InvProps.stepInit] = get_input_info;
 
@@ -60,13 +60,13 @@ disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 
 %% OBS
 
-% freq consists of sources.v_obs and sources.frequency
-if ~exist('sources','var') || ~exist('t_obs','var') || ...
+% freq consists of freqs.v_obs and freqs.frequency
+if ~exist('freqs','var') || ~exist('t_obs','var') || ...
         ~exist('Model_real','var') || ~exist('props_obs','var') || ...
         ~exist('g_obs','var')
     if istart == 1
         disp 'no OBS present, preparing obs...';
-        [Model_real, sources, t_obs, props_obs, g_obs] = prepare_obs(output_path,true_model_type);
+        [Model_real, freqs, t_obs, props_obs, g_obs] = prepare_obs(output_path,true_model_type);
     else
         error('There are no observed properties!')
     end
@@ -76,8 +76,8 @@ end
 
 if istart == 1
     disp 'saving obs variables to matfile...'
-    savename = [output_path,project_name,'.obs.all-vars.mat'];
-    save(savename, 'sources', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
+    savename = [output_path,'/obs.all-vars.mat'];
+    save(savename, 'freqs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
 end
 
 %=========================================================================
@@ -164,36 +164,27 @@ for iter = istart : InvProps.niter;
         disp '======================================';
         disp ' ';
         
-        %% DIFF SOURCES USED 
+        %% DIFF freqs USED 
 
-%         change_src_every = 10;       % how many iterations with the same src?
-        cse = change_src_every;
+%         change_freq_every = 10;       % how many iterations with the same src?
+        cfe = change_freq_every;
 %         if iter > 1; which_src_prev = which_src; end
-        which_src = floor((iter-1)/cse)+1;
-        if which_src > length(sources)
-            which_src = length(sources);
+        which_src = floor((iter-1)/cfe)+1;
+        if which_src > length(freqs)
+            which_src = length(freqs);
         end
-        freqmax(iter) = sources(which_src).frequency;
-        vobs = sources(which_src).v_obs;
-        stf{iter} = sources(which_src).stf;
+        freqmax(iter) = freqs(which_src).frequency;
+        vobs = freqs(which_src).v_obs;
+        stf{iter} = freqs(which_src).stf;
 
 %         if (~exist('which_src_prev','var') || ~(which_src == which_src_prev))
-        if(length(misfit_init) < which_src || misfit_init(which_src) ==0 )
+        if(length(misfit_init) < which_src || isempty(misfit_init(which_src).total) )
             % do somethin with calculate seis misfit for that source @mod1
             [misfit_int.total, misfit_int.seis, misfit_int.grav] = ...
                 calc_misfits(Model(1), g_obs, 0, stf{iter}, vobs, 0);
             misfit_init(which_src) = misfit_int;
         end
         
-%         if iter <= length(sources);
-%             freqmax(iter) = sources(iter).frequency;
-%             vobs = sources(iter).v_obs;
-%             stf{iter} = sources(iter).stf;
-%         else
-%             freqmax(iter) = f_maxlist(end);
-%             vobs = sources(end).v_obs;
-%             stf{iter} = sources(end).stf;
-%         end
         
 
         
@@ -703,12 +694,13 @@ close(fig_end);
 % plot_models_vector;
 
 
-
-% disp 'saving all current variables...'
-% clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
-%     'filenm_old', 'filenm_new', 'fig_knl');
-% savename = [output_path,'/',project_name,'.all-vars.mat'];
-% save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
+if ~exist([output_path,'/all-vars.mat'],'file')
+    disp 'saving all current variables...'
+    clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
+        'filenm_old', 'filenm_new', 'fig_knl');
+    savename = [output_path,'/all-vars.mat'];
+    save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
+end
 
 % disp ' ';
 % disp ' ';

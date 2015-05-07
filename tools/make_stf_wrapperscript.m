@@ -18,6 +18,6 @@ switch stf_type
             stf = make_source_time_function(t,stf_type,tauw_0, tauw, tee_0);
             % bandpass the ricker wavelet!
             
-        end
+end
 
 end

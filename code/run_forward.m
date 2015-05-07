@@ -84,31 +84,31 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     
     %- (make and) plot source time function ---------------------------------
 
-    if isnan(stf_in);
-        switch stf_type
-            case {'delta_bp', 'heaviside_bp'}
-                stf = make_source_time_function(t,stf_type,f_min,f_max);
-            case 'ricker'
-                stf = make_source_time_function(t,stf_type,tauw_0, tauw, tee_0);
-        end
-    elseif isnumeric(stf_in);
-        stf = stf_in;
-    else
-        error('PANIC! stf type not recognised it seems');
-    end
-    fig_stf = plot_source_time_function(t,stf);
-
-    % add the same source time function to all the sources.    
-%     prefactor = 1.875e5;
-%     prefactor = 1.875e5 / dx / dz;
-    prefactor = 1.0 / dx / dz;
-    for i=1:ns
-        stf_all{i}.x = prefactor* stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
-        stf_all{i}.y = prefactor* stf;                           % y direction
-        stf_all{i}.z = prefactor* stf.*stf_PSV(2)./norm(stf_PSV);  % z direction
-    end
-    
-    stf = stf_all;
+%     if isnan(stf_in);
+%         switch stf_type
+%             case {'delta_bp', 'heaviside_bp'}
+%                 stf = make_source_time_function(t,stf_type,f_min,f_max);
+%             case 'ricker'
+%                 stf = make_source_time_function(t,stf_type,tauw_0, tauw, tee_0);
+%         end
+%     elseif isnumeric(stf_in);
+%         stf = stf_in;
+%     else
+%         error('PANIC! stf type not recognised it seems');
+%     end
+%     fig_stf = plot_source_time_function(t,stf);
+% 
+%     % add the same source time function to all the sources.    
+% %     prefactor = 1.875e5;
+% %     prefactor = 1.875e5 / dx / dz;
+%     prefactor = 1.0 / dx / dz;
+%     for i=1:ns
+%         stf_all{i}.x = prefactor* stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
+%         stf_all{i}.y = prefactor* stf;                           % y direction
+%         stf_all{i}.z = prefactor* stf.*stf_PSV(2)./norm(stf_PSV);  % z direction
+%     end
+%     
+%     stf = stf_all;
 end
 
 %% check values
