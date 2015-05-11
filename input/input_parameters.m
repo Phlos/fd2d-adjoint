@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='test.different-sources';
+project_name='test.sources-prep-different';
 
 %==========================================================================
 % inversion properties
@@ -153,28 +153,29 @@ nsrc = 8;
 src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
 dz = 1/16 * Lz;
 src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
-
 for ii = 1:nsrc
-
+    src_info(ii).loc_x = src_x(ii);
+    src_info(ii).loc_z = src_z(ii);
 end
 
 %==========================================================================
 % sources -- source-time functions
 %==========================================================================
 
+% with this loop, all sources are the same w/ the same polarisation (7-5-2015)
 for ii = 1:nsrc
-    sources(ii).stf_type = 'delta_bp';   % 'ricker' or 'delta_bp' (twice butterworth bandpassed 
+    src_info(ii).stf_type = 'delta_bp';   % 'ricker' or 'delta_bp' (twice butterworth bandpassed 
                                          % delta function)
     % needed for 'ricker'
-    sources(ii).tauw_0  = 2.628;         % seconds
-    sources(ii).tauw    = 10*4.0;        % source duration, seconds
-    sources(ii).tee_0   = 10*2.5;        % source start time, seconds
+    src_info(ii).tauw_0  = 2.628;         % seconds
+    src_info(ii).tauw    = 10*4.0;        % source duration, seconds
+    src_info(ii).tee_0   = 10*2.5;        % source start time, seconds
     
     % needed for 'delta_bp'    
-    sources(ii).f_min=0.006667;          % minimum stf frequency [Hz]
-    sources(ii).f_max=0.03;              % maximum stf frequency [Hz]
+    src_info(ii).f_min=0.006667;          % minimum stf frequency [Hz]
+    src_info(ii).f_max=0.03;              % maximum stf frequency [Hz]
 
-    sources{ii}.stf_PSV = [1 0];% [x z]
+    src_info(ii).stf_PSV = [1 0];% [x z]
                         % direction of the source-time-function in P-SV wave 
                         % propagation. The final stf will be normalised
                         % such that its original amplitude is preserved.
@@ -182,9 +183,9 @@ end
                     
                     
 %- source filtering
-f_minlist = [0.006667];
+f_minlist = [0.006667 0.006667]; % 0.006667 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667 0.01267 0.01465];
+f_maxlist = [0.006667 0.008667]; % 0.01267  0.01465 ];
 % how many iterations with the same source?
 change_freq_every = 15;          % how many iterations with the same freq?
 

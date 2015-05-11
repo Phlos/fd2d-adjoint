@@ -34,33 +34,37 @@ set(fig_seisdif, 'OuterPosition', pos_seis);
 [recs_given, recs_in, plot_diff] = check_args(varargin(:));
 
 
-% number of receivers for which we have seismograms
-nrec = length(v_obs);
-
 % number of components (x,y,z) for which seismograms have been recorded
 ncomp = size(fieldnames(v_obs{1}), 1);
 
 switch recs_given
     case 'yes'
+        nrec = length(recs_in);
         recs = recs_in;
     case 'no'
+        % number of receivers for which we have seismograms
+        nrec = length(v_obs);
         recs = 1:nrec;
     otherwise
         error('wrong recs');
 end
 
+iplot = 0;
+maks = 0;
 for irec = recs
     comp = fieldnames(v_obs{irec});
     for icomp = 1:length(comp);
         
-        subplot(ncomp,1,icomp);
-%         subplot(nrec,ncomp,(irec-1)*ncomp + icomp)
+%         subplot(ncomp,1,icomp);
+        iplot = iplot+1;
+        assen(iplot) = subplot(nrec,ncomp,(irec-1)*ncomp + icomp);
         hold on
         plot(t,v_rec{irec}.(comp{icomp}),'k', ...
              t,v_obs{irec}.(comp{icomp}),'r--');
          if strcmp(plot_diff, 'yesdiff')
              plot(t,v_rec{irec}.(comp{icomp}) - v_obs{irec}.(comp{icomp}), 'b');
          end
+        maks = max(maks, max(assen(iplot).YLim));
         %     plot(t,v_rec.(comp{1}) - v_obs.(comp{1}), 'b', 'LineWidth',2)
 %         hold off
         
@@ -81,6 +85,8 @@ for irec = recs
     end
 end
 
+linkaxes(assen, 'y');
+assen(iplot).YLim = [-maks maks];
 
 end
 

@@ -56,7 +56,7 @@ end
 
 end
 
-function [fmin, fmax, tauw_0, tauw, tee_0] = checkargs(stf_type, args);
+function [fmin, fmax, tauw_0, tauw, tee_0] = checkargs(stf_type, args)
 % outputs the needed parameters for simulation
 
 switch stf_type

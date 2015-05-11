@@ -16,7 +16,7 @@
 
 function [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward(varargin)
 
-[updateParams, updateable, stf_in] = checkargs(varargin(:));
+[updateParams, updateable, stf] = checkargs(varargin(:));
 
 if exist('prevmsg') reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
 else reverseStr = '';

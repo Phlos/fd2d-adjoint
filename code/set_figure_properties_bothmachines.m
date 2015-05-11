@@ -151,11 +151,9 @@ end
 
 % position for the seismogram plots
 if strcmp(HostName,'D-13-L-2')
-    pos_seis = [99    17   562   501];
+    pos_seis = [99 1 613  1176];
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     if strcmp(version('-release'),'2014b')
-%         disp 'plotting kernel in Matlab version 2014b'
-%         pos_knl = [3  0  1063  1046];
         pos_seis = [-1080 -439 1081 1688];
     else
         pos_seis = [60,...                      % left
@@ -173,8 +171,6 @@ if strcmp(HostName,'D-13-L-2')
             scn_height-10];             % height
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     if strcmp(version('-release'),'2014b')
-%         disp 'plotting kernel in Matlab version 2014b'
-%         pos_knl = [3  0  1063  1046];
         pos_knl = [-1080        -439        1064        1529];
     else
 %         disp 'plotting knl as SOME OLD VERSION'
