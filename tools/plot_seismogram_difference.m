@@ -51,24 +51,30 @@ end
 
 iplot = 0;
 maks = 0;
-for irec = recs
+for irows = 1:length(recs);
+    irec = recs(irows);
     comp = fieldnames(v_obs{irec});
     for icomp = 1:length(comp);
         
 %         subplot(ncomp,1,icomp);
         iplot = iplot+1;
-        assen(iplot) = subplot(nrec,ncomp,(irec-1)*ncomp + icomp);
+        assen(iplot) = subplot(nrec,ncomp,(irows-1)*ncomp + icomp);
+        vrec = v_rec{irec}.(comp{icomp});
+        vobs = v_obs{irec}.(comp{icomp});
         hold on
-        plot(t,v_rec{irec}.(comp{icomp}),'k', ...
-             t,v_obs{irec}.(comp{icomp}),'r--');
+        plot(t,vrec,'k', ...
+             t,vobs,'r--');
          if strcmp(plot_diff, 'yesdiff')
-             plot(t,v_rec{irec}.(comp{icomp}) - v_obs{irec}.(comp{icomp}), 'b');
+             plot(t,vrec - vobs, 'b');
          end
-        maks = max(maks, max(assen(iplot).YLim));
+         
+        if ~(max(vobs) == 0 && max(vrec) == 0)
+            maks = max(maks, max(assen(iplot).YLim));
+        end
         %     plot(t,v_rec.(comp{1}) - v_obs.(comp{1}), 'b', 'LineWidth',2)
 %         hold off
         
-        if irec==1
+        if irows==1
             if strcmp(plot_diff, 'yesdiff')
                 title({[comp{icomp},' component:']; 'synth - black, obs - red, (synth-obs) - blue'})
             else
@@ -79,6 +85,10 @@ for irec = recs
         xlabel('t [s]')
         end
         ylabel('v [m/s]')
+        
+        text(0.01, 0.9, ['rec. ',num2str(irec)], ...
+                        'Units', 'normalized');
+%                         'HorizontalAlignment','right', ...
         
 %         icomp=icomp+1;
         

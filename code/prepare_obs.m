@@ -71,7 +71,11 @@ for ifr = 1:nfr
         [vobs,t_obs,~,~,~,~] = run_forward(Model_real, stf);
 
         v_0 = make_seismogram_zeros(vobs);
-        fig_seis = plot_seismogram_difference(vobs, v_0, t_obs, 'nodiff');
+        
+        % determine how many seismograms are actually plotted
+        if length(vobs) > 8; recs = [2:2:length(vobs)]; end
+        
+        fig_seis = plot_seismogram_difference(vobs, v_0, t_obs, recs, 'nodiff');
         titel = [project_name,': observed seismograms freq range: ', ...
                  num2str(freqs(ifr).f_min), '-',num2str(freqs(ifr).f_max), ' Hz'];
         mtit(fig_seis, titel, 'xoff', 0.001, 'yoff', -0.05);
