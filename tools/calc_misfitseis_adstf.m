@@ -30,6 +30,10 @@ function [adstf, misfit] = calc_misfitseis_adstf(misfit_tiep, t, v_rec, varargin
 %                   cell array of shape v_rec{irec}.componentxyz(t);
 % - picking_mode:   'auto' or 'manual' (if omitted, will be 'auto')
 %
+% OUTPUT:
+% - adstf:          adstf{irec}.componentxyz(t).
+% - misfit:         struct misfit.total misfit.componentxyz
+%
 % -- Nienke Blom, 28 January 2015
 
 

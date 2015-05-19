@@ -1,27 +1,27 @@
-function K_normd = norm_kernel(kernel, normalise_how, misfit_1, obs)
+function K_normd = norm_kernel(kernel, normalise_how, misfit_1) %, obs)
 
 % Normalises a kernel by misfit_1 -- if applicable
 % - normalise_how = 'byfirstmisfit': divide misfit by 1st misfit
 % - normalise_how = 'no':            misfit_normd = misfit
 
-sum_obs = 0;
-if iscell(obs)
-    for ii = 1:length(obs)
-        comp = fieldnames(obs{ii});
-        for icomp = 1:length(comp)
-            sum_obs = sum_obs + sum(obs{ii}.(comp{icomp}) .^2);
-        end
-    end
-else
-    sum_obs = sum(obs.mag(:) .^2);
-%     sum_obs = sum(obs.x(:) .^2) + sum(obs.z(:) .^2);
-end
+% sum_obs = 0;
+% if iscell(obs)
+%     for ii = 1:length(obs)
+%         comp = fieldnames(obs{ii});
+%         for icomp = 1:length(comp)
+%             sum_obs = sum_obs + sum(obs{ii}.(comp{icomp}) .^2);
+%         end
+%     end
+% else
+%     sum_obs = sum(obs.mag(:) .^2);
+% %     sum_obs = sum(obs.x(:) .^2) + sum(obs.z(:) .^2);
+% end
 
 switch normalise_how
     case 'byfirstmisfit'
         div_by = misfit_1;
-    case 'div_by_obs'
-        div_by = sum_obs;
+%     case 'div_by_obs'
+%         div_by = sum_obs;
     case 'no'
         div_by = 1;
     otherwise

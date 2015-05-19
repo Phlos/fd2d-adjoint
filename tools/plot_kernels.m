@@ -31,6 +31,7 @@ function fig_knl = plot_kernels(K, varargin)
 
     %% PREPARATION
     input_parameters;
+    
     [X,Z,~,~]=define_computational_domain(Lx,Lz,nx,nz);
     set_figure_properties_bothmachines;
 
@@ -103,9 +104,10 @@ function fig_knl = plot_kernels(K, varargin)
     for ii = 1:length(params); % loop over rows = parameters
         for jj = 1:ncols % loop over columns = which_waves fields ('PSV', 'SH', 'total')
             if isfield(K2.(params{ii}), veldje{jj})
+                Ksm = filter_kernels(K2.(params{ii}).(veldje{jj}),smoothgwid);
                 subplot(3,ncols,(ii-1)*ncols + jj)
-                plot_kernel(X,Z,K2.(params{ii}).(veldje{jj}), ...
-                    [params{ii}, ' - ', veldje{jj}],cmaxtype,scale,stf_PSV);
+                plot_kernel(X,Z,Ksm, ...
+                    [params{ii}, ' - ', veldje{jj}],cmaxtype,scale);
             end
         end
     end

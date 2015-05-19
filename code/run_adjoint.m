@@ -4,15 +4,20 @@
 % output:
 %--------
 % K: sensitivity kernel with respect to density
+%    K.[parameter].[field] (e.g. K.rho2.total, K.mu.SH, ...)
 %==========================================================================
 
 function [K] = run_adjoint(u_fw,v_fw,stf,varargin)
 % disp 'Welcome to the ultimate adjoint experience!!'
-disp 'initialising...'
+if exist('prevmsg') reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
+else reverseStr = '';
+end
+prevmsg = sprintf('initialising...');
+fprintf([reverseStr, prevmsg]); 
 
 % check varargin (i.e. if parameters are to be taken from input_parameters
 % or from a previous model run)
-[updateParams, updateable] = checkargs(varargin(:));
+[updateModel, Model] = checkargs(varargin(:));
 
 %==========================================================================
 %% set paths and read input
@@ -59,13 +64,17 @@ end
 
 %% material and domain ----------------------------------------------------
 
-if strcmp(updateParams,'no')
+if strcmp(updateModel,'no')
     [mu,rho,lambda]=define_material_parameters(nx,nz,model_type);
-elseif strcmp(updateParams,'yes')
-    disp 'updating parameters...'
-    rho = updateable.rho;
-    mu = updateable.mu;
-    lambda = updateable.lambda;
+elseif strcmp(updateModel,'yes')    
+    if exist('prevmsg') reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
+    else reverseStr = '';
+    end
+    prevmsg = sprintf('updating parameters...');
+    fprintf([reverseStr, prevmsg]);
+    rho = Model.rho;
+    mu = Model.mu;
+    lambda = Model.lambda;
 end
 
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);

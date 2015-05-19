@@ -1,6 +1,22 @@
-function [sources, t] = prepare_stf()
+function sEventInfo = prepare_stf()
 
 % prepares a source-time function w/ locations & src direction & everything
+%
+% SYNTAX:
+% sEventInfo = prepare_stf();
+%
+% INPUT:
+% information gotten from input_parameters
+%
+% OUTPUT:
+% sEventInfo:   struct like sEventInfo{isrc}.loc_x
+%                                           .loc_z
+%                                           .stf  .x
+%                                                 .y
+%                                                 .z
+%                                           .t
+%
+% -- N.A. Blom, 13 May 2015
 
 %% prep
 
@@ -17,8 +33,8 @@ t = 0:dt:dt*(nt-1);
 for ii = 1:length(src_info)
     
     % copy relevant info from src_info to sources
-    sources(ii).loc_x = src_info(ii).loc_x;
-    sources(ii).loc_z = src_info(ii).loc_z;
+    sEventInfo(ii).loc_x = src_info(ii).loc_x;
+    sEventInfo(ii).loc_z = src_info(ii).loc_z;
     
     % prepare info for stf calculation
     stf_type = src_info(ii).stf_type;
@@ -43,25 +59,13 @@ for ii = 1:length(src_info)
     prefac = 1.0 / dx / dz;
     
     %- insert source time function into x y z with proper magnitudes
-    sources(ii).stf.x = prefac* stfn .* stf_PSV(1)./norm(stf_PSV);  % x direction
-    sources(ii).stf.y = prefac* stfn;                             % y direction
-    sources(ii).stf.z = prefac* stfn .* stf_PSV(2)./norm(stf_PSV);  % z direction
+    sEventInfo(ii).stf.x = prefac* stfn .* stf_PSV(1)./norm(stf_PSV);  % x direction
+    sEventInfo(ii).stf.y = prefac* stfn;                             % y direction
+    sEventInfo(ii).stf.z = prefac* stfn .* stf_PSV(2)./norm(stf_PSV);  % z direction
+    
+    sEventInfo(ii).t = t;
 
     close(fig_stf);
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
 end

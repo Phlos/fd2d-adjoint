@@ -51,32 +51,32 @@ end
 
 iplot = 0;
 maks = 0;
-for irows = 1:length(recs);
+for irows = 1:nrec;
     irec = recs(irows);
     comp = fieldnames(v_obs{irec});
-    for icomp = 1:length(comp);
+    for icomp = 1:ncomp;
         
 %         subplot(ncomp,1,icomp);
         iplot = iplot+1;
-        assen(iplot) = subplot(nrec,ncomp,(irows-1)*ncomp + icomp);
+        subfiguur(iplot) = subplot(nrec,ncomp,(irows-1)*ncomp + icomp);
         vrec = v_rec{irec}.(comp{icomp});
         vobs = v_obs{irec}.(comp{icomp});
         hold on
         plot(t,vrec,'k', ...
              t,vobs,'r--');
          if strcmp(plot_diff, 'yesdiff')
-             plot(t,vrec - vobs, 'b');
+             plot(t,100*(vrec - vobs), 'b');
+             % plot(t,vrec - vobs, 'b', 'LineWidth',2)
          end
          
         if ~(max(vobs) == 0 && max(vrec) == 0)
-            maks = max(maks, max(assen(iplot).YLim));
+            maks = max(maks, max(subfiguur(iplot).YLim));
         end
-        %     plot(t,v_rec.(comp{1}) - v_obs.(comp{1}), 'b', 'LineWidth',2)
-%         hold off
+        
         
         if irows==1
             if strcmp(plot_diff, 'yesdiff')
-                title({[comp{icomp},' component:']; 'synth - black, obs - red, (synth-obs) - blue'})
+                title({[comp{icomp},' component:']; 'synth - black, obs - red, 100*(synth-obs) - blue'})
             else
                 title({[comp{icomp},' component:']; 'synth - black, obs - red'})
             end
@@ -85,18 +85,17 @@ for irows = 1:length(recs);
         xlabel('t [s]')
         end
         ylabel('v [m/s]')
+        xlim([0 t(end)]);
         
         text(0.01, 0.9, ['rec. ',num2str(irec)], ...
                         'Units', 'normalized');
 %                         'HorizontalAlignment','right', ...
         
-%         icomp=icomp+1;
-        
     end
 end
 
-linkaxes(assen, 'y');
-assen(iplot).YLim = [-maks maks];
+linkaxes(subfiguur, 'y');
+subfiguur(iplot).YLim = [-maks maks];
 
 end
 
@@ -124,7 +123,8 @@ switch nargs
         recs = args{1};
         plot_diff = args{2};
     otherwise
-        error('unknown number of input args')
+%         tekstje = ['unknown number of input args: ', num2str(nargs)];
+        error(['unknown number of input args: ', num2str(nargs)])
 end
 
 end

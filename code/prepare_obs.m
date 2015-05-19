@@ -1,8 +1,10 @@
-function [Model_real, freqs, t_obs, props_obs, g_obs] = prepare_obs(output_path, varargin)
+function [Model_real, sObsPerFreq, t_obs, props_obs, g_obs] = prepare_obs(output_path, varargin)
 
 input_parameters;
 nfr = length(f_maxlist);
 
+
+%% Model
 Model_real = checkargs(varargin(:));
 
 % Model_real = update_model(modelnr);
@@ -33,66 +35,56 @@ props_obs = calculate_model_properties(Model_real.rho, 'x');
 % close(fig_grav_obs);
 
 %% source time function
-[sources, t] = prepare_stf();
-nsrc = length(sources);
+sEventInfoUnfilt = prepare_stf();
+nsrc = length(sEventInfoUnfilt);
 
 % make sources frequency dependent
 for ifr = 1:nfr
+    disp(['FREQUENCY NR. ',num2str(ifr),'/',num2str(nfr), ...
+          '. fmin=',num2str(f_minlist(ifr)),', fmax=',num2str(f_minlist(ifr))]);
     
     % get frequencies
-    freqs(ifr).f_max = f_maxlist(ifr);
-    freqs(ifr).f_min = f_minlist(ifr);
+    sObsPerFreq(ifr).f_max = f_maxlist(ifr);
+    sObsPerFreq(ifr).f_min = f_minlist(ifr);
     
     % filter stf per src & per component
-    for isrc = 1:length(sources)
-        comps = fieldnames(sources(isrc).stf);
+    sEventInfo = sEventInfoUnfilt;
+    for isrc = 1:nsrc
+        comps = fieldnames(sEventInfoUnfilt(isrc).stf);
         for icomp = 1:length(comps)
-            stf = sources(isrc).stf.(comps{icomp});
-            stf = butterworth_lp(stf,t,3,freqs(ifr).f_max,'silent');
-            stf = butterworth_hp(stf,t,3,freqs(ifr).f_min,'silent');
-            freqs(ifr).source(isrc).stf.(comps{icomp}) = stf; clearvars stf;
+            stf = sEventInfoUnfilt(isrc).stf.(comps{icomp});
+            t = sEventInfoUnfilt(isrc).t;
+            stf = butterworth_lp(stf,t,3,sObsPerFreq(ifr).f_max,'silent');
+            stf = butterworth_hp(stf,t,3,sObsPerFreq(ifr).f_min,'silent');
+            sEventInfo(isrc).stf.(comps{icomp}) = stf; clearvars stf;
         end
     end
+%     sEventInfo(isrc).loc_x = sEventInfoUnfilt.loc_x;
     
-    % prepare zeros sources
+    % run forward per source
+    [sEventObs, fig_seis] = run_forward_persource(Model_real, sEventInfo);
+    
+    % plot & save each figure fig_seis
     for isrc = 1:nsrc
-        stf_zero{isrc} = make_seismogram_zeros(freqs(ifr).source(isrc).stf);
+        titel = ['src ', num2str(isrc),' - observed seismograms freq range: ', ...
+            num2str(sObsPerFreq(ifr).f_min), '-',num2str(sObsPerFreq(ifr).f_max), ' Hz'];
+        mtit(fig_seis(isrc), titel, 'xoff', 0.001, 'yoff', -0.05);
+        figname = [output_path,'/obs.seis.fmax-',num2str(sObsPerFreq(ifr).f_max,'%.2e'),...
+                               '.src-',num2str(isrc,'%02d'),'.png'];
+        print(fig_seis(isrc),'-dpng','-r400',figname);
+        close(fig_seis(isrc));
     end
     
-    % run fwd per source (other sources = zeros)
-    for isrc = 1:nsrc
-        disp(['Making obs - freq nr. ',num2str(ifr),'/',num2str(nfr),' - src. nr ',num2str(isrc),'/',num2str(nsrc)]);
-        
-        % add a single nonzero source for isrc
-        stf = stf_zero;
-        stf{isrc} = freqs(ifr).source(isrc).stf;
-        
-        % run actual fwd wave propagation per src per freq
-        [vobs,t_obs,~,~,~,~] = run_forward(Model_real, stf);
-
-        v_0 = make_seismogram_zeros(vobs);
-        
-        % determine how many seismograms are actually plotted
-        if length(vobs) > 8; recs = [2:2:length(vobs)]; end
-        
-        fig_seis = plot_seismogram_difference(vobs, v_0, t_obs, recs, 'nodiff');
-        titel = [project_name,': observed seismograms freq range: ', ...
-                 num2str(freqs(ifr).f_min), '-',num2str(freqs(ifr).f_max), ' Hz'];
-        mtit(fig_seis, titel, 'xoff', 0.001, 'yoff', -0.05);
-        figname = [output_path,'/obs.seis.fmax-',num2str(freqs(ifr).f_max,'%.2e'),'.png'];
-        print(fig_seis,'-dpng','-r400',figname);
-%         pause(1);
-        close(fig_seis);
-    
-        % write obs into freq & source gather variable
-        freqs(ifr).source(isrc).v_obs = vobs;
-    end
+    sObsPerFreq(ifr).sEventInfo = sEventInfo;
+    sObsPerFreq(ifr).sEventObs = sEventObs;
 end
+
+t_obs = sObsPerFreq(1).sEventObs(1).t;
 
 % saving the obs variables
 disp 'saving obs variables to matfile...'
 savename = [output_path,'/obs.all-vars.mat'];
-save(savename, 'freqs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
+save(savename, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
 
 close all;
 

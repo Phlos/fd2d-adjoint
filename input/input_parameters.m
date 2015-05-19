@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='test.sources-prep-different';
+project_name='Mantle.test-025.like-020-but-8-consecutive-sources';
 
 %==========================================================================
 % inversion properties
@@ -26,7 +26,7 @@ parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rh
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'no'; % 'yes' or 'no'
+fix_velocities = 'yes'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -38,10 +38,6 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
                                   % divides L2 norm by obs values so that
                                   % you get percent wise misfit
 
-% starting model from matfile
-use_matfile_startingmodel = 'no';
-% starting_model = '../output/Model_0.03Hz.mat';
-starting_model = '';
 
 % initial step length;
 % stepInit = 3.5e14;    % good for circular configuration
@@ -91,8 +87,8 @@ dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % nt=700;      % number of iterations
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
-% tmax = 1100;    % should be enough for ScS.
-tmax = 100;
+tmax = 1100;    % should be enough for ScS.
+% tmax = 300;
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -101,9 +97,14 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % model type
 %==========================================================================
 
+% starting model from matfile
+use_matfile_startingmodel = 'no';
+% starting_model = '../output/Model_0.03Hz.mat';
+starting_model = '';
+
 bg_model_type = 50;     % PREM (for plotting)
 true_model_type = 60;   % PREM + vs, vp, rho2 anoms
-model_type=63;          % PREM + vs, vp anoms (starting model*0.9)
+model_type=61;          % PREM + vs, vp anoms (starting model*0.9)
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation

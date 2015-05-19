@@ -35,7 +35,6 @@ model = change_parametrisation('rhomulambda','rhovsvp',model1);
 
 switch outparam
     
-    % outparam = rhovsvp
     case 'rhovsvp'
         
         if isfield(Kin, 'rho2') && isfield(Kin, 'vs2') && isfield(Kin, 'vp2')
@@ -43,7 +42,6 @@ switch outparam
             Kout = Kin;
         end
         
-
         
         switch inparam
             case 'rhomulambda'
@@ -85,7 +83,7 @@ switch outparam
     case 'rhomulambda'
         
         if isfield(Kin, 'mu') && isfield(Kin, 'lambda')
-            warning('your infields already has the parametrisation you want');
+%             warning('your infields already has the parametrisation you want');
             Kout = Kin;
         else
             switch inparam

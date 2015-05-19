@@ -2,7 +2,7 @@
 
 function [step, fig_lnsrch , steplnArray_total, misfitArray_total ] = calculate_step_length(teststep, niter, ...
                                       currentMisfit, misfit_init, ...
-                                      Model_prev, K_abs, v_obs, g_obs, stf, Model_start)
+                                      Model_prev, K_abs, g_obs, sEventInfo, sEventObs, Model_start)
 %% == 1. Preparation ======================================================
 
 % % obtain useful parameters from input_parameters
@@ -15,8 +15,10 @@ path(path,'../input');
 input_parameters;
 set_figure_properties_bothmachines;
 
+Model_bg = update_model(bg_model_type);
+
 %- plot starting model
-fig_mod_prev = plot_model(Model_prev, param_plot);
+% fig_mod_prev = plot_model_diff(Model_prev, Model_bg, param_plot);
 
 
 %- determine the number of steps we'll try and divide teststep by that nr
@@ -55,7 +57,7 @@ for ntry = 2:nsteps
           ' --- step length ', num2str(steptry,'%3.1e')]);
 
     misfitArray.total(ntry) = calc_misfit_perstep(K_abs, steptry, Model_prev, ...
-        misfit_init, g_obs, v_obs, stf, Model_start);
+        misfit_init, g_obs, sEventInfo, sEventObs, Model_start);
 
     %- give step nr, step length and misfit
     disp(['Step ',num2str(ntry), ...
@@ -151,7 +153,7 @@ while ( (p(1) < 0 || step < 0 || FitGoodness > 0.1) && nextra <= 5 )
     
     % calculate misfit for the new teststep
     misfit_new = calc_misfit_perstep(K_abs, teststep_new, ...
-        Model_prev, misfit_init, g_obs, v_obs, stf, Model_start);
+        Model_prev, misfit_init, g_obs, sEventInfo, sEventObs, Model_start);
     disp ' ';
         %- give step nr, step length and misfit
     disp(['Extra step ',num2str(nextra), ...
@@ -233,7 +235,8 @@ end
 
 %% subfunctions
 
-function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, misfit_init, g_obs, v_obs, stf, Model_start)
+function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, ...
+                       misfit_init, g_obs, sEventInfo, sEventObs, Model_start)
 
 % paths etc.
 
@@ -275,8 +278,11 @@ set_figure_properties_bothmachines;
 
     % NEW as of 29-4-2015
     [misfit.total, misfit.seis, misfit.grav] = calc_misfits(Model_try, ...
-        g_obs, misfit_init.grav, stf, v_obs, misfit_init.seis);
+        g_obs, misfit_init.grav, sEventInfo, sEventObs, misfit_init.seis, ...
+        'noplot','notext');
     misfittotal = misfit.total;
+    
+    close(fig_mod);
     
 %     %% gravity misfit
 %     

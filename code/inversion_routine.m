@@ -1,18 +1,18 @@
 
-% preparation
-path(path,'../input');
-path(path,'../code');
-path(path,'../code/propagation');
-path(path,'../tools');
-path(path,'../tools/misfits');
-path(path,'../quivers');
-path(path,'../mtit');
+% % preparation
+% path(path,'../input');
+% path(path,'../code');
+% path(path,'../code/propagation');
+% path(path,'../tools');
+% path(path,'../tools/misfits');
+% path(path,'../quivers');
+% path(path,'../mtit');
 
 
 
 % number of iterations
-InvProps.niter = 3;
-istart = 1;
+InvProps.niter = 25;
+istart = 10;
 
 niter = InvProps.niter;
 
@@ -61,28 +61,32 @@ disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 %% OBS
 
 % freq consists of freqs.v_obs and freqs.frequency
-if ~exist('freqs','var') || ~exist('t_obs','var') || ...
+if ~exist('sObsPerFreq','var') || ~exist('t_obs','var') || ...
         ~exist('Model_real','var') || ~exist('props_obs','var') || ...
         ~exist('g_obs','var')
     if istart == 1
         disp 'no OBS present, preparing obs...';
-        [Model_real, freqs, t_obs, props_obs, g_obs] = prepare_obs(output_path,true_model_type);
+        [Model_real, sObsPerFreq, t_obs, props_obs, g_obs] = prepare_obs(output_path,true_model_type);
     else
-        error('There are no observed properties!')
+        error('iter > 1 but there are no observed properties!')
     end
 else
     disp 'obs properties all present... proceeding...'
 end
 
-if istart == 1
+% if istart == 1
+
+savename = [output_path,'/obs.all-vars.mat'];
+if ~(exist(savename, 'file'))
     disp 'saving obs variables to matfile...'
-    savename = [output_path,'/obs.all-vars.mat'];
-    save(savename, 'freqs', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
+    save(savename, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v6');
 end
 
 %=========================================================================
 
-%% Inversion preparation
+%% Model preparation
+
+disp 'preparing inversion starting model...'
 
 % save initial model (from input_parameters)
 Model_start = update_model();
@@ -94,7 +98,6 @@ Model_bg = update_model(bg_model_type);
 middle.rho    = mode(Model_start.rho(:));
 middle.mu     = mode(Model_start.mu(:));
 middle.lambda = mode(Model_start.lambda(:));
-
 
 
 % plot initial model
@@ -164,29 +167,7 @@ for iter = istart : InvProps.niter;
         disp '======================================';
         disp ' ';
         
-        %% DIFF freqs USED 
-
-%         change_freq_every = 10;       % how many iterations with the same src?
-        cfe = change_freq_every;
-%         if iter > 1; which_src_prev = which_src; end
-        which_src = floor((iter-1)/cfe)+1;
-        if which_src > length(freqs)
-            which_src = length(freqs);
-        end
-        freqmax(iter) = freqs(which_src).frequency;
-        vobs = freqs(which_src).v_obs;
-        stf{iter} = freqs(which_src).stf;
-
-%         if (~exist('which_src_prev','var') || ~(which_src == which_src_prev))
-        if(length(misfit_init) < which_src || isempty(misfit_init(which_src).total) )
-            % do somethin with calculate seis misfit for that source @mod1
-            [misfit_int.total, misfit_int.seis, misfit_int.grav] = ...
-                calc_misfits(Model(1), g_obs, 0, stf{iter}, vobs, 0);
-            misfit_init(which_src) = misfit_int;
-        end
-        
-        
-
+ 
         
         %% MODEL
         
@@ -201,155 +182,215 @@ for iter = istart : InvProps.niter;
         fig_mod = plot_model_diff(Model(iter),Model_bg,param_plot);
         titel = [project_name,': model diff of iter ', num2str(iter), ' and bg model'];
         mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-        figname = [output_path,'/iter',num2str(iter),'.model-diff.',param_plot,'.png'];
+        figname = [output_path,'/iter',num2str(iter,'%03d'),'.model-diff.',param_plot,'.png'];
         print(fig_mod,'-dpng','-r400',figname);
         close(fig_mod);
         clearvars('fig_mod');
         
+        %% get current frequency and its source & obs info
+
+        cfe = change_freq_every;
+        whichFrq = floor((iter-1)/cfe)+1;
+        if whichFrq > length(sObsPerFreq)
+            whichFrq = length(sObsPerFreq);
+        end
+        freqmax(iter) = sObsPerFreq(whichFrq).f_max;
+        freqmin(iter) = sObsPerFreq(whichFrq).f_min;
+        
+        nsrc = length(sObsPerFreq(whichFrq).sEventObs);
+        
+        % CHANGE TO PER SOURCE!!!
+%         for isrc = 1:nsrc
+%             vobs{isrc} = sObsPerFreq(whichFrq).sEventObs(isrc).v_obs;
+%             stf{isrc}{iter} = sObsPerFreq(whichFrq).sEventObs(isrc).stf;
+%         end
+        sEventInfo = sObsPerFreq(whichFrq).sEventInfo; % contains src locations etc
+        sEventObs = sObsPerFreq(whichFrq).sEventObs;  % contains v_obs
+ 
+        
         %% misfit
         
-        % gravity misfit
-%         if strcmp(use_grav,'yes')
-            % gravity field of current model
-            [g(iter), fig_grav] = calculate_gravity_field(Model(iter).rho, rec_g);
-%             figname = [output_path,'/iter',num2str(i),'.gravity_recordings.png'];
-%             titel = [project_name,': gravity field of ', num2str(i), 'th model'];
-%             mtit(fig_grav, titel, 'xoff', 0.001, 'yoff', 0.00001);
-%             print(fig_grav, '-dpng', '-r400', figname);
-            close(fig_grav);
-            % comparison to real model:
-            if (strcmp(use_grav,'yes'))
-            fig_grav_comp = plot_gravity_quivers(rec_g, g(iter), g_obs, X, Z, Model(iter).rho);
-            figname = [output_path,'/iter',num2str(iter),'.gravity_difference.png'];
-            titel = [project_name,': gravity diff iter ', num2str(iter), ' - real model'];
-            mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.00001);
-            print(fig_grav_comp, '-dpng', '-r400', figname);
-            close(fig_grav_comp);
-            clearvars('fig_mod');
-            end
-            
-            %- calculate gravity misfit:
-            [g_src, InvProps.misfit_g(iter)] = make_gravity_sources(g(iter), g_obs);
-            
-            % NEW AS OF 17-3-2015 - changed as of 25-3-2015
-            InvProps.misfit_g(iter).normd = ...
-                norm_misfit(InvProps.misfit_g(iter).total, ...
-                            normalise_misfits, misfit_init(which_src).grav, ...
-                            g_obs);
-            clearvars norm_misf;
-            
-            % output for gravity misfit
-            sumgobs = sum(g_obs.mag(:) .^2);
-            div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
-            disp ' ';
-            disp(['gravity misfit for iter ',num2str(iter),':    ', ...
-                num2str(InvProps.misfit_g(iter).total,'%3.2e')])
-            disp(['   fraction of g_obs:   ', ...
-                num2str(div_by_gobs,'%3.2e')])
-            disp(['   normalised ',normalise_misfits, ': ', ...
-                num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
-            disp ' ';
-
-
-        
-
-        
-        % seismic misfit
-        
-        % run forward wave propagation
-        disp ' ';
-        disp(['iter ',num2str(iter),', src ',num2str(which_src),': calculating forward wave propagation']);
-%         clearvars u_fw v_fw;
-
-        % NEW as of 24-3-2015 (that stf{iter} is now supplied)
-        [v_iter{iter},t,u_fw,v_fw,rec_x,rec_z]=run_forward(Model(iter), stf{iter});
-        close(clf);
-        close(clf);
-        close(clf);
-        
-        % plot seismogram difference
-
-        fig_seisdif = plot_seismogram_difference(vobs,v_iter{iter},t);
-        titel = [project_name,'difference between seismograms iter ', num2str(iter), ' and obs (source ',num2str(which_src),')'];
-        mtit(fig_seisdif, titel, 'xoff', 0.001, 'yoff', 0.02);
-        figname = [output_path,'/iter',num2str(iter),'.seisdif.png'];
-        print(fig_seisdif,'-dpng','-r400',figname);
-        close(fig_seisdif);
-        
-        % make adjoint sources
-        cd ../tools
-        disp ' '; disp(['iter ',num2str(iter),': calculating adjoint stf']);
-        
-        [adstf{iter}, InvProps.misfit_seis{iter}] = calc_misfitseis_adstf(misfit_type,t,v_iter{iter},vobs);
-        % NEW AS OF 17-3-2015
-            InvProps.misfit_seis{iter}.normd = ...
-                norm_misfit(InvProps.misfit_seis{iter}.total, ...
-                            normalise_misfits, ...
-                            misfit_init(which_src).seis, vobs);
-        
-        
-%         % plot stf to adstf for one station
-%         stationnr = 5;
-%         fig_stftoadstf = plot_seismogram_difference(stf, disp, vel, adstf, t);
-%         titel = [project_name,': stf to adstf at station', num2str(stationnr), ', iter ', num2str(i), ' and obs'];
-%         mtit(fig_stftoadstf, titel, 'xoff', 0.001, 'yoff', 0.02);
-%         figname = [output_path,'/iter',num2str(i),'.stf-to-adstf-station',num2str(stationnr),'.png'];
-%         print(fig_stftoadstf,'-dpng','-r400',figname);
-%         close(fig_stftoadstf);
-
-       
-        %% output total misfit
-        
-        disp ' ';
-        disp '=========================================='
-        disp(['           misfit ITER ',num2str(iter)]);
-        
-        % gravity misfit
-        if strcmp(use_grav,'yes')
-            sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
-            div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
-            disp(['GRAVITY misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
-                num2str(InvProps.misfit_g(iter).total,'%3.2e')])
-            disp(['   fraction of g_obs:         ', ...
-                num2str(div_by_gobs,'%3.2e')])
-            disp(['   normalised ',normalise_misfits,':  ', ...
-                num2str(InvProps.misfit_g(iter).normd,'%3.2e'),...
-            ' (1st misfit = ',num2str(misfit_init(which_src).grav,'%3.2e'),')'])
-            disp ' ';
+        % actually this should only be done if iter>1
+        if(~exist('misfit_init', 'var') || length(misfit_init) < whichFrq || isempty(misfit_init(whichFrq).total) )
+            % do somethin with calculate seis misfit for that source @mod1
+            [misfit_int.total, misfit_int.seis, misfit_int.grav] = ...
+                calc_misfits(Model(1), g_obs, 0, sEventInfo, sEventObs, 0, ...
+                'noplot','notext');
+            misfit_init(whichFrq) = misfit_int;
         end
         
-        % seismic misfit
-        sumvobs = 0;
-        for ii = 1:length(vobs)
-            comp = fieldnames(vobs{ii});
-            for icomp = 1:length(comp)
-            sumvobs = sumvobs + sum(vobs{ii}.(comp{icomp}) .^2);
-            end
-        end
-        div_by_vobs = InvProps.misfit_seis{iter}.total / sumvobs;
+% % %         % gravity misfit
+% % % %         if strcmp(use_grav,'yes')
+% % %             % gravity field of current model
+% % %             [g(iter), fig_grav] = calculate_gravity_field(Model(iter).rho, rec_g);
+% % % %             figname = [output_path,'/iter',num2str(i),'.gravity_recordings.png'];
+% % % %             titel = [project_name,': gravity field of ', num2str(i), 'th model'];
+% % % %             mtit(fig_grav, titel, 'xoff', 0.001, 'yoff', 0.00001);
+% % % %             print(fig_grav, '-dpng', '-r400', figname);
+% % %             close(fig_grav);
+% % %             % comparison to real model:
+% % %             if (strcmp(use_grav,'yes'))
+% % %                 fig_grav_comp = plot_gravity_quivers(rec_g, g(iter), g_obs, X, Z, Model(iter).rho);
+% % %                 figname = [output_path,'/iter',num2str(iter),'.gravity_difference.png'];
+% % %                 titel = [project_name,': gravity diff iter ', num2str(iter), ' - real model'];
+% % %                 mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.00001);
+% % %                 print(fig_grav_comp, '-dpng', '-r400', figname);
+% % %                 close(fig_grav_comp);
+% % %                 clearvars('fig_mod');
+% % %             end
+% % %             
+% % %             %- calculate gravity misfit:
+% % %             [g_src, InvProps.misfit_g(iter)] = make_gravity_sources(g(iter), g_obs);
+% % %             
+% % %             % NEW AS OF 17-3-2015 - changed as of 25-3-2015
+% % %             InvProps.misfit_g(iter).normd = ...
+% % %                 norm_misfit(InvProps.misfit_g(iter).total, ...
+% % %                             normalise_misfits, misfit_init(whichFrq).grav, ...
+% % %                             g_obs);
+% % % %             clearvars norm_misf;
+% % %             
+% % %             % output for gravity misfit
+% % %             sumgobs = sum(g_obs.mag(:) .^2);
+% % %             div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
+% % %             disp ' ';
+% % %             disp(['gravity misfit for iter ',num2str(iter),':    ', ...
+% % %                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
+% % %             disp(['   fraction of g_obs:   ', ...
+% % %                 num2str(div_by_gobs,'%3.2e')])
+% % %             disp(['   normalised ',normalise_misfits, ': ', ...
+% % %                 num2str(InvProps.misfit_g(iter).normd,'%3.2e')])
+% % %             disp ' ';
+% % % 
+% % % 
+% % %         
+% % % 
+% % %         
+% % %         % seismic misfit
+% % %         
+% % %         % run forward wave propagation
+% % %         
+% % % %         clearvars u_fw v_fw;
+% % % 
+% % %         % NEW as of 24-3-2015 (that stf{iter} is now supplied)
+% % %         [v_iter{iter},t,u_fw,v_fw,rec_x,rec_z]=run_forward(Model(iter), stf{iter});
+% % %         close(gcf); close(gcf); close(gcf);
+% % %         
+% % %         % plot seismogram difference
+% % % 
+% % %         fig_seisdif = plot_seismogram_difference(vobs,v_iter{iter},t);
+% % %         titel = [project_name,'difference between seismograms iter ', num2str(iter), ' and obs (source ',num2str(whichFrq),')'];
+% % %         mtit(fig_seisdif, titel, 'xoff', 0.001, 'yoff', 0.02);
+% % %         figname = [output_path,'/iter',num2str(iter),'.seisdif.png'];
+% % %         print(fig_seisdif,'-dpng','-r400',figname);
+% % %         close(fig_seisdif);
+% % %         
+% % %         % make adjoint sources
+% % %         cd ../tools
+% % %         disp ' '; disp(['iter ',num2str(iter),': calculating adjoint stf']);
+% % %         
+% % %         [adstf{iter}, InvProps.misfit_seis{iter}] = calc_misfitseis_adstf(misfit_type,t,v_iter{iter},vobs);
+% % %         % NEW AS OF 17-3-2015
+% % %             InvProps.misfit_seis{iter}.normd = ...
+% % %                 norm_misfit(InvProps.misfit_seis{iter}.total, ...
+% % %                             normalise_misfits, ...
+% % %                             misfit_init(whichFrq).seis, vobs);
+% % %         
+% % %         
+% % % %         % plot stf to adstf for one station
+% % % %         stationnr = 5;
+% % % %         fig_stftoadstf = plot_seismogram_difference(stf, disp, vel, adstf, t);
+% % % %         titel = [project_name,': stf to adstf at station', num2str(stationnr), ', iter ', num2str(i), ' and obs'];
+% % % %         mtit(fig_stftoadstf, titel, 'xoff', 0.001, 'yoff', 0.02);
+% % % %         figname = [output_path,'/iter',num2str(i),'.stf-to-adstf-station',num2str(stationnr),'.png'];
+% % % %         print(fig_stftoadstf,'-dpng','-r400',figname);
+% % % %         close(fig_stftoadstf);
+% % % 
+% % %        
+% % %         %% output total misfit
+% % %         
+% % %         disp ' ';
+% % %         disp '=========================================='
+% % %         disp(['           misfit ITER ',num2str(iter)]);
+% % %         
+% % %         % gravity misfit
+% % %         if strcmp(use_grav,'yes')
+% % %             sumgobs = sum(g_obs.x(:) .^2) + sum(g_obs.z(:) .^2);
+% % %             div_by_gobs = InvProps.misfit_g(iter).total / sumgobs;
+% % %             disp(['GRAVITY misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
+% % %                 num2str(InvProps.misfit_g(iter).total,'%3.2e')])
+% % %             disp(['   fraction of g_obs:         ', ...
+% % %                 num2str(div_by_gobs,'%3.2e')])
+% % %             disp(['   normalised ',normalise_misfits,':  ', ...
+% % %                 num2str(InvProps.misfit_g(iter).normd,'%3.2e'),...
+% % %             ' (1st misfit = ',num2str(misfit_init(whichFrq).grav,'%3.2e'),')'])
+% % %             disp ' ';
+% % %         end
+% % %         
+% % %         % seismic misfit
+% % %         sumvobs = 0;
+% % %         for ii = 1:length(vobs)
+% % %             comp = fieldnames(vobs{ii});
+% % %             for icomp = 1:length(comp)
+% % %             sumvobs = sumvobs + sum(vobs{ii}.(comp{icomp}) .^2);
+% % %             end
+% % %         end
+% % %         div_by_vobs = InvProps.misfit_seis{iter}.total / sumvobs;
+% % %         disp ' ';
+% % %         disp(['SEISMIC misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
+% % %             num2str(InvProps.misfit_seis{iter}.total,'%3.2e')])
+% % %         disp(['   fraction of v_obs:         ', ...
+% % %             num2str(div_by_vobs,'%3.2e')])
+% % % %         if strcmp(normalise_misfits,'byfirstmisfit')
+% % %         disp(['   normalised ',normalise_misfits,':  ', ...
+% % %             num2str(InvProps.misfit_seis{iter}.normd,'%3.2e'),...
+% % %             ' (1st misfit = ',num2str(misfit_init(whichFrq).seis,'%3.2e'),')'])
+% % % %         end
+% % %         disp ' ';
+% % %         
+% % %         if strcmp(use_grav,'yes')
+% % %             InvProps.misfit(iter) = InvProps.misfit_seis{iter}.normd + InvProps.misfit_g(iter).normd;
+% % %         else
+% % %             InvProps.misfit(iter) = InvProps.misfit_seis{iter}.normd;
+% % %         end
+% % %         
+% % %         disp(['TOTAL misfit FOR ITER ',num2str(iter,'%2u'),':     ', ...
+% % %             num2str(InvProps.misfit(iter),'%3.2e')])
+% % % %         disp ' ';
+% % %         disp '=========================================='
+
+         [misfit_total, misfit_seis, misfit_grav, ...
+         giter, g_src, sEventRecIter, sEventAdstfIter] = calc_misfits(Model(iter), ...
+                                             g_obs, misfit_init(whichFrq).grav , ...
+                                             sEventInfo, sEventObs, misfit_init(whichFrq).seis, ...
+                                             'yessavefields','yessaveplots');
+        InvProps.misfit(iter) = misfit_total;
+        InvProps.misfitseis(iter) = misfit_seis;
+        InvProps.misfitgrav(iter) = misfit_grav;
+        g(iter) = giter;
+        sEventRec{iter} = sEventRecIter;
+        sEventAdstf{iter} = sEventAdstfIter;
+        
+        
+        % gravity misfit
         disp ' ';
+        disp(['GRAVITY misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
+            num2str(InvProps.misfitgrav(iter),'%3.2e')])
+        disp(['   normalised ',normalise_misfits, ...
+            ' -- 1st misfit = ',num2str(misfit_init(whichFrq).grav,'%3.2e'),')'])
+        disp ' ';
+        % seismic misfit
         disp(['SEISMIC misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
-            num2str(InvProps.misfit_seis{iter}.total,'%3.2e')])
-        disp(['   fraction of v_obs:         ', ...
-            num2str(div_by_vobs,'%3.2e')])
-%         if strcmp(normalise_misfits,'byfirstmisfit')
-        disp(['   normalised ',normalise_misfits,':  ', ...
-            num2str(InvProps.misfit_seis{iter}.normd,'%3.2e'),...
-            ' (1st misfit = ',num2str(misfit_init(which_src).seis,'%3.2e'),')'])
-%         end
+            num2str(InvProps.misfitseis(iter),'%3.2e')])
+        disp(['   normalised ',normalise_misfits, ...
+            ' -- 1st misfit = ',num2str(misfit_init(whichFrq).seis,'%3.2e'),')'])
         disp ' ';
-        
-        if strcmp(use_grav,'yes')
-            InvProps.misfit(iter) = InvProps.misfit_seis{iter}.normd + InvProps.misfit_g(iter).normd;
-        else
-            InvProps.misfit(iter) = InvProps.misfit_seis{iter}.normd;
-        end
-        
+        % total misfit
         disp(['TOTAL misfit FOR ITER ',num2str(iter,'%2u'),':     ', ...
             num2str(InvProps.misfit(iter),'%3.2e')])
 %         disp ' ';
         disp '=========================================='
         
+
         if iter>1
             % L2 norm( [model(i) - model(i-1)] / model(1) )
             InvProps.modeldifn(iter) =   norm( (Model(iter).rho(:) - Model(iter-1).rho(:)) ./ Model(1).rho(:) ) ...
@@ -374,8 +415,8 @@ for iter = istart : InvProps.niter;
         print(fig_misfit,'-dpdf','-r400',figname);
         close(fig_misfit);
         clearvars fig_misfit
+
         
-%  end
         %% GRAVITY KERNEL
         
         if strcmp(use_grav,'yes')
@@ -395,12 +436,12 @@ for iter = istart : InvProps.niter;
                 
                 % normalising the gravity kernel
                 Kg{iter} = norm_kernel(Kg_temp, normalise_misfits, ...
-                    misfit_init(which_src).grav, g_obs);
+                    misfit_init(whichFrq).grav);
                 clearvars Kg_temp;
                 
                 
                 %  plot gravity kernel
-                figname = [output_path,'/iter',num2str(iter),'.kernel_grav.rho.png'];
+                figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernel_grav.rho.png'];
                 titel = [project_name, '- Gravity kernel for iter ',num2str(iter)];
                 mtit(fig_Kg,titel, 'xoff', 0.001, 'yoff', 0.00001);
                 print(fig_Kg,'-dpng','-r400',figname);
@@ -417,83 +458,55 @@ for iter = istart : InvProps.niter;
             
             % run adjoint to obtain seismic kernels
             disp ' ';
-            disp(['iter ',num2str(iter),': calculating adjoint wave propagation']);
-            cd ../code/
-            Kseis_temp = run_adjoint(u_fw,v_fw,adstf{iter},Model(iter));
+            disp(['iter ',num2str(iter),': calculating seismic kernels']);
+%             cd ../code/
+            [Kseis_temp, sEventKnls{iter}] = run_adjoint_persource(Model(1), sEventAdstf{1});
+%             Kseis_temp = run_adjoint(u_fw,v_fw,sEventAdstf{iter},Model(iter));
             
             % normalise kernels
             Kseis(iter) = norm_kernel(Kseis_temp, normalise_misfits, ...
-                misfit_init(which_src).seis, vobs);
+                misfit_init(whichFrq).seis);
 %             clearvars Kseis_temp;
-            
             
             % plot the kernels
             disp ' ';
             disp(['iter ',num2str(iter),': plotting kernels']);
             cd ../tools/
             
-%             [Kabs, K_reltemp] = calculate_other_kernels(Kseis(iter), Model(iter));
-            switch parametrisation
-                case 'rhomulambda'
+            % absolute rho-mu-lambda
+%           fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
+            fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
+            titel = [project_name,' - seismic kernels (absolute rho-mu-lambda) for iter ',num2str(iter)];
+            mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+            figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernels.abs.rho-mu-lambda.png'];
+            print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+            % absolute rho-vs-vp
+%           fig_knl = plot_kernels_rho_vs_vp(Kabs);
+            fig_knl = plot_kernels(Kseis(iter), 'rhovsvp',Model(iter), 'total', 'own', 99.95);
+            titel = [project_name,' - seismic kernels (absolute rho-vs-vp) for iter ',num2str(iter)];
+            mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+            figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernels.abs.rho-vs-vp.png'];
+            print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+            
+            % plot subkernels
+            for isrc = 1:numel(sEventKnls{iter})
+                Kernel = sEventKnls{iter}(isrc);
+                
+                % absolute rho-mu-lambda
+                fig_knl = plot_kernels(Kernel, 'rhomulambda',Model(iter), 'total', 'own', 99.95);
+                titel = [project_name,' - seismic SUBkernel (absolute rho-mu-lambda) - iter ',num2str(iter),' src ',num2str(isrc)];
+                mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+                figname = [output_path,'/iter',num2str(iter,'%03d'),'.subkernels-src',num2str(isrc,'%02d'),'.abs.rho-mu-lambda.png'];
+                print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+                % absolute rho-vs-vp
+                fig_knl = plot_kernels(Kernel, 'rhovsvp',Model(iter), 'total', 'own', 99.95);
+                titel = [project_name,' - seismic SUBkernel (absolute rho-vs-vp) - iter ',num2str(iter),' src ',num2str(isrc)];
+                mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+                figname = [output_path,'/iter',num2str(iter,'%03d'),'.subkernels-src',num2str(isrc,'%02d'),'.abs.rho-vs-vp.png'];
+                print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+                
+            end; clearvars Kernel
 
-%                     % relative rho-mu-lambda
-% %                     fig_knl = plot_kernels_rho_mu_lambda_relative(K_reltemp);
-%                     fig_knl = plot_kernels(K_reltemp, 'rhomulambda',Model(iter), 'total', 'same', 99.8); 
-%                     figname = [output_path,'/iter',num2str(iter),'.kernels.relative.rho-mu-lambda.png'];
-%                     titel = [project_name,' - seismic kernels (relative rhomulambda) for iter ',num2str(iter)];
-%                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-%                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-
-                    % absolute rho-mu-lambda
-%                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
-                    fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
-                    titel = [project_name,' - seismic kernels (absolute rho-mu-lambda) for iter ',num2str(iter)];
-                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                    figname = [output_path,'/iter',num2str(iter),'.kernels.absolute.rho-mu-lambda.png'];
-                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-
-%                     % relative rho-vs-vp
-% %                     fig_knl = plot_kernels_rho_mu_lambda(Kseis(iter));
-%                     fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.8);
-%                     figname = [output_path,'/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
-%                     titel = [project_name,' - seismic kernels (relative rho-vs-vp) for iter ',num2str(iter)];
-%                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-%                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-                    
-                    % absolute rho-vs-vp
-%                     fig_knl = plot_kernels_rho_vs_vp(Kabs);
-                    fig_knl = plot_kernels(Kseis(iter), 'rhovsvp',Model(iter), 'total', 'own', 99.95);
-                    titel = [project_name,' - seismic kernels (absolute rho-vs-vp) for iter ',num2str(iter)];
-                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                    figname = [output_path,'/iter',num2str(iter),'.kernels.abs.rho-vs-vp.png'];
-                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-
-                case 'rhovsvp'
-%                     % relative rho-vs-vp
-% %                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
-%                     fig_knl = plot_kernels(K_reltemp, 'rhovsvp',Model(iter), 'total', 'same', 99.9);
-%                     titel = [project_name, ' - seismic kernels (relative rhovsvp) for iter ',num2str(iter)];
-%                     mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-%                     figname = [output_path,'/iter',num2str(iter),'.kernels.relative.rho-vs-vp.png'];
-%                     print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-                    % absolute rho-mu-lambda
-%                     fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
-                    fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
-                    titel = [project_name,' - seismic kernels (absolute rho-mu-lambda) for iter ',num2str(iter)];
-                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                    figname = [output_path,'/iter',num2str(iter),'.kernels.absolute.rho-mu-lambda.png'];
-                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-
-                    % absolute rho-vs-vp
-%                     fig_knl = plot_kernels_rho_vs_vp(Kabs);
-                    fig_knl = plot_kernels(Kseis(iter), 'rhovsvp',Model(iter), 'total', 'own', 99.95);
-                    titel = [project_name,' - seismic kernels (absolute rho-vs-vp) for iter ',num2str(iter)];
-                    mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                    figname = [output_path,'/iter',num2str(iter),'.kernels.abs.rho-vs-vp.png'];
-                    print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-                otherwise
-                    error('unrecognised parametrisation for kernel plot');
-            end
         end
 %         clearvars K_reltemp fig_knl;
         
@@ -535,12 +548,21 @@ for iter = istart : InvProps.niter;
             Ktest = change_parametrisation_kernels('rhomulambda',param_addknls,Kseis(iter),Model(iter));
             switch param_addknls
                 case 'rhomulambda'
+                    Krho.seis = filter_kernels(Ktest.rho.total,5);
+                    Krho.grav = filter_kernels(Kg{iter},5);
                     Ktest.rho.total = w_Kseis * Ktest.rho.total + w_Kg * Kg{iter};
+                    Krho.together.total = filter_kernels(Ktest.rho.total,5);
                 case 'rhovsvp'
+                    Krho.seis = filter_kernels(Ktest.rho2.total,5);
+                    Krho.grav = filter_kernels(Kg{iter},5);
                     Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg{iter};
+                    Krho.together = filter_kernels(Ktest.rho2.total,5);
                 otherwise
                     error('the parametrisation in which kernels are added was unknown');
             end
+
+            
+            % saving the total kernel
             Ktest1 = change_parametrisation_kernels(param_addknls,'rhomulambda', Ktest,Model(iter));
             K_total(iter).rho.total    = Ktest1.rho.total;
             K_total(iter).mu.total     = Ktest1.mu.total;
@@ -549,9 +571,29 @@ for iter = istart : InvProps.niter;
         else
             K_total(iter) = Kseis(iter);
         end
+        
+       % plotting the total kernel in (absolute) rhovsvp
+       fig_knl = plot_kernels(K_total(iter), 'rhovsvp',Model(iter), 'total', 'own', 99.95);
+       titel = [project_name,' - TOTAL kernels (absolute rho-vs-vp) for iter ',num2str(iter)];
+       mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+       figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernels-total.abs.rho-vs-vp.png'];
+       print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+       
+       % plotting the density kernels seis + grav = total
+       if strcmp(use_grav, 'yes')
+           fig_Krho = plot_model(Krho);
+           maks = prctile(abs([Krho.seis(:); Krho.grav(:);Krho.together(:)]),99.5);
+           for ii = 2:2:6
+               fig_Krho.Children(ii).CLim = [-maks maks];
+           end
+           titel = [project_name,' - buildup of density kernel - iter ',num2str(iter)];
+           mtit(fig_Krho,titel, 'xoff', 0.001, 'yoff', 0.04);
+           figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernel-rho-buildup.png'];
+           print(fig_Krho,'-dpng','-r400',figname); close(fig_Krho);
+       end
 
-    % empty the big variables so that the computer doesn't slow down.
-    clearvars u_fw v_fw;
+%     % empty the big variables so that the computer doesn't slow down.
+%     clearvars u_fw v_fw;
 
     %% CALC STEP LN and UPDATE MODEL
         % calculate the step length and model update
@@ -559,14 +601,19 @@ for iter = istart : InvProps.niter;
         if iter==1; stapje = InvProps.stepInit;
         elseif iter>1; stapje = InvProps.step(iter-1);
         end
-        [InvProps.step(iter), fig_lnsrch,  InvProps.steplnArray{iter}, InvProps.misfitArray{iter} ] = ...
+        
+        % actual step length calculation
+        [step, fig_lnsrch, steplnArray, misfitArray] = ...
                 calculate_step_length(stapje,iter, ...
-                InvProps.misfit(iter), misfit_init(which_src), ...
-                Model(iter),K_total(iter),vobs, g_obs, stf{iter}, Model_start);
-        clearvars stapje;     
+                InvProps.misfit(iter), misfit_init(whichFrq), ...
+                Model(iter),K_total(iter),g_obs, sEventInfo, sEventObs, Model_start);
+        InvProps.step(iter) = step;
+        InvProps.steplnArray{iter} = steplnArray;
+        InvProps.misfitArray{iter} = misfitArray;
+        clearvars stapje step steplnArray misfitArray;
 
         % save linesearch figure
-        figname = [output_path,'/iter',num2str(iter),'.step-linesearch.png'];
+        figname = [output_path,'/iter',num2str(iter,'%03d'),'.step-linesearch.png'];
         titel = [project_name,': linesearch for iter ',num2str(iter)];
         mtit(fig_lnsrch,titel)%, 'xoff', 0.001, 'yoff', 0.00001);
         print(fig_lnsrch,'-dpng','-r400',figname);
@@ -598,7 +645,7 @@ for iter = istart : InvProps.niter;
                 otherwise
                     error('the parametrisation of the inversion was not recognised')
             end
-            figname = [output_path,'/iter',num2str(iter),'.hard-constraints-rhoupdate.png'];
+            figname = [output_path,'/iter',num2str(iter,'%03d'),'.hard-constraints-rhoupdate.png'];
             titel = [project_name,': hard constraints update for iter ',num2str(iter)];
             mtit(fig_hcupdate,titel, 'xoff', 0.001, 'yoff', 0.00001);
             print(fig_hcupdate,'-dpng','-r400',figname);
@@ -607,6 +654,8 @@ for iter = istart : InvProps.niter;
         else
             Model_prevfix = Model_prehc(iter+1);
         end
+        
+        
         
         if(strcmp(fix_velocities,'yes'))
             Model(iter+1) = fix_vs_vp(Model_prevfix, Model_start);
@@ -646,9 +695,17 @@ for iter = istart : InvProps.niter;
     end
     
     
+    % save all output files to the actual output path
+    blips = dir('../output/*iter.current*');
+    for ii = 1:numel(blips)
+        bestand = blips(ii).name;
+        oldfile = ['../output/',bestand];
+        newfile = [output_path,strrep(blips(ii).name,'iter.current',['iter',num2str(iter,'%03d')])];
+        movefile(oldfile,newfile);
+    end
     
     %% safety
-    if mod(iter,10) == 0
+%     if mod(iter,10) == 0
         % saving current variables to file (crash safeguard)
         disp 'saving all current variables...'
         close all;
@@ -657,7 +714,7 @@ for iter = istart : InvProps.niter;
         %     exclude_vars = {'u_fw', 'v_fw'};
         savename = [output_path,'/',project_name,'.all-vars.mat'];
         save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
-    end
+%     end
     
 end
 

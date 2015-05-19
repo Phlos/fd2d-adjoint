@@ -170,9 +170,13 @@ switch narg
             error('input has to be a model structure or modelnr');
         end
         %         middle = [NaN NaN NaN];
-        middle.rho = NaN;
-        middle.mu = NaN;
-        middle.lambda = NaN;
+        params = fieldnames(Model);
+        for ii = 1:length(params)
+            middle.(params{ii}) = NaN;
+        end
+%         middle.rho = NaN;
+%         middle.mu = NaN;
+%         middle.lambda = NaN;
         
     case 2
         % disp '2 arguments'

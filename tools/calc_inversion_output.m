@@ -1,8 +1,8 @@
 function [InvProps] = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model)
 input_parameters; 
 
-        InvProps.misfitseis(iter) = InvProps.misfit_seis{iter}.normd;
-        InvProps.misfitgrav(iter) = InvProps.misfit_g(iter).normd;
+%         InvProps.misfitseis(iter) = InvProps.misfit_seis{iter}.normd;
+%         InvProps.misfitgrav(iter) = InvProps.misfit_g(iter).normd;
 
     
     %- calculate angles between model updates:

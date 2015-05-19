@@ -10,19 +10,13 @@ set_figure_properties_bothmachines;
 
 % variables
 misfit = InvProps.misfit;
-misfit_seis = InvProps.misfit_seis;
-misfit_g = InvProps.misfit_g;
+misfitseis = InvProps.misfitseis;
+misfitgrav = InvProps.misfitgrav;
 step = InvProps.step;
 
 niter = length(misfit);
 iters = 1:niter;
 
-for i = 1:niter
-misfitseis(i) = misfit_seis{i}.normd;
-end
-for i = 1:niter
-misfitgrav(i) = misfit_g(i).normd;
-end
 
 stepcumsum = [0, cumsum(abs(step(1:imax-1)))];
 
@@ -36,9 +30,9 @@ set(fig_inv2, 'OuterPosition', pos_invplot2)
 subplot(3,1,1)
 % imax
 % length(iters)
-h = semilogy(iters(2:imax),misfit(2:imax), '-k', ...
-             iters(2:imax),misfitseis(2:imax), '-r', ...
-             iters(2:imax), misfitgrav(2:imax), '-b');
+h = semilogy(iters(1:imax),misfit(1:imax), '-k', ...
+             iters(1:imax),misfitseis(1:imax), '-r', ...
+             iters(1:imax), misfitgrav(1:imax), '-b');
 set(h(1), 'LineWidth', 2)
 set(h(2), 'LineWidth', 1)
 set(h(3), 'LineWidth',1)
@@ -50,9 +44,9 @@ ylabel('misfit');
 % misfit versus step - an indication of how irregular the landscape is
 subplot(3,1,2)
 % h2 = plot(stepcumsum / stepcumsum(end) * 100,misfit(2:100), 'k-x');
-h2 = semilogy(stepcumsum(2:imax),misfit(2:imax), 'k-x', ...
-    stepcumsum(2:imax), misfitseis(2:imax), 'r-x', ...
-    stepcumsum(2:imax), misfitgrav(2:imax), '-bx');
+h2 = semilogy(stepcumsum(1:imax),misfit(1:imax), 'k-x', ...
+    stepcumsum(1:imax), misfitseis(1:imax), 'r-x', ...
+    stepcumsum(1:imax), misfitgrav(1:imax), '-bx');
 % min([stepcumsum(1:imax), 0])
 % max(stepcumsum(1:imax))
 xlim([min([stepcumsum(1:imax), 0]) max(stepcumsum(1:imax))]);

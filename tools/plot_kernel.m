@@ -1,4 +1,4 @@
-function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,stf_PSV,varargin)
+function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,varargin)
 
 % plot some random sensitivity kernel
 %
@@ -19,6 +19,7 @@ function plot_kernel(X,Z,kernel,kname,cmaxtype,cmax,stf_PSV,varargin)
 % a plot of the sensitivity kernel
 %==========================================================================
 
+input_parameters;
 checkargs(varargin);
 
 
@@ -43,6 +44,13 @@ axis image
 % colormap(cm);
 hold on;
 
+for k=1:length(src_x)
+    plot(src_x(k),src_z(k),'kx','LineWidth',0.3,'MarkerSize',4)
+end
+
+for k=1:length(rec_x)
+    plot(rec_x(k),rec_z(k),'ko','LineWidth',0.3,'MarkerSize',4)
+end
 
 caxis([-scale scale]);
 

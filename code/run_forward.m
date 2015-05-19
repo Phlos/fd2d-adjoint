@@ -65,7 +65,7 @@ end
 model.rho = rho;
 model.mu = mu;
 model.lambda = lambda;
-fig_mod = plot_model(model, param_plot);
+% fig_mod = plot_model(model, param_plot);
 
 
 %% source & receiver initialisation
@@ -164,28 +164,9 @@ end
 % % This is taking way too long. Only compute if explicitly asked
 if (strcmp(save_u_fw,'yes') || (strcmp(save_v_fw,'yes')) )
     disp 'saving u_fw, v_fw output to file...'
+    save(['../output/forwardfield.mat'], 'u_fw', 'v_fw', '-v6');
 end
-if strcmp(simulation_mode,'forward')
-    if(strcmp(wave_propagation_type,'SH'))
-        if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-            save('../output/v_forward','vy_forward','-v7.3');
-            save('../output/u_forward','uy_forward','-v7.3');
-        end
-    elseif(strcmp(wave_propagation_type,'PSV'))
-        if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-            save('../output/v_forward','vx_forward','vz_forward', '-v7.3');
-            save('../output/u_forward','ux_forward','uz_forward', '-v7.3');
-        end
-    elseif(strcmp(wave_propagation_type,'both'))
-        if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-            if (strcmp(save_u_fw,'yes') && strcmp(save_v_fw,'yes') )
-                save('../output/v_forward','vx_forward','vy_forward','vz_forward', '-v7.3');
-                save('../output/u_forward','ux_forward','uy_forward','uz_forward', '-v7.3');
-            end
 
-        end
-    end
-end
 
 % disp 'saving seismograms...'
 % savename = ['../output/',project_name,'.v_rec.mat'];

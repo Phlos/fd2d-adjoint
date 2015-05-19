@@ -1,6 +1,6 @@
 
 
-function [g, fig_grav] = calculate_gravity_field(rho, rec_grav)
+function [g, fig_grav] = calculate_gravity_field(rho, rec_grav, varargin)
 
 % calculate gravity field
 %
@@ -15,6 +15,10 @@ function [g, fig_grav] = calculate_gravity_field(rho, rec_grav)
 % 
 % TODO:
 % - change rec_grav to optional input.
+
+
+% plot gravity field or not? Default: yes.
+plotornot = plot_or_not(varargin(:));
 
 %- prepare necessary information
 path(path,'../input');
@@ -73,6 +77,25 @@ dum.x = zeros(size(g.x));
 dum.z = zeros(size(g.z));
 dum.mag = zeros(size(g.mag));
 
-fig_grav = plot_gravity_quivers(rec_grav, g, dum, X, Z, rho);
+if strcmp(plotornot, 'yesplot')
+    fig_grav = plot_gravity_quivers(rec_grav, g, dum, X, Z, rho);
+else
+    fig_grav = NaN;
+end
+
+end
+
+function plotornot = plot_or_not(args)
+
+% plot gravity field or not? Default: yes.
+plottext = {'yesplot','noplot'};
+
+if isempty(args)
+    plotornot = 'yesplot';
+elseif (length(args) == 1 &&  ischar(args{1}) && any(strcmp(args{1}, plottext)) )
+    plotornot = args{1};
+else
+    error('plotornot variable input not recognised');
+end
 
 end
