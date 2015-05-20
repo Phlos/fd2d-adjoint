@@ -61,7 +61,7 @@ for ifr = 1:nfr
     end
     
     % run forward per source
-    [sEventObs, fig_seis] = run_forward_persource(Model_real, sEventInfo);
+    [sEventObs, fig_seis] = run_forward_persource(Model_real, sEventInfo, 'yesplot');
     
     % plot & save each figure fig_seis
     for isrc = 1:nsrc
