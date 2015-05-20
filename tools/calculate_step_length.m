@@ -152,14 +152,17 @@ while ( (p(1) < 0 || step < 0 || FitGoodness > 0.1) && nextra <= 5 )
           ' --- step length ', num2str(teststep_new,'%3.1e')]);
     
     % calculate misfit for the new teststep
-    misfit_new = calc_misfit_perstep(K_abs, teststep_new, ...
+    [misfit_new, misfitseis, misfitgrav] = calc_misfit_perstep(K_abs, teststep_new, ...
         Model_prev, misfit_init, g_obs, sEventInfo, sEventObs, Model_start);
     disp ' ';
         %- give step nr, step length and misfit
-    disp(['Extra step ',num2str(nextra), ...
+    disp({['Extra step ',num2str(nextra), ...
           ': step length ', num2str(teststep_new,'%3.1e'), ...
           ' and misfit ', num2str(misfit_new,'%3.1e'), ...
-          ' (diff) ', num2str((misfit_new - currentMisfit) / currentMisfit )]);
+          ' (diff) ', num2str((misfit_new - currentMisfit) / currentMisfit )];
+          ['                  seis: ', num2str(misfitseis,'%3.1e')]; ...
+          ['                  grav: ', num2str(misfitgrav,'%3.1e')]; ...
+          });
       
       % save new misfit to appropriate place in new array and total array
     misfitArray_new.total(idxEmpty) = misfit_new;
@@ -235,7 +238,8 @@ end
 
 %% subfunctions
 
-function misfittotal = calc_misfit_perstep(K_abs, steptry, Model_prev, ...
+function [misfittotal, misfitseis, misfitgrav] = ...
+                       calc_misfit_perstep(K_abs, steptry, Model_prev, ...
                        misfit_init, g_obs, sEventInfo, sEventObs, Model_start)
 
 % paths etc.
@@ -281,6 +285,8 @@ set_figure_properties_bothmachines;
         g_obs, misfit_init.grav, sEventInfo, sEventObs, misfit_init.seis, ...
         'noplot','notext');
     misfittotal = misfit.total;
+    misfitseis = misfit.seis;
+    misfitgrav = misfit.grav;
     
     close(fig_mod);
     

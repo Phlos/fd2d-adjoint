@@ -165,10 +165,11 @@ end
 
 % position for the kernel plots
 if strcmp(HostName,'D-13-L-2')
-    pos_knl = [edge,...                 % left
-            0,...                       % bottom
-            scn_width*2/3 - edge,...    % width
-            scn_height-10];             % height
+    pos_knl = [ 66 1 648 1176]; 
+%     pos_knl = [edge,...                 % left
+%             0,...                       % bottom
+%             scn_width*2/3 - edge,...    % width
+%             scn_height-10];             % height
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     if strcmp(version('-release'),'2014b')
         pos_knl = [-1080        -439        1064        1529];

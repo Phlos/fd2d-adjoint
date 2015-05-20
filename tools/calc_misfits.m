@@ -68,7 +68,6 @@ function [misfit_total, misfit_seis, misfit_grav, ...
     
     % save seismograms (+ diff w/ obs) to file
     if strcmp(plotornot,'yesplot')
-%         disp 'plotting seismograms then';
         for isrc = 1:nsrc
             titel = ['difference between seismograms src ', num2str(isrc), ' and obs'];
             mtit(fig_seisdif(isrc), titel, 'xoff', 0.001, 'yoff', 0.02);
@@ -79,7 +78,6 @@ function [misfit_total, misfit_seis, misfit_grav, ...
             close(fig_seisdif(isrc));
         end
     else
-%         close(fig_seisdif(:))
         clearvars fig_seisdif;
     end
     

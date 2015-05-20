@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-025.like-020-but-8-consecutive-sources';
+project_name='Mantle.test-027.like-025-but-2-consecutive-sources';
 
 %==========================================================================
 % inversion properties
@@ -148,7 +148,7 @@ model_type=61;          % PREM + vs, vp anoms (starting model*0.9)
 % sources -- positions & directions
 %==========================================================================
 
-nsrc = 8;
+nsrc = 2;
 
 %- line of sources near top of the domain
 src_x= (1: 1: nsrc) * (Lx/(nsrc+1));

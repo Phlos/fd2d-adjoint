@@ -59,7 +59,6 @@ for ifr = 1:nfr
             sEventInfo(isrc).stf.(comps{icomp}) = stf; clearvars stf;
         end
     end
-%     sEventInfo(isrc).loc_x = sEventInfoUnfilt.loc_x;
     
     % run forward per source
     [sEventObs, fig_seis] = run_forward_persource(Model_real, sEventInfo);

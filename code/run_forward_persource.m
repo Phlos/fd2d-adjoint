@@ -28,8 +28,11 @@ end
 
         % save forward fields to file
         if strcmp(saveFwdFields, 'yessavefields')
-            disp 'saving u_fw, v_fw output to file...'
+            prevmsg = sprintf( 'saving u_fw, v_fw output to file...');
+            fprintf(prevmsg);
             save(['../output/forwardfield.src-',num2str(isrc),'.mat'], 'u_fw', 'v_fw', '-v6');
+            reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
+            fprintf(reverseStr);
             clearvars u_fw v_fw;
         end
 
@@ -62,33 +65,16 @@ end
 
 function [obsPresent, sEventObs, saveFwdFields, plotornot] = checkargs(args)
 
-% determine whether seisdif figure can use obs
+% determine some output:
+% - whether seisdif figure can use obs
+% - whether the forward wavefield should be saved
+% - whether plots should be made for seisdif etc.
 
 % default values:
 obsPresent = 'no';
 sEventObs = NaN;
 saveFwdFields = 'nosavefields';
 plotornot = 'noplot';
-
-% narg = length(args);
-% 
-% if narg == 0
-%     obsPresent = 'no';
-%     sEventObs = NaN;
-% elseif narg == 1 
-%     if isfield(args{1}, 'vel')
-%         obsPresent = 'yes';
-%         sEventObs = args{1};
-%     elseif ischar(args{1})
-%         saveFwdFields = args{1};
-%     end
-% elseif narg == 2 && isfield(args{1}, 'vel') && ischar(args{2})
-%     obsPresent = 'yes';
-%     sEventObs = args{1};
-%     saveFwdFields = args{2};
-% else
-%     error('Obs input to run_foward_persource is ambiguous');
-% end
 
 for ii = 1:numel(args)
     if isstruct(args{ii}) && isfield(args{ii}, 'vel')
@@ -98,7 +84,7 @@ for ii = 1:numel(args)
         if any(strcmp(args{ii}, {'yesplot'; 'noplot'}))
             plotornot = args{ii};
         elseif any (strcmp(args{ii}, {'yessavefields'; 'nosavefields'}))
-            saveFwdfields = args{ii};
+            saveFwdFields = args{ii};
         end
     else
         error(['Obs input ',args{ii}, ' to run_foward_persource is ambiguous']);
