@@ -290,53 +290,14 @@ set_figure_properties_bothmachines;
     
     close(fig_mod);
     
-%     %% gravity misfit
-%     
-%     if strcmp(use_grav,'yes')
-%       [g_try, fig_grav] = calculate_gravity_field(Model_try.rho, rec_g);
-%       
-% %       %- calculate gravity misfit:
-%       % NEW as of 18-3-2015
-%       [~, misf_g_test] = make_gravity_sources(g_try, g_obs);
-% %       disp(['misfit_g_test.total ', misf_g_test.total]);
-%       misfit.grav = norm_misfit(misf_g_test.total, normalise_misfits, ...
-%                             misfit_grav(1).total, g_obs);
-%     end
-%     
-%     %% seismic misfit
-%     
-%     %- for each step, run forward update
-%     [v_try,t,~,~,~,~] = run_forward(Model_try, stf);
-%     
-% %     % plot seismogram difference:
-% %     fig_seisdif = plot_seismogram_difference(v_obs, v_try, t);
-% %     figname = ['../output/iter.current.calcstepln.seisdif.',num2str(steptry),'.png'];
-% %     print(fig_seisdif,'-dpng','-r400',figname);
-% %     close(fig_seisdif);
-%     
-%     %- for each step, calculate the misfit
-%     [~, misf_s_test] = calc_misfitseis_adstf(misfit_type,t,v_try,v_obs);
-% %       disp(['misfit_s_test.total ', misf_s_test.total]);
-%     % NEW AS OF 18-3-2015
-%     misfit.seis = norm_misfit(misf_s_test.total, normalise_misfits, ...
-%                                 misfit_seis{1}.total, v_obs);
-% 
-% 
-% 
-%     %% combine the misfits
-%     if strcmp(use_grav,'yes')
-%         misfit.total = misfit.seis + misfit.grav;
-%     else
-%         misfit.total =  misfit.seis;
-%     end
-%     misfittotal = misfit.total;
-%     
-%     if strcmp(use_grav,'yes')
-%         disp(['seismic misfit:  ', ...
-%             num2str(misfit.seis,'%3.2e')])
-%         disp(['gravity misfit:  ', ...
-%             num2str(misfit.grav,'%3.2e')])
-%     end
+    
+%         %% display
+%     disp({['    step length ', num2str(steptry,'%3.1e'), ...
+%           ' and misfit ', num2str(misfittotal,'%3.1e'), ...
+%           ' (diff) ', num2str((misfit_new - currentMisfit) / currentMisfit )];
+%           ['                  seis: ', num2str(misfitseis,'%3.1e')]; ...
+%           ['                  grav: ', num2str(misfitgrav,'%3.1e')]; ...
+%           });
 
 end
 

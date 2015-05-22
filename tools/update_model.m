@@ -40,6 +40,8 @@ function Modelout = checkargs(args)
 
 input_parameters;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
+[Model_bg.mu,Model_bg.rho,Model_bg.lambda] = ...
+                              define_material_parameters(nx,nz,model_type);
 
 narg = length(args);
 
@@ -48,7 +50,7 @@ narg = length(args);
 if narg == 0;
     
     % initialise original parameters
-    input_parameters;
+%     input_parameters;
     [Modelo.mu,Modelo.rho,Modelo.lambda] = ...
                               define_material_parameters(nx,nz,model_type);
     
@@ -77,51 +79,27 @@ elseif narg == 3 || narg == 4
     % read input arguments
     K_in = args{1};
     step = args{2};
-    Model_prev = args{3};
+    Model_ref = args{3};
     if narg == 4
         parametrisation = args{4};
     else
         parametrisation = 'rhomulambda';
     end
     
-%     disp(['updating model in ', parametrisation])
-    
-%     disp 'after reading input'
-%     parametrisation
-%     K_in
-%     Model_prev
+
     
     if strcmp(parametrisation,'rhomulambda')
         K_abs = K_in;
     elseif strcmp(parametrisation,'rhovsvp')
-        K_abs = change_parametrisation_kernels('rhomulambda','rhovsvp',K_in, Model_prev);
-        Model_prev = change_parametrisation('rhomulambda', 'rhovsvp',Model_prev);
+        K_abs = change_parametrisation_kernels('rhomulambda','rhovsvp',K_in, Model_ref);
+        Model_ref = change_parametrisation('rhomulambda', 'rhovsvp',Model_ref);
     else
         error('Parametrisation not recognised');
     end
     
-%     disp 'after changing the parametrisation of input K and Model';
-%     K_abs
-%     Model_prev
-    
-    % calculate relative kernels
-%         max(K_abs.rho2.total(:))
-%         max(Model_prev.rho(:))
-    K_rel = calculate_relative_kernels(K_abs, Model_prev);
-%     max(K_rel.rho2.total(:))
-    
-%     disp 'after calculating relative kernels'
-%     K_rel
+    K_rel = calculate_relative_kernels(K_abs, Model_bg);
 
-%     bips = [max(K_rel.rho2.total(:)), min(K_rel.rho2.total(:))]
-%     baps = [max(K_rel.vs2.total(:)), min(K_rel.vs2.total(:))]
-%     bops = [max(K_rel.vp2.total(:)), min(K_rel.vp2.total(:))]
-%     size(K_rel.rho2.total)
-%     [nanrows, nancols]= find(isnan(K_rel.rho2.total));
-% pause(2);
-    
     % smooth the kernels
-    % K_sm = smooth_kernels(K_rel, smoothnp, smoothgwid);
     if strcmp(parametrisation,'rhomulambda')
         K_sm.rho =      filter_kernels(K_rel.rho.total,smoothgwid);
         K_sm.mu =       filter_kernels(K_rel.mu.total,smoothgwid);
@@ -136,30 +114,19 @@ elseif narg == 3 || narg == 4
     end
     
     
-    
-%     bips = [max(K_sm.rho2(:)), min(K_sm.rho2(:))]
-%     baps = [max(K_sm.vs2(:)), min(K_sm.vs2(:))]
-%     bops = [max(K_sm.vp2(:)), min(K_sm.vp2(:))]
-%     figure; pcolor(K_sm.rho2); shading interp
-    
-%     disp 'after smoothing the kernels'
-%     K_sm
-    
     % calculate model update
     if strcmp(parametrisation,'rhomulambda')
-        Model.rho =    Model_prev.rho .* (1 - step * K_sm.rho);
-        Model.mu =     Model_prev.mu .* (1 - step * K_sm.mu);
-        Model.lambda = Model_prev.lambda .* (1 - step * K_sm.lambda);
+        Model.rho =    Model_ref.rho .* (1 - step * K_sm.rho);
+        Model.mu =     Model_ref.mu .* (1 - step * K_sm.mu);
+        Model.lambda = Model_ref.lambda .* (1 - step * K_sm.lambda);
     elseif strcmp(parametrisation,'rhovsvp')
-        Model.rho =    Model_prev.rho .* (1 - step * K_sm.rho2);
-        Model.vs =     Model_prev.vs .* (1 - step * K_sm.vs2);
-        Model.vp =     Model_prev.vp .* (1 - step * K_sm.vp2);
+        Model.rho =    Model_ref.rho .* (1 - step * K_sm.rho2);
+        Model.vs =     Model_ref.vs .* (1 - step * K_sm.vs2);
+        Model.vp =     Model_ref.vp .* (1 - step * K_sm.vp2);
     else
         error('Parametrisation not recognised (updating model)');
     end
     
-%     disp 'after calculating the model update'
-%     Model
     
     % if update param != rhomulambda, reparametrise model to rhomulambda
     if strcmp(parametrisation,'rhomulambda')

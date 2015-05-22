@@ -1,18 +1,9 @@
 
-% % preparation
-% path(path,'../input');
-% path(path,'../code');
-% path(path,'../code/propagation');
-% path(path,'../tools');
-% path(path,'../tools/misfits');
-% path(path,'../quivers');
-% path(path,'../mtit');
-
-
+%% preparation
 
 % number of iterations
-InvProps.niter = 30;
-istart = 1;
+InvProps.niter = 60;
+istart = 16;
 
 niter = InvProps.niter;
 
@@ -74,7 +65,6 @@ else
     disp 'obs properties all present... proceeding...'
 end
 
-% if istart == 1
 
 savename = [output_path,'/obs.all-vars.mat'];
 if ~(exist(savename, 'file'))
@@ -102,6 +92,7 @@ middle.lambda = mode(Model_start.lambda(:));
 
 % plot initial model
 if istart == 1
+    disp 'plotting initial model'
     fig_mod = plot_model_diff(Model_start,Model_bg,param_plot);
     set(fig_mod,'Renderer','painters');
     titel = [project_name,': starting model'];
@@ -124,15 +115,13 @@ if istart == 1
     if(strcmp(apply_hc,'yes'))
         % -> no negative velocities
         % -> mass of the Earth and/or its moment of inertia
-        %     [Model(1).rho, fig_hcupdate,~,~] = ...
-        %                 apply_hard_constraints(props_obs, Model_start.rho,axrot);
         param_applyhc = 'rhovsvp';
         switch param_applyhc;
             case 'rhomulambda'
                 [Model(1).rho, fig_hcupdate,~,~] = ...
-                    apply_hard_constraints(props_obs, Model_start.rho,axrot);
+                    apply_hard_constraints(props_obs, Model(1).rho,axrot);
             case 'rhovsvp'
-                Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_start);
+                Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model(1));
                 [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
                     apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
                 Model(1) = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
@@ -199,11 +188,8 @@ for iter = istart : InvProps.niter;
         
         nsrc = length(sObsPerFreq(whichFrq).sEventObs);
         
-        % CHANGE TO PER SOURCE!!!
-%         for isrc = 1:nsrc
-%             vobs{isrc} = sObsPerFreq(whichFrq).sEventObs(isrc).v_obs;
-%             stf{isrc}{iter} = sObsPerFreq(whichFrq).sEventObs(isrc).stf;
-%         end
+        % event info = source locations & (unfiltered) stf
+        % event obs = observed seismograms per source per receiver
         sEventInfo = sObsPerFreq(whichFrq).sEventInfo; % contains src locations etc
         sEventObs = sObsPerFreq(whichFrq).sEventObs;  % contains v_obs
  
@@ -214,7 +200,7 @@ for iter = istart : InvProps.niter;
         if iter >1
             if(~exist('misfit_init', 'var') || length(misfit_init) < whichFrq || isempty(misfit_init(whichFrq).total) )
                 % do somethin with calculate seis misfit for that source @mod1
-                disp(['calculating initial model misfit for freq. ',num2str(whichFreq)]);
+                disp(['calculating initial model misfit for freq. ',num2str(whichFrq)]);
                 [misfit_int.total, misfit_int.seis, misfit_int.grav] = ...
                     calc_misfits(Model(1), g_obs, 0, sEventInfo, sEventObs, 0, ...
                     'noplot','notext');
@@ -222,9 +208,9 @@ for iter = istart : InvProps.niter;
             end
         end
         if iter ==1;
-            misfit_init(whichFrq).grav = 0;
-            misfit_init(whichFrq).seis = 0;
             misfit_init(whichFrq).total = 0;
+            misfit_init(whichFrq).seis = 0;
+            misfit_init(whichFrq).grav = 0;
         end
         
         % current misfit
@@ -271,23 +257,7 @@ for iter = istart : InvProps.niter;
         disp '=========================================='
         
 
-        if iter>1
-            % L2 norm( [model(i) - model(i-1)] / model(1) )
-            InvProps.modeldifn(iter) =   norm( (Model(iter).rho(:) - Model(iter-1).rho(:)) ./ Model(1).rho(:) ) ...
-                              + norm( (Model(iter).mu(:)  - Model(iter-1).mu(:))  ./ Model(1).mu(:) ) ...
-                              + norm( (Model(iter).lambda(:) - Model(iter-1).lambda(:)) ./ Model(1).lambda(:) );
-            % L2 norm( [model(i) - model_real] / model_real )
-            if(exist('Model_real','var'))
-                InvProps.modeldifnFromTrue(iter) = norm( (Model(iter).rho(:) - Model_real.rho(:)) ./ Model_real.rho(:) ) ...
-                              + norm( (Model(iter).mu(:)  - Model_real.mu(:))  ./ Model_real.mu(:) ) ...
-                              + norm( (Model(iter).lambda(:) - Model_real.lambda(:)) ./ Model_real.lambda(:) );
-            else
-                InvProps.modeldifnFromTrue(iter) = NaN;
-            end
-        else
-            InvProps.modeldifn(iter) = NaN;
-            InvProps.modeldifnFromTrue(iter) = NaN;
-        end 
+
         % plot misfit evolution
         fig_misfit = plot_misfit_evolution(InvProps);
         figname = [output_path,'/misfit-evolution.pdf'];
@@ -352,38 +322,34 @@ for iter = istart : InvProps.niter;
             cd ../tools/
             
             % absolute rho-mu-lambda
-%           fig_knl = plot_kernels_rho_vs_vp_relative(K_reltemp);
             fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
-            titel = [project_name,' - seismic kernels (absolute rho-mu-lambda) for iter ',num2str(iter)];
+            titel = [project_name,' - iter ',num2str(iter), ' seismic kernels (abs rho-mu-lambda)'];
             mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
             figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernels.abs.rho-mu-lambda.png'];
             print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
             % absolute rho-vs-vp
-%           fig_knl = plot_kernels_rho_vs_vp(Kabs);
             fig_knl = plot_kernels(Kseis(iter), 'rhovsvp',Model(iter), 'total', 'own', 99.95);
-            titel = [project_name,' - seismic kernels (absolute rho-vs-vp) for iter ',num2str(iter)];
+            titel = [project_name, ' - iter ',num2str(iter), ' seismic kernels (abs rho-vs-vp)'];
             mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
             figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernels.abs.rho-vs-vp.png'];
             print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
             
-            % plot subkernels
-            for isrc = 1:numel(sEventKnls{iter})
-                Kernel = sEventKnls{iter}(isrc);
-                
-                % absolute rho-mu-lambda
-                fig_knl = plot_kernels(Kernel, 'rhomulambda',Model(iter), 'total', 'own', 99.95);
-                titel = [project_name,' - seismic SUBkernel (absolute rho-mu-lambda) - iter ',num2str(iter),' src ',num2str(isrc)];
-                mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                figname = [output_path,'/iter',num2str(iter,'%03d'),'.subkernels-src',num2str(isrc,'%02d'),'.abs.rho-mu-lambda.png'];
-                print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-                % absolute rho-vs-vp
-                fig_knl = plot_kernels(Kernel, 'rhovsvp',Model(iter), 'total', 'own', 99.95);
-                titel = [project_name,' - seismic SUBkernel (absolute rho-vs-vp) - iter ',num2str(iter),' src ',num2str(isrc)];
-                mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
-                figname = [output_path,'/iter',num2str(iter,'%03d'),'.subkernels-src',num2str(isrc,'%02d'),'.abs.rho-vs-vp.png'];
-                print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
-                
-            end; clearvars Kernel
+%             % plot subkernels
+%             for isrc = 1:numel(sEventKnls{iter})
+%                 Kernel = sEventKnls{iter}(isrc);
+%                 % absolute rho-mu-lambda
+%                 fig_knl = plot_kernels(Kernel, 'rhomulambda',Model(iter), 'total', 'own', 99.95);
+%                 titel = [project_name,' - iter ',num2str(iter),' src ',num2str(isrc),' - seismic SUBkernel (abs rho-mu-lambda)'];
+%                 mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+%                 figname = [output_path,'/iter',num2str(iter,'%03d'),'.subkernels-src',num2str(isrc,'%02d'),'.abs.rho-mu-lambda.png'];
+%                 print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+%                 % absolute rho-vs-vp
+%                 fig_knl = plot_kernels(Kernel, 'rhovsvp',Model(iter), 'total', 'own', 99.95);
+%                 titel = [project_name,' - iter ',num2str(iter),' src ',num2str(isrc),' - seismic SUBkernel (absolute rho-vs-vp)'];
+%                 mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
+%                 figname = [output_path,'/iter',num2str(iter,'%03d'),'.subkernels-src',num2str(isrc,'%02d'),'.abs.rho-vs-vp.png'];
+%                 print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+%             end; clearvars Kernel
 
         end
 %         clearvars K_reltemp fig_knl;
@@ -401,7 +367,6 @@ for iter = istart : InvProps.niter;
             % determine weight of relative kernels
             w_Kseis = 1;
             w_Kg = 1;
-%             w_Kg = 1e7; % was necessary before discovery KMP problem: spatial delta
             
             disp ' ';
             disp '---'
@@ -470,8 +435,6 @@ for iter = istart : InvProps.niter;
            print(fig_Krho,'-dpng','-r400',figname); close(fig_Krho);
        end
 
-%     % empty the big variables so that the computer doesn't slow down.
-%     clearvars u_fw v_fw;
 
     %% CALC STEP LN and UPDATE MODEL
         % calculate the step length and model update
@@ -553,15 +516,18 @@ for iter = istart : InvProps.niter;
     if strcmp(use_grav,'no')
         Kg{iter}=NaN;
     end
-    InvProps = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model);
+    if exist('Model_real', 'var')
+        InvProps = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model, Model_real);
+    else
+        InvProps = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model, Model_real);
+    end
 
     if (iter > 1)
         % inversion results with inversion landscape plot
         fig_inv2 = plot_inversion_development_landscapeshape(InvProps, iter);
-        figname = [output_path,'/inversion_development.',project_name,'.misfit-landscape.png'];
-        print(fig_inv2,'-dpng','-r400',figname);
-        figname = [output_path,'/inversion_development.',project_name,'.misfit-landscape.eps'];
-        print(fig_inv2,'-depsc','-r400',figname);
+        figname = [output_path,'/inversion_development.',project_name,'.misfit-landscape'];
+        print(fig_inv2,'-dpng','-r400',[figname,'.png']);
+        print(fig_inv2,'-depsc','-r400',[figname,'.eps']);
         close(fig_inv2)
         
         fig_invres = plot_inversion_result(InvProps, iter);
@@ -569,7 +535,6 @@ for iter = istart : InvProps.niter;
         mtit(fig_invres,titel, 'xoff', 0.0000001, 'yoff', 0.03);
         figname = [output_path,'/inversion_result.',project_name];
         print(fig_invres,'-dpng','-r400',[figname,'.png']);
-%         figname = [output_path,'/inversion_result.',project_name,'.eps'];
         print(fig_invres,'-depsc','-r400',[figname,'.eps']);
         close(fig_invres)
     end
@@ -585,14 +550,14 @@ for iter = istart : InvProps.niter;
     end
     
     %% safety
+    % saving current variables to file (crash safeguard)
+
 %     if mod(iter,10) == 0
-        % saving current variables to file (crash safeguard)
         disp 'saving all current variables...'
         close all;
         clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
             'filenm_old', 'filenm_new', 'fig_knl');
-        %     exclude_vars = {'u_fw', 'v_fw'};
-        savename = [output_path,'/',project_name,'.all-vars.mat'];
+        savename = [output_path,'/inversion.all-vars.mat'];
         save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
 %     end
     
@@ -630,11 +595,11 @@ close(fig_end);
 % plot_models_vector;
 
 
-if ~exist([output_path,'/all-vars.mat'],'file')
+if ~exist([output_path,'/inversion.all-vars.mat'],'file')
     disp '|  (saving all current variables..)  |'
     clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
         'filenm_old', 'filenm_new', 'fig_knl');
-    savename = [output_path,'/all-vars.mat'];
+    savename = [output_path,'/inversion.all-vars.mat'];
     save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
 end
 
