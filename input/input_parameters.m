@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-027.like-025-but-2-consecutive-sources';
+project_name='Mantle.test-027-RERUN-multiple-freq.like-025-but-2-consecutive-sources';
 
 %==========================================================================
 % inversion properties
@@ -184,9 +184,9 @@ end
                     
                     
 %- source filtering
-f_minlist = [0.006667 0.006667]; % 0.006667 0.006667];
+f_minlist = [0.006667 0.006667 0.006667 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667]; % 0.01267  0.01465 ];
+f_maxlist = [0.006667 0.008667 0.01267  0.01465 ];
 % how many iterations with the same source?
 change_freq_every = 15;          % how many iterations with the same freq?
 

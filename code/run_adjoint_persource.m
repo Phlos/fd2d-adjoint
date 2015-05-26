@@ -3,6 +3,7 @@ function [Kseis, sEventKnls] = run_adjoint_persource(Model, sEventAdstf)
 % wrapper to run adjoint for each kernel consecutively
 
 %% prep
+input_parameters;
 nsrc = length(sEventAdstf);
 
 %% actual loop over sources
@@ -25,12 +26,22 @@ for isrc = 1:nsrc
     Kevent = run_adjoint(u_fw, v_fw, adstf, Model);
         
     % save adjoint into sEventKnls
-    sEventKnls(isrc) = Kevent;
+%     sEventKnls(isrc) = Kevent;
+    sEventKnls(isrc).rho.total = Kevent.rho.total;
+    sEventKnls(isrc).mu.total = Kevent.mu.total;
+    sEventKnls(isrc).lambda.total = Kevent.lambda.total;
+    if strcmp(wave_propagation_type, {'both', 'SH'})
+        sEventKnls(isrc).rho.SH = Kevent.rho.SH;
+        sEventKnls(isrc).mu.SH = Kevent.mu.SH;
+        sEventKnls(isrc).lambda.SH = Kevent.lambda.SH;
+    end
     
 end
 
 % add up all event kernels into a single big one
 Kseis = add_kernels(sEventKnls);
+
+
 
 end
 

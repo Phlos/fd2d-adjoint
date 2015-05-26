@@ -78,12 +78,12 @@ for ifr = 1:nfr
     sObsPerFreq(ifr).sEventObs = sEventObs;
 end
 
-t_obs = sObsPerFreq(1).sEventObs(1).t;
+t_obs = sObsPerFreq(ifr).sEventObs(1).t;
 
 % saving the obs variables
 disp 'saving obs variables to matfile...'
 savename = [output_path,'/obs.all-vars.mat'];
-save(savename, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v7.3');
+save(savename, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v6');
 
 close all;
 

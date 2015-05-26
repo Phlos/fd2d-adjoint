@@ -1,9 +1,9 @@
-
+cd
 %% preparation
 
 % number of iterations
 InvProps.niter = 60;
-istart = 16;
+istart = 31;
 
 niter = InvProps.niter;
 
@@ -309,7 +309,10 @@ for iter = istart : InvProps.niter;
             % run adjoint to obtain seismic kernels
             disp ' ';
             disp(['iter ',num2str(iter),': calculating seismic kernels']);
-            [Kseis_temp, sEventKnls{iter}] = run_adjoint_persource(Model(iter), sEventAdstf{iter});
+            [Kseis_temp, sEventKnls_iter] = run_adjoint_persource(Model(iter), sEventAdstf{iter});
+            
+            % save event kernels to a matfile
+            save([output_path,'iter',num2str(iter),'.sEventKnls.mat'], 'sEventKnls_iter');
             
             % normalise kernels
             Kseis(iter) = norm_kernel(Kseis_temp, normalise_misfits, ...
@@ -319,7 +322,7 @@ for iter = istart : InvProps.niter;
             % plot the kernels
             disp ' ';
             disp(['iter ',num2str(iter),': plotting kernels']);
-            cd ../tools/
+%             cd ../tools/
             
             % absolute rho-mu-lambda
             fig_knl = plot_kernels(Kseis(iter), 'rhomulambda',Model(iter), 'total', 'own', 99.95);
@@ -464,7 +467,7 @@ for iter = istart : InvProps.niter;
         % initial model update (pre hc, pre fix velocities)
         disp ' ';
         disp(['iter ',num2str(iter),': updating model']);
-        Model_prehc(iter+1) = update_model(K_total(iter),InvProps.step(iter),Model(iter),parametrisation);
+        Model_prehc = update_model(K_total(iter),InvProps.step(iter),Model(iter),parametrisation);
 
         
         
@@ -476,11 +479,11 @@ for iter = istart : InvProps.niter;
             param_applyhc = 'rhovsvp';
             switch param_applyhc
                 case 'rhomulambda'
-                    Model_prevfix = Model_prehc(iter+1);
+                    Model_prevfix = Model_prehc;
                     [Model_prevfix.rho, fig_hcupdate,~,~] = ...
-                        apply_hard_constraints(props_obs, Model_prehc(iter+1).rho,axrot);
+                        apply_hard_constraints(props_obs, Model_prehc.rho,axrot);
                 case 'rhovsvp'
-                    Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_prehc(iter+1));
+                    Model_rhovsvp = change_parametrisation('rhomulambda','rhovsvp', Model_prehc);
                     [Model_rhovsvp.rho, fig_hcupdate,~,~] = ...
                         apply_hard_constraints(props_obs, Model_rhovsvp.rho,axrot);
                     Model_prevfix = change_parametrisation('rhovsvp','rhomulambda',Model_rhovsvp);
@@ -495,7 +498,7 @@ for iter = istart : InvProps.niter;
             close(fig_hcupdate);
             clearvars fig_rhoupdate
         else
-            Model_prevfix = Model_prehc(iter+1);
+            Model_prevfix = Model_prehc;
         end
         
         
@@ -578,7 +581,7 @@ disp '======================================';
 disp '|         ...FINISHING UP...         |';
 
 fig_end = plot_model_diff(Model(niter), Model_bg, 'rhovsvp');
-clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);k
+clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);
 for ii = 2:2:6; 
 %     clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);
     fig_end.Children(ii).CLim = [-clim_rounded clim_rounded]; 
