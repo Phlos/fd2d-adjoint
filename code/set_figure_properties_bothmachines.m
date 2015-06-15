@@ -2,7 +2,7 @@
 % set some figure information so that plotting is not so cumbersome
 %==========================================================================
 
-path(path,'../externaltools');
+% path(path,'./externaltools');
 %% preparation
 HostName = gethostname;
 known_machines = {'D-13-L-2', 'doffer.geo.uu.nl', 'UBUNTU', 'DOFFER.GEO.UU.NL'};

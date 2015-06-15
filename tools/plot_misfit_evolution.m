@@ -8,7 +8,11 @@ set_figure_properties_bothmachines;
 % misfit_seis = InvProps.misfit_seis;
 % misfit_g = InvProps.misfit_g;
 misfit = InvProps.misfit;
-modeldifnorm = InvProps.modeldifn;
+if isfield(InvProps, 'modeldifn')
+    modeldifnorm = InvProps.modeldifn;
+else
+    modeldifnorm = NaN;
+end
 
 % for i=1:length(misfit_seis)
 %     misf_seis(i) = misfit_seis{i}.normd;

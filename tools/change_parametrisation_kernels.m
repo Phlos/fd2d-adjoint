@@ -4,12 +4,17 @@ function Kout = change_parametrisation_kernels(inparam, outparam, Kin, model1, v
 % elastic domain. Given an input parametrisation with three fields (e.g. 
 % rho mu lambda), it calculates the corresponding values of the fields in 
 % the output parametrisation.
+%
 % NOTE: only 'total' subkernels are converted!
 % 
 % NOTE: For now, only rhovsvp <--> rhomulambda works, but I can easily expand.
 %
 % INPUT:
-% inparam:  parametrisation of the input kernels: 'rhovsvp' or 'rhomulambda'
+% inparam:  parametrisation of the input kernels: 
+%               - 'rhovsvp' 
+%               - 'rhovsvp_rel'
+%               - 'rhomulambda'
+%               - 'rhomulambda_rel'
 % outparam: parametrisation of the output kernels, idem
 % in:       input kernels, structured as (at least):
 %           in.param1.total, in.param2.total, in.param3.total
@@ -52,10 +57,6 @@ switch outparam
                     Kin.lambda.total  = Kin.lambda.total ./ model1.lambda;
                 end
                 
-%                 fig_knlin = plot_kernels(Kin);
-%                 titel = ['input kernel in rhomulambda'];
-%                 mtit(fig_knlin, titel);
-%                 pause(1)
                 
                 Kout.rho2.total = Kin.rho.total ...
                     + model.vs.^2 .* Kin.mu.total ...
@@ -64,10 +65,7 @@ switch outparam
                 Kout.vs2.total  = 2*model.rho .* model.vs .* Kin.mu.total ...
                     - 4*model.rho .* model.vs .* Kin.lambda.total;
                 Kout.vp2.total  = 2*model.rho .* model.vp .* Kin.lambda.total;
-%                 fig_knlout = plot_kernels(Kout);
-%                 titel = ['output kernel in rhovsvp'];
-%                 mtit(fig_knlout, titel);
-%                 pause(15)
+
             otherwise
                 warning('Unexpected output parametrisation.');
         end

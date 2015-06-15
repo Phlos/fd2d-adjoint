@@ -6,7 +6,7 @@ function fig_grav = plot_gravity_quivers(rec_g, g1, g2, X, Z, rho)
 % fig_grav = plot_gravity_quivers(rec_g, g1, g2, X, Z, rho)
 
 %% preparation
-load '../code/propagation/cm_model.mat';
+load './code/propagation/cm_model.mat';
 
 fig_grav = figure;
 clf;

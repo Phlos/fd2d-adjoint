@@ -1,9 +1,8 @@
-cd
 %% preparation
 
 % number of iterations
 InvProps.niter = 60;
-istart = 31;
+istart = 2;
 
 niter = InvProps.niter;
 
@@ -12,8 +11,10 @@ niter = InvProps.niter;
     use_matfile_startingmodel, starting_model, bg_model_type,...
     true_model_type, f_maxlist, change_freq_every, ...
     parametrisation, param_plot, rec_g, X, Z, misfit_type, ...
-    normalise_misfits, InvProps.stepInit] = get_input_info;
+    normalise_misfits, InvProps.stepInit, smoothgwid] = get_input_info;
 
+% % kernels to be added in same parametrisation as inversion.
+% param_addknls = parametrisation;
 
 % project folder
 output_path = ['../output/',project_name,'/'];
@@ -237,23 +238,21 @@ for iter = istart : InvProps.niter;
         sEventAdstf{iter} = sEventAdstfIter;
         
         
-        % gravity misfit
+        % display misfits
         disp ' ';
         disp(['GRAVITY misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
             num2str(InvProps.misfitgrav(iter),'%3.2e')])
         disp(['   normalised ',normalise_misfits, ...
             ' -- 1st misfit = ',num2str(misfit_init(whichFrq).grav,'%3.2e'),')'])
         disp ' ';
-        % seismic misfit
         disp(['SEISMIC misfit FOR ITER ',num2str(iter,'%2u'),':   ', ...
             num2str(InvProps.misfitseis(iter),'%3.2e')])
         disp(['   normalised ',normalise_misfits, ...
             ' -- 1st misfit = ',num2str(misfit_init(whichFrq).seis,'%3.2e'),')'])
         disp ' ';
-        % total misfit
         disp(['TOTAL misfit FOR ITER ',num2str(iter,'%2u'),':     ', ...
-            num2str(InvProps.misfit(iter),'%3.2e')])
-%         disp ' ';
+            num2str(InvProps.misfit(iter),'%3.2e'), ...
+            ' (',num2str(InvProps.misfit(iter)*100,'%g'),'%)'])
         disp '=========================================='
         
 
@@ -278,11 +277,11 @@ for iter = istart : InvProps.niter;
                 disp(['iter ',num2str(iter),': calculating gravity kernel']);
 
                 % calculating the gravity kernel
-                if iter == 1
-                    [Kg_temp, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
-                else
-                    [Kg_temp, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
-                end
+%                 if iter == 1
+                    [Kg_temp] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
+%                 else
+%                     [Kg_temp, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
+%                 end
                 
                 % normalising the gravity kernel
                 Kg{iter} = norm_kernel(Kg_temp, normalise_misfits, ...
@@ -291,6 +290,7 @@ for iter = istart : InvProps.niter;
                 
                 
                 %  plot gravity kernel
+                fig_Kg = plot_gravity_kernel(Kg{iter});
                 figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernel_grav.rho.png'];
                 titel = [project_name, '- Gravity kernel for iter ',num2str(iter)];
                 mtit(fig_Kg,titel, 'xoff', 0.001, 'yoff', 0.00001);
@@ -388,28 +388,35 @@ for iter = istart : InvProps.niter;
             
             % combine seismic and gravity kernels
             disp ' '; disp(['iter ',num2str(iter),': combining gravity and seismic kernels']);
-            param_addknls = 'rhovsvp';  % gravity kernel doesn't say anything about vs and vp!!!
-                                        % should ALWAYS be applied in
-                                        % rhovsvp
-            Ktest = change_parametrisation_kernels('rhomulambda',param_addknls,Kseis(iter),Model(iter));
-            switch param_addknls
+            
+            % Below is utter BULLSHIT.
+            % the gravity kernel doesn't say anything about mu and lambda
+            % either. What does count, is the parametrisation in which the
+            % inversion is chosen to run. If we want to minimise our misfit
+            % functional using relative rho-mu-lambda, then Kg should be
+            % added to Kseis in rho-mu-lambda as well.
+%             param_addknls = 'rhovsvp';  % B$ gravity kernel doesn't say anything about vs and vp!!!
+%                                         % B$ should ALWAYS be applied in
+%                                         % B$ rhovsvp
+            Ktest = change_parametrisation_kernels('rhomulambda',parametrisation,Kseis(iter),Model(iter));
+            switch parametrisation
                 case 'rhomulambda'
-                    Krho.seis = filter_kernels(Ktest.rho.total,5);
-                    Krho.grav = filter_kernels(Kg{iter},5);
+                    Krho.seis = filter_kernels(Ktest.rho.total,smoothgwid);
+                    Krho.grav = filter_kernels(Kg{iter},smoothgwid);
                     Ktest.rho.total = w_Kseis * Ktest.rho.total + w_Kg * Kg{iter};
-                    Krho.together.total = filter_kernels(Ktest.rho.total,5);
+                    Krho.together = filter_kernels(Ktest.rho.total,smoothgwid);
                 case 'rhovsvp'
-                    Krho.seis = filter_kernels(Ktest.rho2.total,5);
-                    Krho.grav = filter_kernels(Kg{iter},5);
+                    Krho.seis = filter_kernels(Ktest.rho2.total,smoothgwid);
+                    Krho.grav = filter_kernels(Kg{iter},smoothgwid);
                     Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg{iter};
-                    Krho.together = filter_kernels(Ktest.rho2.total,5);
+                    Krho.together = filter_kernels(Ktest.rho2.total,smoothgwid);
                 otherwise
                     error('the parametrisation in which kernels are added was unknown');
             end
 
             
             % saving the total kernel
-            Ktest1 = change_parametrisation_kernels(param_addknls,'rhomulambda', Ktest,Model(iter));
+            Ktest1 = change_parametrisation_kernels(parametrisation,'rhomulambda', Ktest,Model(iter));
             K_total(iter).rho.total    = Ktest1.rho.total;
             K_total(iter).mu.total     = Ktest1.mu.total;
             K_total(iter).lambda.total = Ktest1.lambda.total;

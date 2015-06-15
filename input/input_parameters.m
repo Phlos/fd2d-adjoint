@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Mantle.test-027-RERUN-multiple-freq.like-025-but-2-consecutive-sources';
+project_name='InvTbx.test-002.like-M025-but-unconstrained-4-src';
 
 %==========================================================================
 % inversion properties
@@ -26,7 +26,7 @@ parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rh
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'yes'; % 'yes' or 'no'
+fix_velocities = 'no'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -103,8 +103,8 @@ use_matfile_startingmodel = 'no';
 starting_model = '';
 
 bg_model_type = 50;     % PREM (for plotting)
-true_model_type = 60;   % PREM + vs, vp, rho2 anoms
-model_type=61;          % PREM + vs, vp anoms (starting model*0.9)
+true_model_type = 54;   % PREM + rho2 anoms
+model_type=50;          % PREM
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -145,10 +145,10 @@ model_type=61;          % PREM + vs, vp anoms (starting model*0.9)
 
 
 %==========================================================================
-% sources -- positions & directions
+% sources -- positions
 %==========================================================================
 
-nsrc = 2;
+nsrc = 4;
 
 %- line of sources near top of the domain
 src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
@@ -184,9 +184,9 @@ end
                     
                     
 %- source filtering
-f_minlist = [0.006667 0.006667 0.006667 0.006667];
+f_minlist = [0.006667 0.006667 0.006667]; % 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667 0.01267  0.01465 ];
+f_maxlist = [0.006667 0.008667 0.011267]; % 0.014647 ];
 % how many iterations with the same source?
 change_freq_every = 15;          % how many iterations with the same freq?
 

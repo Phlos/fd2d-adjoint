@@ -28,8 +28,8 @@ fprintf([reverseStr, prevmsg]);
 %% set paths and read input
 %==========================================================================
 
-path(path,'propagation/');
-path(path,'../input/');
+% path(path,'propagation/');
+% path(path,'../input/');
 
 input_parameters;
 

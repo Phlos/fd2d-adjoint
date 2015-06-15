@@ -7,10 +7,10 @@ Model_real = checkargs(varargin(:));
 
 input_parameters; 
 if iter < InvProps.niter;
-    Kg_iter = filter_kernels(Kg{iter},smoothgwid);
-    Ktotal_iter.rho.total = filter_kernels(K_total(iter).rho.total,smoothgwid);
-    Ktotal_iter.mu.total = filter_kernels(K_total(iter).mu.total,smoothgwid);
-    Ktotal_iter.lambda.total = filter_kernels(K_total(iter).lambda.total,smoothgwid);
+    Kg_iter = filter_2Dfield(Kg{iter},smoothgwid);
+    Ktotal_iter.rho.total = filter_2Dfield(K_total(iter).rho.total,smoothgwid);
+    Ktotal_iter.mu.total = filter_2Dfield(K_total(iter).mu.total,smoothgwid);
+    Ktotal_iter.lambda.total = filter_2Dfield(K_total(iter).lambda.total,smoothgwid);
 end
 
 

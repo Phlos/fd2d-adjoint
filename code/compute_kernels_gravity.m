@@ -1,4 +1,4 @@
-function [Kg, fig_Kg] = compute_kernels_gravity(g_src, rec_grav, varargin)
+function [Kg] = compute_kernels_gravity(g_src, rec_grav, varargin)
 
 % calculation of gravity kernels based on the gravity source (obtained in
 % e.g. calculate_gravity_misfit) and on domain properties.
@@ -153,21 +153,12 @@ end
 
 if(strcmp(plotornot,'yes'))
     close(fig_grav_src, totalkernel);
-else
-        Kg_sm = filter_kernels(Kg, 15); % if it hasn't been smoothed already, smooth now for output figure
+% else
+%     disp ' ';
+% %         Kg_sm = filter_kernels(Kg, smoothgwid); % if it hasn't been smoothed already, smooth now for output figure
 end
 
-%- output figure
-fig_Kg = figure;
-pcolor(X,Z, Kg_sm')
-colormap(cm);
-shading interp
-axis image
-titel = ['Total kernel'];
-title(titel);
-colorbar
-scale = prctile(abs(Kg_sm(:)),98);
-caxis([-scale scale]);
+
       
 
 end

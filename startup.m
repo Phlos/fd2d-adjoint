@@ -15,13 +15,13 @@ if strcmp(version('-release'),'2014b')
 end
 
 %- adding all the fd2d-adjoint paths to path
-cd code;
-path(path,'../code');
-path(path,'../code/propagation');
-path(path,'../input');
-path(path,'../output');
-path(path,'../tools');
-path(path,'../ojwoodford-export_fig-5735e6d')
-path(path,'../mtit')
-path(path,'../quivers/')
-path(path,'../externaltools');
+path(path,'./code');
+path(path,'./code/propagation');
+path(path,'./input');
+path(path,'./output');
+path(path,'./tools');
+path(path,'./ojwoodford-export_fig-5735e6d')
+path(path,'./mtit')
+path(path,'./quivers/')
+path(path,'./externaltools');
+path(path,'./InvTlbx_callback_fn');

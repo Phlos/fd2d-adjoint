@@ -21,10 +21,10 @@ function [g, fig_grav] = calculate_gravity_field(rho, rec_grav, varargin)
 plotornot = plot_or_not(varargin(:));
 
 %- prepare necessary information
-path(path,'../input');
-path(path,'../tools');
-path(path,'../code');
-path(path,'../code/propagation');
+% path(path,'./input');
+% path(path,'./tools');
+% path(path,'./code');
+% path(path,'./code/propagation');
 
 % gravitational constant
 % 6.67384 * 10-11 m3 kg-1 s-2

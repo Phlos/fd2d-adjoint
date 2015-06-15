@@ -24,10 +24,10 @@ fprintf([reverseStr, prevmsg]);
 %==========================================================================
 
 % path(path,'helper_programmes/');
-path(path,'../input/');
-path(path,'../output/');
-path(path,'propagation/');
-path(path,'../tools/');
+% path(path,'../input/');
+% path(path,'../output/');
+% path(path,'propagation/');
+% path(path,'../tools/');
 
 % read input parameters from the input file
 input_parameters;

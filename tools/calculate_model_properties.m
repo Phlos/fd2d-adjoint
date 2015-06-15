@@ -28,10 +28,10 @@ function model = calculate_model_properties(rho, axrot)
 
 
 %- prepare necessary information
-path(path,'../input');
-path(path,'../tools');
-path(path,'../code');
-path(path,'../code/propagation');
+% path(path,'./input');
+% path(path,'./tools');
+% path(path,'./code');
+% path(path,'./code/propagation');
 
 input_parameters;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);

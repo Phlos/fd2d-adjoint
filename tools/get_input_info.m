@@ -2,11 +2,11 @@ function [project_name, axrot, apply_hc, use_grav, fix_velocities, ...
     use_matfile_startingmodel, starting_model, bg_model_type, ...
     true_model_type, f_maxlist, change_freq_every, ...
     parametrisation, param_plot, ...
-    rec_g, X, Z, misfit_type, normalise_misfits, stepInit] = get_input_info
+    rec_g, X, Z, misfit_type, normalise_misfits, stepInit, smoothgwid] = get_input_info
 
 % function that gives the project name from the file input_parameters.m
 
-path(path,'../input');
+% path(path,'./input');
 input_parameters;
 [X,Z,~,~]=define_computational_domain(Lx,Lz,nx,nz);
 

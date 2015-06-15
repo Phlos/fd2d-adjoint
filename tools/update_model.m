@@ -26,10 +26,10 @@ function [Model] = update_model(varargin)
 %   Model.lambda
 %
 
-path(path,'../input')
-path(path,'../code')
-path(path,'../code/propagation')
-path(path,'../tools');
+% path(path,'../input')
+% path(path,'../code')
+% path(path,'../code/propagation')
+% path(path,'../tools');
 
     Model = checkargs(varargin(:));
 %     Model
@@ -101,14 +101,14 @@ elseif narg == 3 || narg == 4
 
     % smooth the kernels
     if strcmp(parametrisation,'rhomulambda')
-        K_sm.rho =      filter_kernels(K_rel.rho.total,smoothgwid);
-        K_sm.mu =       filter_kernels(K_rel.mu.total,smoothgwid);
-        K_sm.lambda =   filter_kernels(K_rel.lambda.total,smoothgwid);
+        K_sm.rho =      filter_2Dfield(K_rel.rho.total,smoothgwid);
+        K_sm.mu =       filter_2Dfield(K_rel.mu.total,smoothgwid);
+        K_sm.lambda =   filter_2Dfield(K_rel.lambda.total,smoothgwid);
     elseif strcmp(parametrisation,'rhovsvp')
 %         disp 'filtering in rhovsvp'
-        K_sm.rho2 =      filter_kernels(K_rel.rho2.total,smoothgwid);
-        K_sm.vs2 =       filter_kernels(K_rel.vs2.total,smoothgwid);
-        K_sm.vp2 =   filter_kernels(K_rel.vp2.total,smoothgwid);
+        K_sm.rho2 =      filter_2Dfield(K_rel.rho2.total,smoothgwid);
+        K_sm.vs2 =       filter_2Dfield(K_rel.vs2.total,smoothgwid);
+        K_sm.vp2 =   filter_2Dfield(K_rel.vp2.total,smoothgwid);
     else
         error('Parametrisation not recognised (smoothing kernels)');
     end
@@ -153,9 +153,9 @@ elseif narg == 3 || narg == 4
 %     K_rel = calculate_relative_kernels(K_abs, Model_prev);
 %     
 %     % smooth the kernels
-%     K_sm.rho =      filter_kernels(K_rel.rho.total,smoothgwid);
-%     K_sm.mu =       filter_kernels(K_rel.mu.total,smoothgwid);
-%     K_sm.lambda =   filter_kernels(K_rel.lambda.total,smoothgwid);
+%     K_sm.rho =      filter_2Dfield(K_rel.rho.total,smoothgwid);
+%     K_sm.mu =       filter_2Dfield(K_rel.mu.total,smoothgwid);
+%     K_sm.lambda =   filter_2Dfield(K_rel.lambda.total,smoothgwid);
 %     
 %     % calculate model update
 %     Model.mu =     Model_prev.mu .* (1 - step * K_sm.mu);
