@@ -121,7 +121,7 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
     % TODO: use quadratic approximation to compute step-length 
     % for iteration 1
     %[sigma,objective_new,gn]=optlib_wolfe(m,s,stg,objective,delta,theta,sigma,usr_par);
-    [sigma,model_new]=optlib_wolfe(model.m,s,stg,objective,delta,theta,sigma,usr_par);
+    [sigma,model_new]=optlib_wolfe(model.m,s,stg,model.objective,delta,theta,sigma,usr_par);
  
     mn=model_new.m;
     gn=model_new.gradient;
