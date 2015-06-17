@@ -28,6 +28,7 @@ InvProps    = usr_par.InvProps;
 % iter        = usr_par.iter;
 
 % inversion stuff
+output_path     = usr_par.output_path;
 parametrisation = usr_par.parametrisation;
 use_grav        = usr_par.use_grav;
 smoothgwid      = usr_par.smoothgwid;
@@ -50,6 +51,19 @@ disp(['calculating current misfit']);
 % InvProps.misfitseis(iter) = misfit_seis;
 % InvProps.misfitgrav(iter) = misfit_grav;
 
+% % save model and forward field info to file
+% mkdir([output_path,'/fwd_temp/',ModRandString])
+% save([output_path,'/fwd_temp/',ModRandString,'model-adstf.mat'], ...
+%     'ModRandString', 'Model', 'sEventAdstfIter', '-v6');
+% 
+% blips = dir([output_path,'/fwd_temp/*.mat']);
+% for ii = 1:numel(blips)
+%     bestand = blips(ii).name;
+%     oldfile = [output_path,'/fwd_temp/',bestand];
+%     newfile = [output_path,'/fwd_temp/',ModRandString,'/',bestand];
+%     movefile(oldfile,newfile);
+% end; clearvars blips;
+
 %% calculate gradients
 
 % gravity
@@ -59,7 +73,7 @@ if strcmp(use_grav,'yes')
     disp(['calculating gravity kernel']);
     
     % calculating the gravity kernel
-    [Kg_temp, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
+    [Kg_temp] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
 
     % normalising the gravity kernel
     Kg = norm_kernel(Kg_temp, normalise_misfits, ...

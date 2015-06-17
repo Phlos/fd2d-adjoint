@@ -2,7 +2,12 @@ function [sEventRec, fig_seis] = run_forward_persource(Model, sEventInfo, vararg
 
 % wrapper to run forward for each source consecutively
 
+
+
 %% prep
+input_parameters;
+% project folder
+output_path = ['./output/',project_name,'/'];
 nsrc = length(sEventInfo);
 
 % determine if v_obs is supplied (in order to plot seisdif)
@@ -28,9 +33,12 @@ end
 
         % save forward fields to file
         if strcmp(saveFwdFields, 'yessavefields')
+            if ~(exist([output_path,'/fwd_temp/'], 'dir')); 
+                mkdir([output_path,'/fwd_temp/']); 
+            end
             prevmsg = sprintf( 'saving u_fw, v_fw output to file...');
             fprintf(prevmsg);
-            save(['../output/forwardfield.src-',num2str(isrc),'.mat'], 'u_fw', 'v_fw', '-v6');
+            save([output_path,'/fwd_temp/forwardfield.src-',num2str(isrc),'.mat'], 'u_fw', 'v_fw', '-v6');
             reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
             fprintf(reverseStr);
             clearvars u_fw v_fw;

@@ -102,7 +102,9 @@ function [misfit_total, misfit_seis, misfit_grav, ...
     
     misfit_seis = sum(misfit_s_test);
 
-
+        disp ' '; disp(['seismic misfit (normalised ',normalise_misfits, '):    ', ...
+            num2str(misfit_seis,'%3.2e')])
+        disp ' ';
 
 
     %% combine the misfits

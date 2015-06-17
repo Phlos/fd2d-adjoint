@@ -1,4 +1,5 @@
-function [usr_par] = new_iteration( m, it, usr_par) 
+% function [usr_par] = new_iteration( m, it, usr_par) 
+function [usr_par] = new_iteration( it, m, jm, gm, usr_par) 
 % NEW_ITERATION This auxiliary function is called before a new iteration is started.
 % You might use it for writing output files, plotting, ...
 %
@@ -22,7 +23,7 @@ Model_bg    = usr_par.Model_bg;
 % Kg          = usr_par.Kg(iter);
 % Kseis       = usr_par.Kseis(iter);
 % K_total     = usr_par.K_total(iter);
-% InvProps    = usr_par.InvProps;
+ InvProps    = usr_par.InvProps;
 % if isfield(usr_par, 'Model_real')
 %     Model_real = usr_par.Model_real;
 % end
@@ -30,9 +31,11 @@ Model_bg    = usr_par.Model_bg;
 % 
 %% load model in usable format
 [Model] = map_m_to_parameters(m, usr_par);
-% 
-% %% inversion output
-% 
+K_rel   = map_gradm_to_gradparameters(gm, usr_par);
+
+%% inversion output
+InvProps.misfit = jm;
+
 % % useful output
 % if strcmp(use_grav,'no')
 %     Kg{iter}=NaN;
@@ -42,8 +45,8 @@ Model_bg    = usr_par.Model_bg;
 % else
 %     InvProps = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model);
 % end
-% 
-% 
+
+
 %% plot stuff
 
 % model
@@ -143,9 +146,21 @@ clearvars('fig_mod');
 %         print(fig_invres,'-depsc','-r400',[figname,'.eps']);
 %         close(fig_invres)
 % end
+
+
+%% save output
+
+% if ~exist([output_path,'/iter',num2str(iter,'%03d'),'.all-vars.mat'],'file')
+disp '|  (saving all current variables..)  |'
+clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
+    'filenm_old', 'filenm_new', 'fig_knl');
+savename = [output_path,'/iter',num2str(iter,'%03d'),'.all-vars.mat'];
+save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
+% end
+
 %     
-% %% save all output files to the actual output path
-% blips = dir('../output/*iter.current*');
+% %% move all output files to the actual output path
+% blips = dir('./output/*iter.current*');
 % for ii = 1:numel(blips)
 %     bestand = blips(ii).name;
 %     oldfile = ['../output/',bestand];
@@ -153,9 +168,11 @@ clearvars('fig_mod');
 %     movefile(oldfile,newfile);
 % end
 
+%% throw away temp folder
+
+rmdir([output_path,'/fwd_temp'], 's');
+
 %% initialise new frequency if necessary
-
-
 
 cfe = change_freq_every;
 whichFrq = floor((iter-1)/cfe)+1;
@@ -173,6 +190,8 @@ usr_par.Model(iter) = Model;
 % usr_par.misfit(iter) = usr_par.misfit_total;
 usr_par.sEventInfo  = sEventInfo;
 usr_par.sEventObs   = sEventObs;
+
+
 
 
 end

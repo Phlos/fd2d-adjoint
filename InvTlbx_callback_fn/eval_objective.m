@@ -1,5 +1,5 @@
  
-function [jm] = eval_objective(m, usr_par)
+function [jm] = eval_objective(m, ModRandString, usr_par)
 % EVAL_OBJECTIVE function to evaluate the objective function at a given
 % model m.
 %
@@ -20,6 +20,9 @@ sEventInfo  = usr_par.sEventInfo;
 sEventObs   = usr_par.sEventObs;
 InvProps    = usr_par.InvProps;
 
+% inversion stuff
+output_path = usr_par.output_path;
+
 
 %% convert variable structures InvTbx -> my stuff
 [Model] = map_m_to_parameters(m, usr_par);
@@ -36,6 +39,22 @@ disp(['calculating current misfit']);
 % InvProps.misfit(iter) = misfit_total;
 % InvProps.misfitseis(iter) = misfit_seis;
 % InvProps.misfitgrav(iter) = misfit_grav;
+
+% save model and forward field info to file
+TempFolder = [output_path,'/fwd_temp/'];
+ModFolder = [output_path,'/fwd_temp/',ModRandString,'/'];
+mkdir(ModFolder)
+save([ModFolder,'model-adstf.mat'], ...
+    'ModRandString', 'Model', 'sEventAdstfIter', 'g_src', '-v6');
+
+blips = dir([TempFolder,'*.mat']);
+for ii = 1:numel(blips)
+    bestand = blips(ii).name;
+    oldfile = [TempFolder,bestand];
+    newfile = [ModFolder,bestand];
+    movefile(oldfile,newfile);
+end; clearvars blips;
+
 
 %% OUTPUT to Inversion Toolbox structure
 jm = misfit_total;

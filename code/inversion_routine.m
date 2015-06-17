@@ -551,10 +551,10 @@ for iter = istart : InvProps.niter;
     
     
     % save all output files to the actual output path
-    blips = dir('../output/*iter.current*');
+    blips = dir('./output/*iter.current*');
     for ii = 1:numel(blips)
         bestand = blips(ii).name;
-        oldfile = ['../output/',bestand];
+        oldfile = ['./output/',bestand];
         newfile = [output_path,strrep(blips(ii).name,'iter.current',['iter',num2str(iter,'%03d')])];
         movefile(oldfile,newfile);
     end

@@ -6,6 +6,9 @@ function [Kseis, sEventKnls] = run_adjoint_persource(Model, sEventAdstf)
 input_parameters;
 nsrc = length(sEventAdstf);
 
+% project folder
+output_path = ['./output/',project_name,'/'];
+
 %% actual loop over sources
 
 % per source:   
@@ -18,7 +21,7 @@ for isrc = 1:nsrc
     % load u_fw, v_fw from file
     prevmsg = sprintf('loading forward fields...');
     fprintf(prevmsg);
-    load(['../output/forwardfield.src-',num2str(isrc),'.mat'], 'u_fw', 'v_fw');
+    load([output_path,'/fwd_temp/forwardfield.src-',num2str(isrc),'.mat'], 'u_fw', 'v_fw');
     reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
     fprintf(reverseStr);
     

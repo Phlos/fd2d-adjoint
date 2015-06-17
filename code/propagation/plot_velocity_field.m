@@ -21,7 +21,7 @@
 %%% Updated the way things are plotted -- no more ugly ifs 
 %%%   --- Nienke Blom 18-4-2014.
     
-path(path,'../tools')
+path(path,'./tools')
 figure(fig_vel)
 clf
 

@@ -41,7 +41,7 @@ nsrc = length(sEventInfoUnfilt);
 % make sources frequency dependent
 for ifr = 1:nfr
     disp(['FREQUENCY NR. ',num2str(ifr),'/',num2str(nfr), ...
-          '. fmin=',num2str(f_minlist(ifr)),', fmax=',num2str(f_minlist(ifr))]);
+          '. fmin=',num2str(f_minlist(ifr)),', fmax=',num2str(f_maxlist(ifr))]);
     
     % get frequencies
     sObsPerFreq(ifr).f_max = f_maxlist(ifr);

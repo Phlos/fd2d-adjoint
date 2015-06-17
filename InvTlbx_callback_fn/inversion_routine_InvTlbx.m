@@ -9,11 +9,11 @@ istart = 1;
 niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
-[project_name, axrot, apply_hc, use_grav, fix_velocities, ...
+[project_name, ~, apply_hc, use_grav, fix_velocities, ...
     use_matfile_startingmodel, starting_model, bg_model_type,...
-    true_model_type, f_maxlist, change_freq_every, ...
-    parametrisation, param_plot, rec_g, X, Z, misfit_type, ...
-    normalise_misfits, InvProps.stepInit, smoothgwid] = get_input_info;
+    true_model_type, ~, ~, ...
+    parametrisation, param_plot, rec_g, ~, ~, ~, ...
+    ~, ~, smoothgwid] = get_input_info;
 
 % kernels to be added in same parametrisation as inversion.
 param_addknls = parametrisation;
@@ -119,18 +119,8 @@ end
 
 %% calculate initial model misfit per frequency
 
-for ifrq = 1:length(sObsPerFreq)
-    
-    sEventInfo = sObsPerFreq(ifrq).sEventInfo; % contains src locations etc
-    sEventObs = sObsPerFreq(ifrq).sEventObs;  % contains v_obs
-    
-    disp(['calculating initial model misfit for freq. ',num2str(ifrq)]);
-    [misfit_int.total, misfit_int.seis, misfit_int.grav] = ...
-        calc_misfits(Model(1), g_obs, 0, sEventInfo, sEventObs, 0, ...
-        'noplot','notext');
-    misfit_init(ifrq) = misfit_int;
-    
-end
+misfit_init = calc_initial_misfits(Model(1), sObsPerFreq, g_obs);
+save([output_path,'/initial_misfits.mat'], 'misfit_init', '-v6');
 
 %% set initial inversion values
 whichFrq = 1;
@@ -167,4 +157,6 @@ end
 % call steepest gradient, L-BFGS, something else.
 
 m = map_parameters_to_m(Model(1), usr_par);
+
+
 

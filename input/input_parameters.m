@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='InvTbx.test-002.like-M025-but-unconstrained-4-src';
+project_name='InvTlbx.test-003-RERUN.like-002-but-coarser-grid';
 
 %==========================================================================
 % inversion properties
@@ -75,19 +75,19 @@ Lz=2890e3;     % model extension in z-direction [m] ! PREM: don't exceed 2891
 
 % nx=901;     % grid points in x-direction
 % nz=430;     % grid points in z-direction
-nx = 601;
-nz = 291;
+nx = 241;
+nz = 116;
 % nx = 1201;
 % nz = 581;
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
-dt=0.4;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
+dt=1.0;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
 % dt=0.1;       % time step [s] 0.4 suffices @PREM dx=dz=10km
 % nt=700;      % number of iterations
 % tmax = 1400;  % final time [s]
 % tmax = 580;     % PcP = 510 s, ScS = 935 s
-tmax = 1100;    % should be enough for ScS.
+tmax = 1200;    % should be enough for ScS.
 % tmax = 300;
 nt = ceil(tmax/dt); % number of iterations
 
@@ -278,7 +278,7 @@ absorb_bottom=0;% absorb waves on the bottom boundary
 %==========================================================================
 
 % plot every 'plot every'th image (otherwise computationally rather heavy)
-plot_every=100000; % value larger than nt, so that no plotting takes place
+plot_every=nt*2; % value larger than nt, so that no plotting takes place
 % plot_every = 40;
 % plot_every = 100;
 % plot_every = 10;

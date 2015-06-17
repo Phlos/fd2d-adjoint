@@ -10,10 +10,10 @@ function [Kg] = compute_kernels_gravity(g_src, rec_grav, varargin)
 plotornot = checkargs(varargin(:)); % plots figures by default
 
 %- prepare necessary information
-path(path,'../input');
-path(path,'../tools');
-path(path,'../code');
-path(path,'../code/propagation');
+path(path,'./input');
+path(path,'./tools');
+path(path,'./code');
+path(path,'./code/propagation');
 set_figure_properties_doffer;
 
 % input
