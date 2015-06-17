@@ -27,7 +27,7 @@ fprintf(fid,'it=%d   j=%e   ||g||=%e  \n',it,model.objective,model.normg);
 
 
 % init data for LBFGS here
-[previous_models, previous_gradients] = restore_lbfgs_information(usr_par);
+[previous_models, previous_gradients] = optlib_restore_lbfgs_information(usr_par);
 
 if (size(previous_models,2) > 0)
    l_history = size(previous_models,2);
@@ -103,7 +103,7 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
 
     % check if BFGS-step provides sufficient decrease; else take gradient
     stg=s'*g;
-    if stg<min(alpha,normg)*normg*norm(s)
+    if stg<min(alpha,model.normg)*normg*norm(s)
         s=g;
         stg=s'*g;
         step='Grad';
