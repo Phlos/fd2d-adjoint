@@ -103,7 +103,7 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
 
     % check if BFGS-step provides sufficient decrease; else take gradient
     stg=s'*g;
-    if stg<min(alpha,model.normg)*normg*norm(s)
+    if stg<min(alpha,model.normg)*model.normg*norm(s)
         s=g;
         stg=s'*g;
         step='Grad';
@@ -125,18 +125,14 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
  
     mn=model_new.m;
     gn=model_new.gradient;
-    objective_new = model_new.objective;
-    m_string = model_new.name;
     model_new.normg = norm(model_new.gradient);
     
-    mn=m-sigma*s;
-
     fprintf(fid,'it=%d   j=%e   ||g||=%e   sigma=%6.5f ||s||=%e  step=%s\n', ...
             it, model_new.objective, model_new.normg,sigma,norm(s),step);
         
     % update BFGS-matrix
     d=g-gn;
-    p=m-mn;
+    p=model.m-mn;
     dtp=d'*p;
     if dtp>=1e-8*norm(d)*norm(p)
         rho(ln)=1/dtp;
