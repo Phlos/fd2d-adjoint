@@ -7,7 +7,7 @@ j
 norm(g)
 norm_dm = norm(dm)
 
-dcheck = zeros(hpmax-hpmin+1,4);
+dcheck = zeros(hpmax-hpmin+1,5);
 it=0;
 for hp=hpmin:1:hpmax
     it=it+1;
@@ -15,7 +15,7 @@ for hp=hpmin:1:hpmax
     [jh] = eval_objective(mh, usr_par);
     djdm = g' * dm;
     djdmh = (jh-j) / (10^hp);
-    dcheck(it,:) = [10^hp, djdm, djdmh, abs(djdm - djdmh)];
+    dcheck(it,:) = [10^hp, djdm, djdmh, abs(djdm - djdmh), abs(djdm - djdmh) / abs(djdm)];
 end
 
 h1 = figure;

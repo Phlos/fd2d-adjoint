@@ -7,16 +7,17 @@ delta=0.001;
 % constant del<theta<1 for Wolfe condition
 theta=0.6;
 
-sigma=1;
+sigma=sigma_init;
 m=m0;
-[j, g] = eval_objective_and_gradient(m, usr_par)
+[j, g] = eval_objective_and_gradient(m, usr_par);
 
 normg0=norm(g);
 normg=normg0;
 
 it=0;
+fid = fopen('iteration.tab','a+');
 
-fprintf(1,'it=%d   j=%e   ||g||=%e  \n',it,j,normg);
+fprintf(fid,'it=%d   j=%e   ||g||=%e  \n',it,j,normg);
 
 % main loop
 while (normg>tol*normg0 && it < maxiter)
@@ -44,17 +45,17 @@ while (normg>tol*normg0 && it < maxiter)
  normg=norm(g);
  
  usr_par = new_iteration(m,it,usr_par);
- fprintf(1,'it=%3.d   f=%e   ||g||=%e   sig=%5.3f\n',it,j,normg,sigma); 
+ fprintf(fid,'it=%3.d   f=%e   ||g||=%e   sig=%5.3f\n',it,j,normg,sigma); 
 end
 
 if (normg<=tol*normg0)
-    fprintf(1,'Successful termination with ||g||<%e*||g0||:\n',tol);
+    fprintf(fid,'Successful termination with ||g||<%e*||g0||:\n',tol);
     flag = 0;
 else
-    fprintf(1,'Maximum number of iterations reached.\n');
+    fprintf(fid,'Maximum number of iterations reached.\n');
     flag =1;
 end
 mfinal=m;
-
+fclose(fid);
 
 end
