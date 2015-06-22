@@ -644,7 +644,7 @@ function [rho2, vs, vp] = load_PREM()
     [X,Z,dx,dz] = define_computational_domain(Lx,Lz,nx,nz);
     
     %- load PREM data from file
-    PREM = csvread('./models/PREM-reference-model/PREM_1s_nowater.csv');
+    PREM = dlmread('./models/PREM-reference-model/PREM_1s_nowater.csv' , '\t');
     
     %- depth coordinate manipulation
     depth = PREM(:,2);      % in km

@@ -78,7 +78,9 @@ end
 % angle between total kernels
 if (length(K_total) > 1 && iter > 1 && iter < InvProps.niter)
     Ktransf{iter} = change_parametrisation_kernels('rhomulambda','rhovsvp',K_total(iter),Model(iter));
+    Ktransf{iter-1} = change_parametrisation_kernels('rhomulambda','rhovsvp',K_total(iter-1),Model(iter-1));
     totaalkernel{iter} = [Ktransf{iter}.rho2.total Ktransf{iter}.vs2.total Ktransf{iter}.vp2.total];
+    totaalkernel{iter-1} = [Ktransf{iter-1}.rho2.total Ktransf{iter-1}.vs2.total Ktransf{iter-1}.vp2.total];
     
     kernelskeerelkaar = totaalkernel{iter-1}(:)'*totaalkernel{iter}(:);
     normz = norm(totaalkernel{iter-1}(:))*norm(totaalkernel{iter}(:));

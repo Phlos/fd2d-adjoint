@@ -7,8 +7,22 @@
 HostName = gethostname;
 known_machines = {'D-13-L-2', 'doffer.geo.uu.nl', 'UBUNTU', 'DOFFER.GEO.UU.NL'};
 
+if strcmp(HostName,'D-13-L-2')
+    ubuntubar=75;
+else
+    ubuntubar=0;
+end
+
 if ~any(strcmp(HostName,known_machines))
     HostName = 'D-13-L-2';
+    scnsize = [1 1 1920 1200];
+    scn_width = 1920;
+    scn_height = 1200;
+else
+    scnsize = get(0,'ScreenSize');
+    scnsize = scnsize - [ 0,0,ubuntubar,0];
+    scn_width = scnsize(3);
+    scn_height = scnsize(4);
 end
 
 % % testing the host we're in
@@ -26,19 +40,14 @@ load cm_velocity;       % load the color map we want to use
 
 set(0,'Units','pixels') 
 
-if strcmp(HostName,'D-13-L-2')
-    ubuntubar=75;
-else
-    ubuntubar=0;
 
-end
 
-scnsize = get(0,'ScreenSize');
-% if strcmp(HostName,'D-13-L-2')
-%     disp 'we are in maggi'
-    scnsize = scnsize - [ 0,0,ubuntubar,0];
-    scn_width = scnsize(3);
-    scn_height = scnsize(4);
+% scnsize = get(0,'ScreenSize');
+% % if strcmp(HostName,'D-13-L-2')
+% %     disp 'we are in maggi'
+%     scnsize = scnsize - [ 0,0,ubuntubar,0];
+%     scn_width = scnsize(3);
+%     scn_height = scnsize(4);
 if strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     verti_scn = [scnsize(1) ...
                  scnsize(2) ...

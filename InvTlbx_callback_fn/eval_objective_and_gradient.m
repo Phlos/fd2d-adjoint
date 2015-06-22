@@ -13,7 +13,9 @@ function [jm, gm] = eval_objective_and_gradient(m, ModRandString, usr_par)
 %
 % See also EVAL_OBJECTIVE and EVAL_GRAD_OBJECTIVE.
 
+disp ' ';
 disp('----evaluating objective AND gradient');
+disp ' ';
 
 %% initialise stuff
 input_parameters;

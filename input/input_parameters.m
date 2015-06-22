@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='InvTlbx.test-003-RERUN.like-002-but-coarser-grid';
+project_name='InvTlbx.test-003c-RE-RERUN.like-002-but-coarser-grid';
 
 %==========================================================================
 % inversion properties
