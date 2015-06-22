@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='InvTlbx.test-003c-RE-RERUN.like-002-but-coarser-grid';
+project_name='InvTlbx.test-003d-RE-RE-RERUN.20-iters-per-freq';
 
 %==========================================================================
 % inversion properties
@@ -188,7 +188,7 @@ f_minlist = [0.006667 0.006667 0.006667]; % 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
 f_maxlist = [0.006667 0.008667 0.011267]; % 0.014647 ];
 % how many iterations with the same source?
-change_freq_every = 10;          % how many iterations with the same freq?
+change_freq_every = 20;          % how many iterations with the same freq?
 
 
 

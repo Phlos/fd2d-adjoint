@@ -54,13 +54,20 @@ disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 
 %% OBS
 
+obs_file = [output_path,'/obs.all-vars.mat'];
 % freq consists of freqs.v_obs and freqs.frequency
-if ~exist('sObsPerFreq','var') || ~exist('t_obs','var') || ...
+if ((~exist('sObsPerFreq','var') || ~exist('t_obs','var') || ...
         ~exist('Model_real','var') || ~exist('props_obs','var') || ...
-        ~exist('g_obs','var')
+        ~exist('g_obs','var'))  && exist(init_misfit_file, 'file'))
+    disp 'loading OBS file...'
+    load(obs_file);
+elseif (~exist('sObsPerFreq','var') || ~exist('t_obs','var') || ...
+        ~exist('Model_real','var') || ~exist('props_obs','var') || ...
+        ~exist('g_obs','var'))
     if istart == 1
         disp 'no OBS present, preparing obs...';
         [Model_real, sObsPerFreq, t_obs, props_obs, g_obs] = prepare_obs(output_path,true_model_type);
+        save(savename, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v6');
     else
         error('iter > 1 but there are no observed properties!')
     end
@@ -69,7 +76,7 @@ else
 end
 
 
-savename = [output_path,'/obs.all-vars.mat'];
+% savename = [output_path,'/obs.all-vars.mat'];
 if ~(exist(savename, 'file'))
     disp 'saving obs variables to matfile...'
     save(savename, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v6');
@@ -140,6 +147,8 @@ elseif ~exist('misfit_init', 'var')
     disp 'calculating initial misfits'
     misfit_init = calc_initial_misfits(Model(1), sObsPerFreq, g_obs);
     save(init_misfit_file, 'misfit_init', '-v6');
+else
+    disp 'initial misfits already present... proceeding...';
 end
 
 %% set initial inversion values
@@ -192,6 +201,13 @@ end
 
 m = map_parameters_to_m(Model(1), usr_par);
 
+% prepare L-BFGS options
+options.verbose = true;
+options.max_iterations = cfe;
+options.init_step_length = stap;
+options.tolerance = 1e-13;
+options.output_file = output_log;
+
 output_log = [output_path,'/lbfgs_output_log.txt'];
 
 % loop over L-BFGS calls at different frequencies
@@ -219,7 +235,7 @@ for ifreq = 1:nfreq
 %     m = map_parameters_to_m(usr_par.Model(end), usr_par);
     
     % run L-BFGS
-    [flag,mfinal, usr_par]=optlib_lbfgs(m,usr_par,stap, 1e-13, cfe, output_log);
+    [flag,mfinal, usr_par]=optlib_lbfgs(m, options, usr_par);
     
     m = mfinal;
 end
