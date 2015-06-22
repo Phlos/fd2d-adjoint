@@ -1,18 +1,14 @@
-function [flag,mfinal, usr_par]=optlib_lbfgs(m0, usr_par, initial_steplength, tolerance, max_iterations, output_file)
+function [flag,mfinal, usr_par]=optlib_lbfgs(m0, options, usr_par)
 %
 %
 
-%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    % constants 0<del<theta<1, del<1/2 for strong Wolfe condition
-    delta=0.001;
-    theta=0.6;
-    % constant 0<al<1 for sufficient decrease condition
-    alpha=0.001;
-%+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  
+options = optlib_init_default_parameters_lbfgs(options);
 
+if (options.verbose)
+    options
+end
 
-fid = fopen(output_file,'a+');
+fid = fopen(options.output_file,'a+');
 it=0;
 
 model.m = m0;
@@ -32,9 +28,11 @@ fprintf(fid,'it=%d   j=%e   ||g||=%e  \n',it,model.objective,model.normg);
 [previous_models, previous_gradients] = optlib_restore_lbfgs_information(usr_par);
 
 if (size(previous_models,2) > 0)
-    disp 'restoring previous models...'
+    if (options.verbose)
+        disp 'restoring previous models...'
+    end
    l_history = size(previous_models,2);
-   lmax = max(5,l_history);
+   lmax = max(options.max_memory,l_history);
     
     P=zeros(size(m0,1),lmax);
     D=zeros(size(m0,1),lmax);
@@ -58,8 +56,10 @@ if (size(previous_models,2) > 0)
     ln=min(lmax, l_history);
 
 else
-    disp 'not restoring previous models...'
-    lmax=5;
+    if (options.verbose)
+        disp 'not restoring previous models...'
+    end
+    lmax=options.max_memory;
     P=zeros(size(m0,1),lmax);
     D=zeros(size(m0,1),lmax);
     ga=zeros(lmax,1);
@@ -72,7 +72,8 @@ end
 
 
 % main loop
-while (model.normg>tolerance*normg0 && it < max_iterations)
+while (model.normg > options.tolerance *normg0 && ...
+       it < options.max_iterations)
     
     it=it+1;
 
@@ -84,7 +85,12 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
         ga(i)=rho(i)*(P(:,i)'*q);
         q=q-ga(i)*D(:,i);
     end
-    r=gak*q;
+    
+    %if(options.bfgs_init == 0)
+        r=gak*q;
+    %else
+    %    
+    %end
     for j=l:-1:1
         i=mod(ln-j-1,lmax)+1;
         be=rho(i)*(D(:,i)'*r);
@@ -95,7 +101,8 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
 
     % check if BFGS-step provides sufficient decrease; else take gradient
     stg=s'*g;
-    if stg<min(alpha,model.normg)*model.normg*norm(s)
+    if ( stg / (model.normg*norm(s)) < options.sufficient_decrease_angle )
+        fprintf(fid, '\tWarning: Bad angle of search direction. Use steepest descent instead.\n');
         s=g;
         stg=s'*g;
         step='Grad';
@@ -105,7 +112,7 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
     if (it==1)
         % TODO: provide alternative guess of the initial step length based
         % on relative model perturbations
-        sigma=initial_steplength;
+        sigma=options.init_step_length;
     else
         sigma = 1.0;
     end
@@ -113,9 +120,16 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
     % TODO: use quadratic approximation to compute step-length 
     % for iteration 1
     %[sigma,objective_new,gn]=optlib_wolfe(m,s,stg,objective,delta,theta,sigma,usr_par);
-    [sigma,model_new]=optlib_wolfe(model.m,s,stg, model.objective, delta,theta,sigma,usr_par);
+    [sigma,model_new]=optlib_wolfe(model.m,s,stg, model.objective, ...
+                                   options.wolfe_delta, ...
+                                   options.wolfe_theta, ...
+                                   sigma, ...
+                                   options.wolfe_try_to_increase_step_length, ...
+                                   usr_par);
 
-    disp 'new model found.';
+    if (options.verbose)
+        disp 'new model found.';
+    end
     mn=model_new.m;
     gn=model_new.gradient;
     model_new.normg = norm(model_new.gradient);
@@ -135,6 +149,8 @@ while (model.normg>tolerance*normg0 && it < max_iterations)
         P(:,ln)=p;
         l=min(l+1,lmax);
         ln=mod(ln,lmax)+1;
+        
+        % always scale initial guess
         %  if l==lmax
             gak=dtp/(d'*d);
         % end
