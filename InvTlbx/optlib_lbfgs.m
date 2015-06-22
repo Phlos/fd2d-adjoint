@@ -166,7 +166,7 @@ while (model.normg > options.tolerance *normg0 && ...
 end
 
 
-if (model.normg<=tolerance*normg0)
+if (model.normg<=options.tolerance*normg0)
     fprintf(fid,'Successful termination with ||g||<%e*min(1,||g0||):\n',tolerance);
     flag = 0;
 else
