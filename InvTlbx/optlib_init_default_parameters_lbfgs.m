@@ -41,11 +41,11 @@ function [options] = optlib_init_default_parameters_lbfgs(options)
     end
 
     if (~isfield (options, 'max_iterations') )
-        options.max_iterations = '100';
+        options.max_iterations = 100;
     end
 
     if (~isfield (options, 'tolerance') )
-        options.tolerance = '1e-3';
+        options.tolerance = 1e-3;
     end
 
 end
