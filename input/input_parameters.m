@@ -51,7 +51,7 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 7e7;         % PREM + 1% vs anomalies
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
-stepInit = 1e7;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
+stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -188,7 +188,7 @@ f_minlist = [0.006667 0.006667 0.006667]; % 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
 f_maxlist = [0.006667 0.008667 0.011267]; % 0.014647 ];
 % how many iterations with the same source?
-change_freq_every = 15;          % how many iterations with the same freq?
+change_freq_every = 10;          % how many iterations with the same freq?
 
 
 

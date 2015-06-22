@@ -14,6 +14,8 @@ function [gm] = eval_grad_objective(m, ModRandString, usr_par)
 
 % [jm, gm] = eval_objective_and_gradient(m, usr_par);
 
+disp('----evaluating gradient only');
+
 %% initialise stuff
 input_parameters; 
 
@@ -38,7 +40,7 @@ output_path = usr_par.output_path;
 TempFolder = [output_path,'/fwd_temp/'];
 ModFolder = [output_path,'/fwd_temp/',ModRandString,'/'];
 
-% move the files from the model subfolder to the temp folder
+% move the mat-files from the model subfolder to the temp folder
 blips = dir([ModFolder,'*.mat']);
 for ii = 1:numel(blips)
     bestand = blips(ii).name;
@@ -69,7 +71,7 @@ if strcmp(use_grav,'yes')
     disp(['calculating gravity kernel']);
     
     % calculating the gravity kernel
-    [Kg_temp, fig_Kg] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
+    [Kg_temp] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
 
     % normalising the gravity kernel
     Kg = norm_kernel(Kg_temp, normalise_misfits, ...
@@ -126,17 +128,17 @@ K_rel = calculate_relative_kernels(K_reparam, Model_bg);
 % filter kernels
 K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
 
+%% move matfiles back to model folder
+
+for ii = 1:numel(blips)
+    bestand = blips(ii).name;
+    oldfile = [TempFolder,bestand];
+    newfile = [ModFolder,bestand];
+    movefile(oldfile,newfile);
+end; 
+
 %% convert the obtained gradient back to same struc as m
-switch parametrisation
-    case 'rhomulambda'
-        gm = [K_rel.rho.total(:); ...
-            K_rel.mu.total(:); ...
-            K_rel.lambda.total(:)];
-    case 'rhovsvp'
-        gm = [K_rel.rho2.total(:); ...
-            K_rel.vs2.total(:); ...
-            K_rel.vp2.total(:)];
-end
+gm = map_gradparameters_to_gradm(K_rel, usr_par);
 
 % usr_par.Kseis(iter)   = Kseis;
 % usr_par.Kg{iter}      = Kg;

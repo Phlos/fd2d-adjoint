@@ -38,7 +38,7 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,usr_par)
         xnn_string = optlib_generate_random_string(8);
         [fnn,gnn] = eval_objective_and_gradient(xnn, xnn_string, usr_par);
 
-        while (gn'*s>theta*stg)&(f-fnn>=2*del*sig*stg)
+        while (gn'*s>theta*stg)&&(f-fnn>=2*del*sig*stg)
             sig=2*sig;
             xn=xnn;
             fn=fnn;

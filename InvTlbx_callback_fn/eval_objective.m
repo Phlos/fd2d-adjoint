@@ -12,6 +12,8 @@ function [jm] = eval_objective(m, ModRandString, usr_par)
 %
 % See also EVAL_GRAD_OBJECTIVE and EVAL_OBJECTIVE_AND_GRADIENT.
 
+disp('----evaluating objective only');
+
 %% initialise stuff
 misfit_init = usr_par.misfit_init;
 whichFrq    = usr_par.whichFrq;
@@ -34,7 +36,7 @@ disp(['calculating current misfit']);
         giter, g_src, sEventRecIter, sEventAdstfIter] = calc_misfits(Model, ...
                   g_obs, misfit_init(whichFrq).grav , ...
                   sEventInfo, sEventObs, misfit_init(whichFrq).seis, ...
-                  'nosavefields','yessaveplots');
+                  'yessavefields','noplot', 'nosaveplots');
 
 % InvProps.misfit(iter) = misfit_total;
 % InvProps.misfitseis(iter) = misfit_seis;
@@ -46,6 +48,8 @@ ModFolder = [output_path,'/fwd_temp/',ModRandString,'/'];
 mkdir(ModFolder)
 save([ModFolder,'model-adstf.mat'], ...
     'ModRandString', 'Model', 'sEventAdstfIter', 'g_src', '-v6');
+save([ModFolder,'iter-rec.mat'], ...
+    'ModRandString', 'Model', 'sEventRecIter', '-v6');
 
 blips = dir([TempFolder,'*.mat']);
 for ii = 1:numel(blips)
@@ -59,9 +63,9 @@ end; clearvars blips;
 %% OUTPUT to Inversion Toolbox structure
 jm = misfit_total;
 
-usr_par.g_src           = g_src;
-usr_par.sEventRecIter   = sEventRecIter;
-usr_par.sEventAdstfIter = sEventAdstfIter;
+% usr_par.g_src           = g_src;
+% usr_par.sEventRecIter   = sEventRecIter;
+% usr_par.sEventAdstfIter = sEventAdstfIter;
 
 % usr_par.InvProps = InvProps;
 % usr_par.misfit_total  = misfit_total;

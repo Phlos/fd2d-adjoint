@@ -72,7 +72,7 @@ narg = length(arg);
 if narg == 1
     colormap(arg{1})
 elseif narg == 0;
-    load '../code/propagation/cm_velocity.mat';
+    load './code/propagation/cm_velocity.mat';
     colormap(cm);
 else
     error('wrong number of variable arguments')

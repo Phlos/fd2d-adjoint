@@ -13,7 +13,8 @@ function [misfit_total, misfit_seis, misfit_grav, ...
     input_parameters;
     [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
     
-    output_path = '../output/';
+    % project folder
+    output_path = ['./output/',project_name,'/'];
     
     
     nsrc = length(sEventObs);

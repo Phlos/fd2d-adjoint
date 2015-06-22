@@ -25,3 +25,7 @@ path(path,'./mtit')
 path(path,'./quivers/')
 path(path,'./externaltools');
 path(path,'./InvTlbx_callback_fn');
+path(path,'./InvTlbx');
+
+%- if error, go to debug mode
+dbstop if error

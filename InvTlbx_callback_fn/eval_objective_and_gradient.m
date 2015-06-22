@@ -1,5 +1,5 @@
  
-function [jm, gm] = eval_objective_and_gradient(m, usr_par)
+function [jm, gm] = eval_objective_and_gradient(m, ModRandString, usr_par)
 % EVAL_OBJECTIVE_AND_GRADIENT function to evaluate the objective function and
 % to evaluate the gradient at a given model m.
 %
@@ -13,6 +13,7 @@ function [jm, gm] = eval_objective_and_gradient(m, usr_par)
 %
 % See also EVAL_OBJECTIVE and EVAL_GRAD_OBJECTIVE.
 
+disp('----evaluating objective AND gradient');
 
 %% initialise stuff
 input_parameters;
@@ -45,24 +46,22 @@ disp(['calculating current misfit']);
         giter, g_src, sEventRecIter, sEventAdstfIter] = calc_misfits(Model, ...
                   g_obs, misfit_init(whichFrq).grav , ...
                   sEventInfo, sEventObs, misfit_init(whichFrq).seis, ...
-                  'yessavefields','yessaveplots');
+                  'yessavefields','noplot','yessaveplots');
 
 % InvProps.misfit(iter) = misfit_total;
 % InvProps.misfitseis(iter) = misfit_seis;
 % InvProps.misfitgrav(iter) = misfit_grav;
 
-% % save model and forward field info to file
-% mkdir([output_path,'/fwd_temp/',ModRandString])
-% save([output_path,'/fwd_temp/',ModRandString,'model-adstf.mat'], ...
-%     'ModRandString', 'Model', 'sEventAdstfIter', '-v6');
-% 
-% blips = dir([output_path,'/fwd_temp/*.mat']);
-% for ii = 1:numel(blips)
-%     bestand = blips(ii).name;
-%     oldfile = [output_path,'/fwd_temp/',bestand];
-%     newfile = [output_path,'/fwd_temp/',ModRandString,'/',bestand];
-%     movefile(oldfile,newfile);
-% end; clearvars blips;
+% save model and forward field info to file
+TempFolder = [output_path,'/fwd_temp/'];
+ModFolder = [output_path,'/fwd_temp/',ModRandString,'/'];
+mkdir(ModFolder)
+save([ModFolder,'model-adstf.mat'], ...
+    'ModRandString', 'Model', 'sEventAdstfIter', 'g_src', '-v6');
+save([ModFolder,'iter-rec.mat'], ...
+    'ModRandString', 'Model', 'sEventRecIter', '-v6');
+
+
 
 %% calculate gradients
 
@@ -152,5 +151,15 @@ end
 % usr_par.misfit_total  = misfit_total;
 % usr_par.misfit_seis   = misfit_seis;
 % usr_par.misfit_grav   = misfit_grav;
+
+%% move saved matfiles to model specific folder
+
+blips = dir([TempFolder,'*.mat']);
+for ii = 1:numel(blips)
+    bestand = blips(ii).name;
+    oldfile = [TempFolder,bestand];
+    newfile = [ModFolder,bestand];
+    movefile(oldfile,newfile);
+end; clearvars blips;
 
 end
