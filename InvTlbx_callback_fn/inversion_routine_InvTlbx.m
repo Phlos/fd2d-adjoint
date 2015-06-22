@@ -201,12 +201,7 @@ end
 
 m = map_parameters_to_m(Model(1), usr_par);
 
-% prepare L-BFGS options
-options.verbose = true;
-options.max_iterations = cfe;
-options.init_step_length = stap;
-options.tolerance = 1e-13;
-options.output_file = output_log;
+
 
 output_log = [output_path,'/lbfgs_output_log.txt'];
 
@@ -230,6 +225,13 @@ for ifreq = 1:nfreq
     else
         stap = 1.0;
     end
+    
+    % prepare L-BFGS options
+    options.verbose = true;
+    options.max_iterations = cfe;
+    options.init_step_length = stap;
+    options.tolerance = 1e-13;
+    options.output_file = output_log;
     
 %     % retrieve model
 %     m = map_parameters_to_m(usr_par.Model(end), usr_par);
