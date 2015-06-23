@@ -114,7 +114,8 @@ function fig_knl = plot_kernels(K, varargin)
     
     % plotting the colorbar from -max to max
     h = colorbar('horiz');
-    lmt = get(h, 'Limits');
+    lmt = caxis;
+    %lmt = get(h, 'Limits');
     set(h,'XTick',[lmt(1) 0 lmt(2)])
     set(h,'Xticklabel',{'-max','0', 'max'})
     set(h,'Position',[0.3 0.05 0.4 0.02])

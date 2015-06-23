@@ -70,7 +70,8 @@ for irows = 1:nrec;
          end
          
         if ~(max(vobs) == 0 && max(vrec) == 0)
-            maks = max(maks, max(subfiguur(iplot).YLim));
+            maks = max(maks, max(ylim(subfiguur(iplot))));
+           %maks = max(maks, max(subfiguur(iplot).YLim));
         end
         
         
@@ -95,7 +96,8 @@ for irows = 1:nrec;
 end
 
 linkaxes(subfiguur, 'y');
-subfiguur(iplot).YLim = [-maks maks];
+ylim(subfiguur(iplot), [-maks maks]);
+%subfiguur(iplot).YLim = [-maks maks];
 
 end
 
