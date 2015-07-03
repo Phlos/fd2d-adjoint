@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='InvTlbx.test-007b.like-006-but-rec-g-at-20000m-not-200';
+project_name='InvTlbx.test-008.only-6-circles';
 
 %==========================================================================
 % inversion properties
@@ -51,8 +51,8 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 7e7;         % PREM + 1% vs anomalies
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
-% stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-stepInit = 10; % test step for hard edged circles
+stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
+
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
