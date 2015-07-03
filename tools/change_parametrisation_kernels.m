@@ -43,7 +43,7 @@ switch outparam
     case 'rhovsvp'
         
         if isfield(Kin, 'rho2') && isfield(Kin, 'vs2') && isfield(Kin, 'vp2')
-            warning('your infields already has the parametrisation you want');
+%             warning('your infields already has the parametrisation you want');
             Kout = Kin;
         end
         

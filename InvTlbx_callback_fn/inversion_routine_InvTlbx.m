@@ -94,10 +94,10 @@ Model_start = update_model();
 % save background model (for plotting purposes)
 Model_bg = update_model(bg_model_type);
 
-% set the background values for plot_model to mode of the initial model
-middle.rho    = mode(Model_start.rho(:));
-middle.mu     = mode(Model_start.mu(:));
-middle.lambda = mode(Model_start.lambda(:));
+% % set the background values for plot_model to mode of the initial model
+% middle.rho    = mode(Model_start.rho(:));
+% middle.mu     = mode(Model_start.mu(:));
+% middle.lambda = mode(Model_start.lambda(:));
 
 
 % plot initial model
@@ -232,12 +232,12 @@ for ifreq = 1:nfreq
     options.init_step_length = stap;
     options.tolerance = 1e-13;
     options.output_file = output_log;
-    
+%     options.wolfe_try_to_increase_step_length = true;
 %     % retrieve model
 %     m = map_parameters_to_m(usr_par.Model(end), usr_par);
     
     % run L-BFGS
-    [flag,mfinal, usr_par]=optlib_lbfgs(m, options, usr_par);
+    [flag, mfinal, usr_par]=optlib_lbfgs(m, options, usr_par);
     
     m = mfinal;
 end

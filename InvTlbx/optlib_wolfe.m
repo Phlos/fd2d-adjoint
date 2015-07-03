@@ -79,12 +79,13 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
         end
         sigp=2*sig;
 
-        % Perform bisektion until sig satisfies also the Wolfe condition
+        % Perform bisection until sig satisfies also the Wolfe condition
         while (gn'*s>theta*stg)
             sigb=0.5*(sig+sigp);
             xb=xj-sigb*s;
             xb_string = optlib_generate_random_string(8);
             if (verbose)
+                fprintf( 'inside bisection loop \n' );
                 fprintf( 'requesting new misfit to test Wolfe condition.\n' );
                 fprintf( 'testing step length %f...\n',  sigb);
             end

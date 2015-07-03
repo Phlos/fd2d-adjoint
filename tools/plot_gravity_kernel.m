@@ -4,10 +4,10 @@ function fig_Kg = plot_gravity_kernel(Kg)
 input_parameters;
 [X,Z,~,~]=define_computational_domain(Lx,Lz,nx,nz);
 
-load '../code/propagation/cm_velocity.mat';
+load './code/propagation/cm_velocity.mat';
 
 % smooth kernel
-Kg_sm = filter_kernel(Kg, smoothgwid);
+Kg_sm = filter_2Dfield(Kg, smoothgwid);
 
 %- output figure
 fig_Kg = figure;

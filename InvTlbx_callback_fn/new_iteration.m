@@ -1,4 +1,3 @@
-% function [usr_par] = new_iteration( m, it, usr_par) 
 function [usr_par] = new_iteration( it, m, ModRandString, jm, gm, usr_par) 
 % NEW_ITERATION This auxiliary function is called before a new iteration is started.
 % You might use it for writing output files, plotting, ...
@@ -36,7 +35,12 @@ Model_bg    = usr_par.Model_bg;
 % end
 % 
 % 
-%% load model in usable format
+%% preparation
+
+% domain
+[X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
+
+% convert model to usable format
 [Model] = map_m_to_parameters(m, usr_par);
 K_rel   = map_gradm_to_gradparameters(gm, usr_par);
 
@@ -65,21 +69,34 @@ print(fig_mod,'-dpng','-r400',figname);
 close(fig_mod);
 clearvars('fig_mod');
 
+% load obs information belonging to the current ModRandString
+ModFolder = [output_path,'/fwd_temp/',ModRandString,'/'];
+load([ModFolder,'iter-rec.mat']);
+
+% gravity difference
+fig_grav_comp = plot_gravity_quivers(usr_par.rec_g, g_recIter, usr_par.g_obs, ...
+                X, Z, Model.rho);
+figname = [output_path,'/iter.',num2str(iter,'%03d'),'.gravity_difference.png'];
+titel = ['gravity diff of model - real model (iter ', num2str(iter), ')'];
+mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.00001);
+print(fig_grav_comp, '-dpng', '-r400', figname);
+close(fig_grav_comp); clearvars('fig_grav_comp');
+
 
 % seismograms
 disp 'plotting seis?'
-% for isrc = 1:nsrc
-%     % determine how many seismograms are actually plotted
-%     if length(vel) > 8; recs = [2:2:length(vel)]; end
-%     
-%     if strcmp(obsPresent, 'yes');
-%         vobs = sEventObs(isrc).vel;
-%         fig_seis(isrc) = plot_seismogram_difference(vel, vobs, t, recs);
-%     else
-%         vobs = make_seismogram_zeros(vel);
-%         fig_seis(isrc) = plot_seismogram_difference(vel, vobs, t, recs, 'nodiff');
-%     end
-% end
+for isrc = 1:nsrc
+    vel = sEventRecIter(isrc).vel;
+    vobs = usr_par.sEventObs(isrc).vel;
+    t   = sEventRecIter(isrc).t;
+    recs = 1:length(vel);
+    % determine how many seismograms are actually plotted
+    if length(vel) > 8; recs = [2:2:length(vel)]; end
+    % actual plotting
+    fig_seisdif = plot_seismogram_difference(vel, vobs, t, recs);
+    figname = [output_path,'/iter.',num2str(iter,'%03d'),'.seisdif.src',num2str(isrc),'.png'];
+    print(fig_seisdif,'-dpng','-r400',figname); close(fig_seisdif);
+end
 
 % 
 % % gravity kernel (if applicable)

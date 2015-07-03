@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='InvTlbx.test-003d-RE-RE-RERUN.20-iters-per-freq';
+project_name='InvTlbx.test-007b.like-006-but-rec-g-at-20000m-not-200';
 
 %==========================================================================
 % inversion properties
@@ -51,7 +51,8 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 7e7;         % PREM + 1% vs anomalies
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
-stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
+% stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
+stepInit = 10; % test step for hard edged circles
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -103,7 +104,7 @@ use_matfile_startingmodel = 'no';
 starting_model = '';
 
 bg_model_type = 50;     % PREM (for plotting)
-true_model_type = 54;   % PREM + rho2 anoms
+true_model_type = 70;   % PREM + circle anomalies non-overlapping rho-vs-vp
 model_type=50;          % PREM
 
 % 1=homogeneous 
@@ -184,9 +185,9 @@ end
                     
                     
 %- source filtering
-f_minlist = [0.006667 0.006667 0.006667]; % 0.006667];
+f_minlist = [0.006667 0.006667 0.006667 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667 0.011267]; % 0.014647 ];
+f_maxlist = [0.006667 0.008667 0.011267 0.014647 ];
 % how many iterations with the same source?
 change_freq_every = 20;          % how many iterations with the same freq?
 
@@ -246,7 +247,7 @@ rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)
 %==========================================================================
 
 %- a line of gravity receivers above the domain
-rec_height = 200; % m
+rec_height = 20000; % m
 nrec_g = 50;
 rec_g.x= (0: 1: nrec_g) * (Lx/nrec_g);
 rec_g.z=ones(size(rec_g.x)) * (Lz + rec_height);

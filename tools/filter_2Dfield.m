@@ -33,7 +33,6 @@ Kf = zeros(size(K));
 %- ACTUAL FILTERING
 
 %- Filtering in y-direction.
-
 for j=1:ny
     
     %- Gaussian.
@@ -47,10 +46,11 @@ for j=1:ny
         Kfy(j,i)=sum(K(:,i).*g')/N;
     end
 
+    
+    
 end
 
 %- Filtering in x-direction.
-
 for i=1:nx
     
     %- Gaussian.
@@ -63,8 +63,14 @@ for i=1:nx
     for j=1:ny 
         Kf(j,i)=sum(Kfy(j,:).*g)/N;
     end
+    
+    
 
 end
-    
+
+% figure; pcolor(Kfy'); scale = max(abs(Kfy(:))); caxis([-scale scale]); shading interp; axis image; colorbar;
+% figure; pcolor(Kf'); scale = max(abs(Kf(:))); caxis([-scale scale]); shading interp; axis image; colorbar;    
+% figure; pcolor(Kfy'); scale = prctile(abs(Kfy(:)),98); caxis([-scale scale]); shading interp; axis image; colorbar;
+% figure; pcolor(Kf'); scale = prctile(abs(Kf(:)),98); caxis([-scale scale]); shading interp; axis image; colorbar;    
 end
 

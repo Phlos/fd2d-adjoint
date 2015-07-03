@@ -18,21 +18,21 @@ Model_real = checkargs(varargin(:));
 
 % real - background model
 Mbg = update_model(bg_model_type);
-% fig_mod_diff = plot_model_diff(Model_real, Mbg, 'rhovsvp');
-% mtit(fig_mod_diff, 'real - bg model -- rho-vs-vp parametrisation');
-% figname = [output_path,'/obs.model-real-diff-bg.rhovsvp.png'];
-% print(fig_mod_diff, '-dpng', '-r400', figname);
-% close(fig_mod_diff);
+fig_mod_diff = plot_model_diff(Model_real, Mbg, 'rhovsvp');
+mtit(fig_mod_diff, 'real - bg model -- rho-vs-vp parametrisation');
+figname = [output_path,'/obs.model-real-diff-bg.rhovsvp.png'];
+print(fig_mod_diff, '-dpng', '-r400', figname);
+close(fig_mod_diff);
 
 % h.c. model properties for real model
 props_obs = calculate_model_properties(Model_real.rho, 'x');
 
 % gravity field of real model
 [g_obs, fig_grav_obs] = calculate_gravity_field(Model_real.rho, rec_g);
-% figname = [output_path,'/obs.gravityrecordings.png'];
-% mtit(fig_grav_obs, 'gravity field of real model');
-% print(fig_grav_obs, '-dpng', '-r400', figname);
-% close(fig_grav_obs);
+figname = [output_path,'/obs.gravityrecordings.png'];
+mtit(fig_grav_obs, 'gravity field of real model');
+print(fig_grav_obs, '-dpng', '-r400', figname);
+close(fig_grav_obs);
 
 %% source time function
 sEventInfoUnfilt = prepare_stf();
