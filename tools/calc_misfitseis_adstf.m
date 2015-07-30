@@ -118,17 +118,18 @@ for irec = 1:nrec
     %         figure(bips)
     %         subplot(3,1,2); plot(t,adstf_temp); title('adstf');
             
-            % taper adstf_temp
-            taper_width=t(end)/10;   % why divide by ten??
-            lmax = taper_width;
-            rmax = t(end) - taper_width;
-            if (left < taper_width) || (right > t(end) - taper_width)
-                left = max(left,lmax);
-                right = min(right,rmax);
-            end
-
-            adstf_temp = taper(fliplr(adstf_temp),t,left,right,taper_width);
-            adstf_temp = fliplr(adstf_temp);
+%% taper adstf_temp
+%% --> moved to misfit_wavef_L2
+%            taper_width=t(end)/10;   % why divide by ten??
+%            lmax = taper_width;
+%            rmax = t(end) - taper_width;
+%            if (left < taper_width) || (right > t(end) - taper_width)
+%                left = max(left,lmax);
+%                right = min(right,rmax);
+%            end
+%
+%            adstf_temp = taper(fliplr(adstf_temp),t,left,right,taper_width);
+%            adstf_temp = fliplr(adstf_temp);
     %         figure(bips)
     %         subplot(3,1,3); plot(t,adstf_temp); title('tapered'),
             
@@ -149,8 +150,8 @@ for irec = 1:nrec
             
             % give the adstf the right magnitude so that the spatial integral
             % is 1 (because the stf/adstf are spatial delta functions)
-            adstf_temp = adstf_temp / dx / dz;
-            
+            adstf_temp = adstf_temp; % / dx / dz;
+
             adstf{irec}.(comp{icomp}) = adstf_temp;
             
             % misfit
@@ -364,10 +365,41 @@ u_0 = cumsum(v_0,2)*dt;
 
 adstf=u-u_0;
 
-%- time-reverse the adjoint stf
-adstf = fliplr(adstf);
+taper_width=t(end)/10;   % why divide by ten??
+t_min = taper_width;
+t_max = t(end) - taper_width;
+
+tw=get_taper_weights(t, t_min, t_max, taper_width);
+
+adstf=adstf.*tw;
 
 misfit=sum(adstf.*adstf) * dt;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The misfit functional is given by
+% \[
+%   j(m) = \frac{1}{2}\int_0^T ( w_i(t)(u(t) - u_{\text{obs}}(t)))^2\,dt,
+% \]
+% where the w_i's are the taper weights.
+% Hence,
+% \[
+%   (\frac{\partial}{\partial u} j(m), \delta u) = \int_0^T ( w_i(t)(u(t) - u_{\text{obs}}(t)), w_i(t) * \delta u(t))\,dt.
+% \]
+% i.e., the adjoint source is
+% \[
+%   f_\text{adj}(t) w_i(t)^2(u(t) - u_{\text{obs}}(t)
+% \]
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%- time-reverse the adjoint stf and apply taper weights again
+adstf=adstf.*tw;
+adstf = fliplr(adstf);
+
+
+
+% careful: dt is currently one so this should have no influence
+adstf = adstf * 2;
+
 
 
 end
