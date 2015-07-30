@@ -46,6 +46,7 @@ end
 
         if strcmp(plotornot,'yesplot')
             % determine how many seismograms are actually plotted
+            recs=nrec;
             if length(vel) > 8; recs = [2:2:length(vel)]; end
             
             if strcmp(obsPresent, 'yes');
