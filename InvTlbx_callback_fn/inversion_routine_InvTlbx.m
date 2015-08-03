@@ -9,7 +9,7 @@ istart = 1;
 niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
-[project_name, ~, apply_hc, use_grav, fix_velocities, ...
+[project_name, ~, apply_hc, use_grav, use_seis, fix_velocities, ...
     use_matfile_startingmodel, starting_model, bg_model_type,...
     true_model_type, ~, change_freq_every, ...
     parametrisation, param_plot, rec_g, ~, ~, ~, ...
@@ -27,11 +27,16 @@ savename = [output_path,project_name,'.input_parameters.m'];
 copyfile('./input/input_parameters.m',savename)
 
 %% welcome
-
+% 
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '======================================';
 disp(['INVERSION RUN ', project_name]);
 disp(['-- parametrisation:  ', parametrisation]);
+if strcmp(use_seis , 'yesseis')
+    disp '-- using seis? ..... YES!!'
+else
+    disp '-- using seis? ..... no'
+end
 disp '-- using seis? ..... YES!!'
 if strcmp(use_grav , 'yes')
     disp '-- using grav? ..... YES!!'
@@ -173,7 +178,7 @@ usr_par.InvProps        = InvProps;
 usr_par.Model(1)        = Model(1);
 usr_par.sObsPerFreq     = sObsPerFreq;
 usr_par.misfit_init     = misfit_init;
-% usr_par.whichFrq        = whichFrq;
+usr_par.whichFrq        = whichFrq;
 usr_par.g_obs           = g_obs;
 usr_par.sEventInfo      = sEventInfo;
 usr_par.sEventObs       = sEventObs;
@@ -194,7 +199,7 @@ end
 % remove old fwd fields
 TempFolder = [output_path,'/fwd_temp'];
 if (exist(TempFolder, 'dir'))
-    rmdir([output_path,'/fwd_temp'], 's');
+    rmdir(TempFolder, 's');
 end
 
 % call steepest gradient, L-BFGS, something else.

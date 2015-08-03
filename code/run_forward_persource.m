@@ -96,7 +96,7 @@ for ii = 1:numel(args)
             saveFwdFields = args{ii};
         end
     else
-        error(['Obs input ',args{ii}, ' to run_foward_persource is ambiguous']);
+        error(['Obs input nr',num2str(ii), ': ',args{ii}, ' to run_foward_persource is ambiguous']);
     end
 end
     

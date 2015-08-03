@@ -27,14 +27,14 @@ g_obs       = usr_par.g_obs;
 sEventInfo  = usr_par.sEventInfo;
 sEventObs   = usr_par.sEventObs;
 Model_bg    = usr_par.Model_bg;
-InvProps    = usr_par.InvProps;
+% InvProps    = usr_par.InvProps;
 % iter        = usr_par.iter;
 
 % inversion stuff
 output_path     = usr_par.output_path;
-parametrisation = usr_par.parametrisation;
-use_grav        = usr_par.use_grav;
-smoothgwid      = usr_par.smoothgwid;
+% parametrisation = usr_par.parametrisation;
+% use_grav        = usr_par.use_grav;
+% smoothgwid      = usr_par.smoothgwid;
 
 
 %% convert variable structures InvTbx -> my structures
@@ -84,18 +84,19 @@ if strcmp(use_grav,'yes')
 end
 
 % seismic
-disp ' ';
-disp(['calculating seismic kernels']);
-[Kseis_temp, sEventKnls_iter] = run_adjoint_persource(Model, sEventAdstfIter);
-
-% normalise kernels
-Kseis = norm_kernel(Kseis_temp, normalise_misfits, ...
-    misfit_init(whichFrq).seis);
-
+if strcmp(use_seis, 'yesseis')
+    disp ' ';
+    disp(['calculating seismic kernels']);
+    [Kseis_temp, sEventKnls_iter] = run_adjoint_persource(Model, sEventAdstfIter);
+    
+    % normalise kernels
+    Kseis = norm_kernel(Kseis_temp, normalise_misfits, ...
+        misfit_init(whichFrq).seis);
+end
 
 %% combine gradients to Ktotal
 
-if strcmp(use_grav,'yes')
+if strcmp(use_grav,'yes') && strcmp(use_seis, 'yesseis')
     % determine weight of respective kernels
     w_Kseis = 1;
     w_Kg = 1;
@@ -118,8 +119,22 @@ if strcmp(use_grav,'yes')
     K_total = change_parametrisation_kernels(parametrisation,'rhomulambda', Ktest,Model);
 
     clearvars('Ktest', 'Ktest1');
-else
+elseif ~strcmp(use_grav,'yes') && strcmp(use_seis, 'yesseis')
     K_total = Kseis;
+elseif strcmp(use_grav,'yes') && ~strcmp(use_seis, 'yesseis')
+    switch parametrisation
+        case 'rhomulambda'
+            K_total.rho.total = Kg;
+            K_total.mu.total = zeros(size(Kg));
+            K_total.lambda.total = zeros(size(Kg));
+        case 'rhovsvp'
+            Ktest.rho2.total = Kg;
+            Ktest.vs2.total = zeros(size(Kg));
+            Ktest.vp2.total = zeros(size(Kg));
+            K_total = change_parametrisation_kernels('rhovsvp', 'rhomulambda', Ktest, Model);
+    end
+else
+    error('help, NO data?!');
 end
 
 % reparametrising Kernel to inversion parametrisation
@@ -129,7 +144,8 @@ K_reparam = change_parametrisation_kernels('rhomulambda', parametrisation, K_tot
 K_rel = calculate_relative_kernels(K_reparam, Model_bg);
 
 % filter kernels
-K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
+disp('WARNING! Kernelsare not being filtered!!', 'r');
+% K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
 
 %% OUTPUT to Inversion Toolbox structure
 

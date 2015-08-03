@@ -363,8 +363,10 @@ dt = t(2) - t(1);
 u = cumsum(v,2)*dt;
 u_0 = cumsum(v_0,2)*dt;
 
-adstf=u-u_0;
+% waveform difference
+wavedif=u-u_0;
 
+%<<<<<<< Updated upstream
 taper_width=t(end)/10;   % why divide by ten??
 t_min = taper_width;
 t_max = t(end) - taper_width;
@@ -401,5 +403,12 @@ adstf = fliplr(adstf);
 adstf = adstf * 2;
 
 
+% =======
+% % misfit is waveform difference squared
+% misfit= 0.5 * sum(wavedif.*wavedif) * dt;
+%
+% %- time-reverse the waveform difference to get the adjoint stf
+% adstf = fliplr(wavedif);
+% >>>>>>> Stashed changes
 
 end

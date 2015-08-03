@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='InvTlbx.test-008.only-6-circles';
+project_name='CirclesRho.test-007.like-6-but-PSV';
 
 %==========================================================================
 % inversion properties
@@ -16,7 +16,8 @@ apply_hc = 'no';   % 'yes' or 'no'
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'yes'; % 'yes' or 'no'
+use_grav = 'no'; % 'yes' or 'no'
+use_seis = 'yesseis'; % 'yesseis' or 'noseis'
 
 % what misfit functional are we using
 misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift'
@@ -51,8 +52,8 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 7e7;         % PREM + 1% vs anomalies
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
-stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-
+% stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
+stepInit = 1e-3;
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -104,7 +105,7 @@ use_matfile_startingmodel = 'no';
 starting_model = '';
 
 bg_model_type = 50;     % PREM (for plotting)
-true_model_type = 70;   % PREM + circle anomalies non-overlapping rho-vs-vp
+true_model_type = 81;   % PREM + circle anomalies non-overlapping rho-vs-vp
 model_type=50;          % PREM
 
 % 1=homogeneous 
@@ -149,12 +150,13 @@ model_type=50;          % PREM
 % sources -- positions
 %==========================================================================
 
-nsrc = 4;
+nsrc = 1;
 
 %- line of sources near top of the domain
 src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
 dz = 1/16 * Lz;
-src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
+% src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
+src_z=ones(size(src_x)) * (2*dz);
 for ii = 1:nsrc
     src_info(ii).loc_x = src_x(ii);
     src_info(ii).loc_z = src_z(ii);
@@ -185,11 +187,11 @@ end
                     
                     
 %- source filtering
-f_minlist = [0.006667 0.006667 0.006667 0.006667];
+f_minlist = [0.006667];% 0.006667 0.006667 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667 0.011267 0.014647 ];
+f_maxlist = [0.006667];% 0.008667 0.011267 0.014647 ];
 % how many iterations with the same source?
-change_freq_every = 20;          % how many iterations with the same freq?
+change_freq_every = 10;          % how many iterations with the same freq?
 
 
 

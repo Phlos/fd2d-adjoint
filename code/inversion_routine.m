@@ -1,13 +1,13 @@
 %% preparation
 
 % number of iterations
-InvProps.niter = 60;
-istart = 2;
+InvProps.niter = 20;
+istart = 1;
 
 niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
-[project_name, axrot, apply_hc, use_grav, fix_velocities, ...
+[project_name, axrot, apply_hc, use_grav, use_seis, fix_velocities, ...
     use_matfile_startingmodel, starting_model, bg_model_type,...
     true_model_type, f_maxlist, change_freq_every, ...
     parametrisation, param_plot, rec_g, X, Z, misfit_type, ...
@@ -17,12 +17,12 @@ niter = InvProps.niter;
 % param_addknls = parametrisation;
 
 % project folder
-output_path = ['../output/',project_name,'/'];
-mkdir('../output/',project_name)
+output_path = ['./output/',project_name,'/'];
+mkdir('./output/',project_name)
 
 % save input_parameters to this path
 savename = [output_path,project_name,'.input_parameters.m'];
-copyfile('../input/input_parameters.m',savename)
+copyfile('./input/input_parameters.m',savename)
 
 %% welcome
 
@@ -30,6 +30,11 @@ disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 disp '======================================';
 disp(['INVERSION RUN ', project_name]);
 disp(['-- parametrisation:  ', parametrisation]);
+if strcmp(use_seis , 'yesseis')
+    disp '-- using seis? ..... YES!!'
+else
+    disp '-- using seis? ..... no'
+end
 disp '-- using seis? ..... YES!!'
 if strcmp(use_grav , 'yes')
     disp '-- using grav? ..... YES!!'
@@ -146,7 +151,7 @@ end
 
 for iter = istart : InvProps.niter;
 %   if i > 1
-        cd ../code;
+%         cd ../code;
         
         disp  ' ';
         disp  ' ';
@@ -228,7 +233,11 @@ for iter = istart : InvProps.niter;
             misfit_init(whichFrq).seis = misfit_seis;
             misfit_seis = 1;
             misfit_init(whichFrq).total = misfit_total;
-            misfit_total = 2;
+            if strcmp(use_seis, 'yesseis') && strcmp(use_grav, 'yes')
+                misfit_total = 2;
+            else
+                misfit_total = 1;
+            end
         end
         InvProps.misfit(iter) = misfit_total;
         InvProps.misfitseis(iter) = misfit_seis;
@@ -401,15 +410,15 @@ for iter = istart : InvProps.niter;
             Ktest = change_parametrisation_kernels('rhomulambda',parametrisation,Kseis(iter),Model(iter));
             switch parametrisation
                 case 'rhomulambda'
-                    Krho.seis = filter_kernels(Ktest.rho.total,smoothgwid);
-                    Krho.grav = filter_kernels(Kg{iter},smoothgwid);
+                    Krho.seis = filter_2Dfield(Ktest.rho.total,smoothgwid);
+                    Krho.grav = filter_2Dfield(Kg{iter},smoothgwid);
                     Ktest.rho.total = w_Kseis * Ktest.rho.total + w_Kg * Kg{iter};
-                    Krho.together = filter_kernels(Ktest.rho.total,smoothgwid);
+                    Krho.together = filter_2Dfield(Ktest.rho.total,smoothgwid);
                 case 'rhovsvp'
-                    Krho.seis = filter_kernels(Ktest.rho2.total,smoothgwid);
-                    Krho.grav = filter_kernels(Kg{iter},smoothgwid);
+                    Krho.seis = filter_2Dfield(Ktest.rho2.total,smoothgwid);
+                    Krho.grav = filter_2Dfield(Kg{iter},smoothgwid);
                     Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg{iter};
-                    Krho.together = filter_kernels(Ktest.rho2.total,smoothgwid);
+                    Krho.together = filter_2Dfield(Ktest.rho2.total,smoothgwid);
                 otherwise
                     error('the parametrisation in which kernels are added was unknown');
             end
@@ -435,12 +444,17 @@ for iter = istart : InvProps.niter;
        % plotting the density kernels seis + grav = total
        if strcmp(use_grav, 'yes')
            fig_Krho = plot_model(Krho);
+           % set colour limits
            maks = prctile(abs([Krho.seis(:); Krho.grav(:);Krho.together(:)]),99.5);
-           for ii = 2:2:6
-               fig_Krho.Children(ii).CLim = [-maks maks];
+           blips = findobj(fig_Krho, 'type', 'axes');
+           for ii = 1:3
+               blips(ii).CLim =  [-maks maks];
            end
+%            for ii = 2:2:6
+%                fig_Krho.Children(ii).CLim = [-maks maks];
+%            end
            titel = [project_name,' - buildup of density kernel - iter ',num2str(iter)];
-           mtit(fig_Krho,titel, 'xoff', 0.001, 'yoff', 0.04);
+           mtit(fig_Krho,titel); % 'xoff', 0.001, 'yoff', 0.04);
            figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernel-rho-buildup.png'];
            print(fig_Krho,'-dpng','-r400',figname); close(fig_Krho);
        end
@@ -588,11 +602,15 @@ disp '======================================';
 disp '|         ...FINISHING UP...         |';
 
 fig_end = plot_model_diff(Model(niter), Model_bg, 'rhovsvp');
-clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);
-for ii = 2:2:6; 
-%     clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);
-    fig_end.Children(ii).CLim = [-clim_rounded clim_rounded]; 
-end
+% blips = findobj(fig_Krho, 'type', 'axes');
+% for ii = 1:3
+%     blips(ii).CLim =  [-maks maks];
+% end
+% % clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);
+% % for ii = 2:2:6; 
+% % %     clim_rounded = 10*round(fig_end.Children(6).CLim(2) / 10);
+% %     fig_end.Children(ii).CLim = [-clim_rounded clim_rounded]; 
+% % end
 titel = [project_name, ' - Final - background model'];
 mtit(fig_end, titel); %, 'xoff', 0.001, 'yoff', 0.02);
 figname = [output_path,'/out.model-diff-final-bg.',param_plot,'.png'];

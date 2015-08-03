@@ -52,7 +52,7 @@ fprintf(1, [reverseStr, prevmsg]);
 %%
 for n=1:nt
     % little trick to change the 'Percentage completed' inline
-    if (mod(n,floor(nt/100)) == 0)
+    if (mod(n,floor(nt/10)) == 0)
         fprintf(1,'\b\b\b\b\b\b%6.0f',n/nt*100);
     end
     
@@ -237,10 +237,11 @@ for n=1:nt
     %% adjoint calculations    
     elseif(strcmp(simulation_mode,'adjoint'))
         
-        % plot and compute kernel every 5th iteration -----------------------
+        % plot and compute kernel every sfe-th iteration -----------------------
 %         store_fw_every = 10; % These params also defined above at save fwd
         sfe = store_fw_every;
-        if (mod(n,sfe)==0)
+%         if (mod(n,sfe)==0)
+        if (mod(n + (sfe-1),sfe)==0)
                         
             % calculate kernels
             compute_kernels;

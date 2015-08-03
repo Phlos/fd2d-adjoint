@@ -16,6 +16,8 @@ g_src.z = g.z - g_obs.z;
 % quadratic misfit.
 misfit_g.x = sum(g_src.x .* g_src.x);
 misfit_g.z = sum(g_src.z .* g_src.z);
+% misfit_g.x = 0.5 * sum(g_src.x .* g_src.x);
+% misfit_g.z = 0.5 * sum(g_src.z .* g_src.z);
 misfit_g.total = misfit_g.x + misfit_g.z;
 misfit_g.normd = NaN;
 % determine scalingfactor if the misfit has to be scaled by itself

@@ -53,6 +53,8 @@ for i = 1:nrec % separate kernel per receiver
     % gravity kernel per component per receiver
     Kg_rec{i}.x = -2 * dx * dz * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
     Kg_rec{i}.z = -2 * dx * dz * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
+%    Kg_rec{i}.x = -1 * dx *dz * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
+%    Kg_rec{i}.z = -1 * dx *dz * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
 %     Kg_rec{i}.x = -1 * normfac * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
 %     Kg_rec{i}.z = -1 * normfac * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
     

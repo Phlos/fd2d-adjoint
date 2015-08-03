@@ -10,8 +10,8 @@ function [step, fig_lnsrch , steplnArray_total, misfitArray_total ] = calculate_
 
 % paths etc.
 
-path(path,'../code');
-path(path,'../input');
+% path(path,'../code');
+% path(path,'../input');
 input_parameters;
 set_figure_properties_bothmachines;
 
@@ -198,8 +198,12 @@ end
 %- do something with steplnArray_total and misfitArray_total here!
 close all;
 [~, ~, ~, ~, fig_lnsrch] = fit_polynomial(steplnArray_total, misfitArray_total.total);
-fig_lnsrch.Children.Children(1).Color = 'w';
-fig_lnsrch.Children.Children(2).LineStyle = '--';
+lines_linesrch = findobj(fig_lnsrch, 'type', 'line');
+lines_linesrch(1).LineStyle = 'none';
+lines_linesrch(2).LineStyle = '--';
+% 
+% fig_lnsrch.Children.Children(1).Color = 'w';
+% fig_lnsrch.Children.Children(2).LineStyle = '--';
 % add the final polyfit and step to it
 iksmin = min(steplnArray_total); iksmaks = max(steplnArray_total); 
 iks = iksmin:(iksmaks-iksmin)/30:iksmaks;
@@ -244,8 +248,8 @@ function [misfittotal, misfitseis, misfitgrav] = ...
 
 % paths etc.
 
-path(path,'../code');
-path(path,'../input');
+% path(path,'../code');
+% path(path,'../input');
 input_parameters;
 set_figure_properties_bothmachines;
 

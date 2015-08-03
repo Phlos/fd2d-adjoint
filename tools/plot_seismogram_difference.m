@@ -65,7 +65,7 @@ for irows = 1:nrec;
         plot(t,vrec,'k', ...
              t,vobs,'r--');
          if strcmp(plot_diff, 'yesdiff')
-             plot(t,100*(vrec - vobs), 'b');
+             plot(t,10*(vrec - vobs), 'b');
              % plot(t,vrec - vobs, 'b', 'LineWidth',2)
          end
          
@@ -77,7 +77,7 @@ for irows = 1:nrec;
         
         if irows==1
             if strcmp(plot_diff, 'yesdiff')
-                title({[comp{icomp},' component:']; 'synth - black, obs - red, 100*(synth-obs) - blue'})
+                title({[comp{icomp},' component:']; 'synth - black, obs - red, 10*(synth-obs) - blue'})
             else
                 title({[comp{icomp},' component:']; 'synth - black, obs - red'})
             end

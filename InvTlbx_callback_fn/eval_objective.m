@@ -20,7 +20,7 @@ whichFrq    = usr_par.whichFrq;
 g_obs       = usr_par.g_obs;
 sEventInfo  = usr_par.sEventInfo;
 sEventObs   = usr_par.sEventObs;
-InvProps    = usr_par.InvProps;
+% InvProps    = usr_par.InvProps;
 
 % inversion stuff
 output_path = usr_par.output_path;

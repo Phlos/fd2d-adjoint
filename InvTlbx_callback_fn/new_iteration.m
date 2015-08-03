@@ -84,19 +84,21 @@ close(fig_grav_comp); clearvars('fig_grav_comp');
 
 
 % seismograms
-disp 'plotting seis?'
-for isrc = 1:nsrc
-    vel = sEventRecIter(isrc).vel;
-    vobs = usr_par.sEventObs(isrc).vel;
-    t   = sEventRecIter(isrc).t;
-    recs = 1:length(vel);
-    % determine how many seismograms are actually plotted
-    if length(vel) > 8; recs = [2:2:length(vel)]; end
-    % actual plotting
-    fig_seisdif = plot_seismogram_difference(vel, vobs, t, recs);
-    figname = [output_path,'/iter.',num2str(iter,'%03d'),'.seisdif.src',num2str(isrc),'.png'];
-    print(fig_seisdif,'-dpng','-r400',figname); close(fig_seisdif);
-end
+% disp 'plotting seis?'
+% if strcmp(use_seis, 'yesseis')
+%     for isrc = 1:nsrc
+%         vel = sEventRecIter(isrc).vel;
+%         vobs = usr_par.sEventObs(isrc).vel;
+%         t   = sEventRecIter(isrc).t;
+%         recs = 1:length(vel);
+%         % determine how many seismograms are actually plotted
+%         if length(vel) > 8; recs = [2:2:length(vel)]; end
+%         % actual plotting
+%         fig_seisdif = plot_seismogram_difference(vel, vobs, t, recs);
+%         figname = [output_path,'/iter.',num2str(iter,'%03d'),'.seisdif.src',num2str(isrc),'.png'];
+%         print(fig_seisdif,'-dpng','-r400',figname); close(fig_seisdif);
+%     end
+% end
 
 % 
 % % gravity kernel (if applicable)
