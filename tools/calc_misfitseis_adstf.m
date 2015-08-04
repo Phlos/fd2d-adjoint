@@ -373,7 +373,7 @@ t_max = t(end) - taper_width;
 
 tw=get_taper_weights(t, t_min, t_max, taper_width);
 
-adstf=adstf.*tw;
+adstf=wavedif.*tw;
 
 misfit=sum(adstf.*adstf) * dt;
 

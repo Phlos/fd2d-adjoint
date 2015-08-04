@@ -744,20 +744,7 @@ elseif (model_type==81) % CIRCLES only rho:
             if dist_neg_rho < anom.radius;
                 rho2(ii,jj) = rho2(ii,jj) * (1 - anom.strength);
             end
-%             % vs
-%             if dist_pos_vs < anom.radius;
-%                 vs(ii,jj) = vs(ii,jj) * (1 + anom.strength);
-%             end
-%             if dist_neg_vs < anom.radius;
-%                 vs(ii,jj) = vs(ii,jj) * (1 - anom.strength);
-%             end
-%             % vp
-%             if dist_pos_vp < anom.radius;
-%                 vp(ii,jj) = vp(ii,jj) * (1 + anom.strength);
-%             end
-%             if dist_neg_vp < anom.radius;
-%                 vp(ii,jj) = vp(ii,jj) * (1 - anom.strength);
-%             end
+
         end
     end
     
@@ -765,6 +752,149 @@ elseif (model_type==81) % CIRCLES only rho:
     rho     = rho2;
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);    
+    
+    
+elseif (model_type==82) % CIRCLES - like 80 but smaller:
+                        % PREM background model plus regular grid of 'hard'
+                        % edged circles - non-overlapping rho - vp - vs
+                        % ONLY 6 CIRCLES
+                        % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
+                        % so don't make the model higher than 2891 km!!
+     
+    % load prem
+    [rho2, vs, vp] = load_PREM();
+    
+    % anomaly grid
+    spacing = [nx / (3+1), nz / (2)]; % could change this to min(xspacing, zspacing) to have a regular grid
+    %- location shift
+    shift = [0 -0.5] .* spacing; % [to the right, up];
+    %- divide into 3+1 horizontally
+    locX = spacing(1) * [1:3] + shift(1);
+    %- divide into 2+1 vertically
+    locZ = spacing(2) * [1:2] + shift(2);
+    [nx, nz];
+
+    
+    % anomaly properties
+    anom.strength = 1.0 * 1/100; % 1 procent
+    anom.radius = 0.25 * min( locX(2)-locX(1), locZ(2)-locZ(1) ); % (2)-(1) so that I can still pad the outside of the domain
+    
+
+    % add the anomalies
+    % --> you can probably do this without loops using any()
+    %- rho at columns 1 and 4
+    rhopos(1).mid = [locX(1), locZ(1)];
+    rhoneg(1).mid = [locX(1), locZ(2)];
+    %- vs at columns 2 & 5
+    vspos(1).mid = [locX(2), locZ(1)];
+    vsneg(1).mid = [locX(2), locZ(2)];
+    %- vp at columns 3 & 6
+    vppos(1).mid = [locX(3), locZ(1)];
+    vpneg(1).mid = [locX(3), locZ(2)];
+    
+    for ii = 1:size(rho2,1)
+        for jj = 1:size(rho2,2)
+            dist_pos_rho = min([ norm([ii,jj] - rhopos(1).mid , 2)]); 
+            dist_neg_rho = min([ norm([ii,jj] - rhoneg(1).mid , 2)]); 
+            dist_pos_vs = min([ norm([ii,jj] - vspos(1).mid , 2)]); 
+            dist_neg_vs = min([ norm([ii,jj] - vsneg(1).mid , 2)]); 
+            dist_pos_vp = min([ norm([ii,jj] - vppos(1).mid , 2) ]); 
+            dist_neg_vp = min([ norm([ii,jj] - vpneg(1).mid , 2)]); 
+            
+            % rho2
+            if dist_pos_rho < anom.radius;
+                rho2(ii,jj) = rho2(ii,jj) * (1 + anom.strength);
+            end
+            if dist_neg_rho < anom.radius;
+                rho2(ii,jj) = rho2(ii,jj) * (1 - anom.strength);
+            end
+            % vs
+            if dist_pos_vs < anom.radius;
+                vs(ii,jj) = vs(ii,jj) * (1 + anom.strength);
+            end
+            if dist_neg_vs < anom.radius;
+                vs(ii,jj) = vs(ii,jj) * (1 - anom.strength);
+            end
+            % vp
+            if dist_pos_vp < anom.radius;
+                vp(ii,jj) = vp(ii,jj) * (1 + anom.strength);
+            end
+            if dist_neg_vp < anom.radius;
+                vp(ii,jj) = vp(ii,jj) * (1 - anom.strength);
+            end
+        end
+    end
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);    
+    
+elseif (model_type==83) % CIRCLES (small type) only rho:
+                        % PREM background model plus regular grid of 'hard'
+                        % edged circles - non-overlapping rho - vp - vs
+                        % ONLY 6 CIRCLES
+                        % IMPORTANT: 
+                        % Model values will be sampled at height above CMB!
+                        % so don't make the model higher than 2891 km!!
+     
+    % load prem
+    [rho2, vs, vp] = load_PREM();
+    
+    % anomaly grid
+    spacing = [nx / (3+1), nz / (2)]; % could change this to min(xspacing, zspacing) to have a regular grid
+    %- location shift
+    shift = [0 -0.5] .* spacing; % [to the right, up];
+    %- divide into 3+1 horizontally
+    locX = spacing(1) * [1:3] + shift(1);
+    %- divide into 2+1 vertically
+    locZ = spacing(2) * [1:2] + shift(2);
+    [nx, nz];
+
+    
+    % anomaly properties
+    anom.strength = 1.0 * 1/100; % 1 procent
+    anom.radius = 0.25 * min( locX(2)-locX(1), locZ(2)-locZ(1) ); % (2)-(1) so that I can still pad the outside of the domain
+    
+
+    % add the anomalies
+    % --> you can probably do this without loops using any()
+    %- rho at columns 1 and 4
+    rhopos(1).mid = [locX(1), locZ(1)];
+    rhoneg(1).mid = [locX(1), locZ(2)];
+    %- vs at columns 2 & 5
+    vspos(1).mid = [locX(2), locZ(1)];
+    vsneg(1).mid = [locX(2), locZ(2)];
+    %- vp at columns 3 & 6
+    vppos(1).mid = [locX(3), locZ(1)];
+    vpneg(1).mid = [locX(3), locZ(2)];
+    
+    for ii = 1:size(rho2,1)
+        for jj = 1:size(rho2,2)
+            dist_pos_rho = min([ norm([ii,jj] - rhopos(1).mid , 2)]); 
+            dist_neg_rho = min([ norm([ii,jj] - rhoneg(1).mid , 2)]); 
+            dist_pos_vs = min([ norm([ii,jj] - vspos(1).mid , 2)]); 
+            dist_neg_vs = min([ norm([ii,jj] - vsneg(1).mid , 2)]); 
+            dist_pos_vp = min([ norm([ii,jj] - vppos(1).mid , 2) ]); 
+            dist_neg_vp = min([ norm([ii,jj] - vpneg(1).mid , 2)]); 
+            
+            % rho2
+            if dist_pos_rho < anom.radius;
+                rho2(ii,jj) = rho2(ii,jj) * (1 + anom.strength);
+            end
+            if dist_neg_rho < anom.radius;
+                rho2(ii,jj) = rho2(ii,jj) * (1 - anom.strength);
+            end
+
+        end
+    end
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);    
+        
     
 %% misc models    
 elseif (model_type==100) % layered: left = high density, right = low density.

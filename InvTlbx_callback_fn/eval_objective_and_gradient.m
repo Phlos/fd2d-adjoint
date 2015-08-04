@@ -144,7 +144,7 @@ K_reparam = change_parametrisation_kernels('rhomulambda', parametrisation, K_tot
 K_rel = calculate_relative_kernels(K_reparam, Model_bg);
 
 % filter kernels
-disp('WARNING! Kernelsare not being filtered!!', 'r');
+disp('WARNING! Kernels are not being filtered!!');
 % K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
 
 %% OUTPUT to Inversion Toolbox structure

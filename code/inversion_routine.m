@@ -1,8 +1,8 @@
 %% preparation
 
 % number of iterations
-InvProps.niter = 20;
-istart = 1;
+InvProps.niter = 10;
+istart = 5;
 
 niter = InvProps.niter;
 
@@ -261,7 +261,7 @@ for iter = istart : InvProps.niter;
         disp ' ';
         disp(['TOTAL misfit FOR ITER ',num2str(iter,'%2u'),':     ', ...
             num2str(InvProps.misfit(iter),'%3.2e'), ...
-            ' (',num2str(InvProps.misfit(iter)*100,'%g'),'%)'])
+            ' (',num2str(InvProps.misfit(iter)/InvProps.misfit(1)*100,'%g'),'%)'])
         disp '=========================================='
         
 

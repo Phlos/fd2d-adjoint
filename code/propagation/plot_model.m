@@ -104,8 +104,8 @@ for params = fieldnames(Model)';
     caxis([cmin cmax]);
     
     
-    for k=1:length(src_x)
-        plot(src_x(k),src_z(k),'kx','LineWidth',0.3,'MarkerSize',4)
+    for k=1:length(src_info)
+        plot(src_info(k).loc_x,src_info(k).loc_z,'kx','LineWidth',0.3,'MarkerSize',4)
     end
     
     for k=1:length(rec_x)

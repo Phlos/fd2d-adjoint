@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='CirclesRho.test-007.like-6-but-PSV';
+project_name='CirclesRho.test-010.like-9-but-smaller-circles';
 
 %==========================================================================
 % inversion properties
@@ -53,7 +53,7 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
 % stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-stepInit = 1e-3;
+stepInit = 5e-3;
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -105,7 +105,7 @@ use_matfile_startingmodel = 'no';
 starting_model = '';
 
 bg_model_type = 50;     % PREM (for plotting)
-true_model_type = 81;   % PREM + circle anomalies non-overlapping rho-vs-vp
+true_model_type = 83;   % PREM + small circles in rho
 model_type=50;          % PREM
 
 % 1=homogeneous 
@@ -150,16 +150,33 @@ model_type=50;          % PREM
 % sources -- positions
 %==========================================================================
 
-nsrc = 1;
+nsrc = 4;
 
-%- line of sources near top of the domain
-src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
+% %- line of sources near top/bot of the domain
+% src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
+% dz = 1/16 * Lz;
+% % src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
+% src_z=ones(size(src_x)) * (2*dz); % at the bottom, 2*dz from the bottom ivm absbound
+% for ii = 1:nsrc
+%     src_info(ii).loc_x = src_x(ii);
+%     src_info(ii).loc_z = src_z(ii);
+% end
+
+%- P and S sources in the same places - only possible w/ even nsrc
 dz = 1/16 * Lz;
-% src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
-src_z=ones(size(src_x)) * (2*dz);
+nsrcpos = nsrc/2;
+pos_x= (1: 1: nsrcpos) * (Lx/(nsrcpos+1));
+% src_x = pos_x
 for ii = 1:nsrc
-    src_info(ii).loc_x = src_x(ii);
-    src_info(ii).loc_z = src_z(ii);
+    if mod(ii,2)==0 % even
+        src_info(ii).loc_x = pos_x(ii/2);
+    else % odd
+        src_info(ii).loc_x = pos_x((ii-1)/2 + 1);
+    end
+    src_x(ii) = src_info(ii).loc_x;
+        
+    src_info(ii).loc_z = 2*dz; % bottom
+    src_z(ii) = src_info(ii).loc_z;
 end
 
 %==========================================================================
@@ -179,7 +196,11 @@ for ii = 1:nsrc
     src_info(ii).f_min=0.006667;          % minimum stf frequency [Hz]
     src_info(ii).f_max=0.03;              % maximum stf frequency [Hz]
 
-    src_info(ii).stf_PSV = [1 0];% [x z]
+    if mod(ii,2)==0; % even
+        src_info(ii).stf_PSV = [1 0]; % [x z] --> S waves radiate up/down
+    else % odd
+        src_info(ii).stf_PSV = [0 1]; % [x z] --> P waves radiate up/down
+    end
                         % direction of the source-time-function in P-SV wave 
                         % propagation. The final stf will be normalised
                         % such that its original amplitude is preserved.
