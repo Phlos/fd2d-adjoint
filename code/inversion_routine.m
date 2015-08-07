@@ -1,8 +1,8 @@
 %% preparation
 
 % number of iterations
-InvProps.niter = 10;
-istart = 5;
+InvProps.niter = 100;
+istart = 16;
 
 niter = InvProps.niter;
 
@@ -35,7 +35,6 @@ if strcmp(use_seis , 'yesseis')
 else
     disp '-- using seis? ..... no'
 end
-disp '-- using seis? ..... YES!!'
 if strcmp(use_grav , 'yes')
     disp '-- using grav? ..... YES!!'
 else
@@ -147,6 +146,19 @@ if istart == 1
     
 end
 
+%% load initial model misfit
+
+init_misfit_file = [output_path,'/initial_misfits.mat'];
+% if there's a initial misfit file in the inversion directory, load it
+if  (~exist('misfit_init', 'var') && exist(init_misfit_file, 'file'))
+    disp 'loading initial misfit file'
+    load(init_misfit_file);
+elseif exist('misfit_init', 'var')
+    disp 'initial misfits already present... proceeding...';
+else
+    disp 'initial misfits will be calculated during the inversions';
+end
+
 %% start of iterations
 
 for iter = istart : InvProps.niter;
@@ -202,6 +214,7 @@ for iter = istart : InvProps.niter;
         
         %% misfit
         
+        
         % initial misfit  ---  actually this should only be done if iter>1
         if iter >1
             if(~exist('misfit_init', 'var') || length(misfit_init) < whichFrq || isempty(misfit_init(whichFrq).total) )
@@ -211,6 +224,7 @@ for iter = istart : InvProps.niter;
                     calc_misfits(Model(1), g_obs, 0, sEventInfo, sEventObs, 0, ...
                     'noplot','notext');
                 misfit_init(whichFrq) = misfit_int;
+                save(init_misfit_file, 'misfit_init', '-v6');
             end
         end
         if iter ==1;
@@ -584,6 +598,13 @@ for iter = istart : InvProps.niter;
         savename = [output_path,'/inversion.all-vars.mat'];
         save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
 %     end
+
+    % saving initial misfit file
+    save(init_misfit_file, 'misfit_init', '-v6');
+
+    
+    %% clean up
+    rmdir([output_path,'/fwd_temp'], 's');
     
 end
 

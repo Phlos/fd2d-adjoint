@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='CirclesRho.test-010.like-9-but-smaller-circles';
+project_name='Circles.test-004c.deriv-check';
 
 %==========================================================================
 % inversion properties
@@ -16,7 +16,7 @@ apply_hc = 'no';   % 'yes' or 'no'
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'no'; % 'yes' or 'no'
+use_grav = 'yes'; % 'yes' or 'no'
 use_seis = 'yesseis'; % 'yesseis' or 'noseis'
 
 % what misfit functional are we using
@@ -63,7 +63,7 @@ smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
                 
 % store forward wavefield every .. timesteps
-store_fw_every = 10; 
+store_fw_every = 1; 
 
 
 %==========================================================================
@@ -84,13 +84,9 @@ nz = 116;
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
-dt=1.0;      % time step [s] % 0.5 explodes in the PREM model dx=dz=10km
-% dt=0.1;       % time step [s] 0.4 suffices @PREM dx=dz=10km
-% nt=700;      % number of iterations
-% tmax = 1400;  % final time [s]
-% tmax = 580;     % PcP = 510 s, ScS = 935 s
-tmax = 1200;    % should be enough for ScS.
-% tmax = 300;
+dt=1.0;      % time step [s] % PREM model, dx=dz=25km
+% dt=0.1;       % time step [s] 0.5 explodes, 0.4 suffices @PREM dx=dz=10km
+tmax = 1200;    % length of run [s] -- 1200 should be enough for ScS (=935 s) (PcP = 510)
 nt = ceil(tmax/dt); % number of iterations
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
@@ -105,7 +101,7 @@ use_matfile_startingmodel = 'no';
 starting_model = '';
 
 bg_model_type = 50;     % PREM (for plotting)
-true_model_type = 83;   % PREM + small circles in rho
+true_model_type = 82;   % PREM + solid circles in all parameters
 model_type=50;          % PREM
 
 % 1=homogeneous 
@@ -134,23 +130,28 @@ model_type=50;          % PREM
 % 'initial'= read initial model for waveform inversion (mu_initial, rho_initial)
 
 
-% % set the background values for plot_model for all models based on Tromp
-% trompmodels = [10:39];
-% if any(model_type==trompmodels)
-%     disp 'real model based on Tromp'
-%     middle.rml = [2600 2.66e10    2.42e10];
-%     middle.rvv = [2600 3198.55736 5797.87759];
-% end
-
-
-
-
 
 %==========================================================================
 % sources -- positions
 %==========================================================================
 
-nsrc = 4;
+nsrc = 8;
+
+%- line of sources that have P and S sources in the same places - only possible w/ even nsrc
+pos_x= (1: 1: nsrc/2) * (Lx/(nsrc/2+1));
+% src_x = pos_x
+for ii = 1:nsrc
+    if mod(ii,2)==0 % even
+        src_info(ii).loc_x = pos_x(ii/2);
+    else % odd
+        src_info(ii).loc_x = pos_x((ii-1)/2 + 1);
+    end
+    src_x(ii) = src_info(ii).loc_x;
+        
+    src_info(ii).loc_z = (Lz - 500e3); % sources at 500 km depth
+    src_z(ii) = src_info(ii).loc_z;
+end
+
 
 % %- line of sources near top/bot of the domain
 % src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
@@ -162,22 +163,6 @@ nsrc = 4;
 %     src_info(ii).loc_z = src_z(ii);
 % end
 
-%- P and S sources in the same places - only possible w/ even nsrc
-dz = 1/16 * Lz;
-nsrcpos = nsrc/2;
-pos_x= (1: 1: nsrcpos) * (Lx/(nsrcpos+1));
-% src_x = pos_x
-for ii = 1:nsrc
-    if mod(ii,2)==0 % even
-        src_info(ii).loc_x = pos_x(ii/2);
-    else % odd
-        src_info(ii).loc_x = pos_x((ii-1)/2 + 1);
-    end
-    src_x(ii) = src_info(ii).loc_x;
-        
-    src_info(ii).loc_z = 2*dz; % bottom
-    src_z(ii) = src_info(ii).loc_z;
-end
 
 %==========================================================================
 % sources -- source-time functions
@@ -208,11 +193,11 @@ end
                     
                     
 %- source filtering
-f_minlist = [0.006667];% 0.006667 0.006667 0.006667];
+f_minlist = [0.006667 0.006667 0.006667 0.006667 0.006667 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667];% 0.008667 0.011267 0.014647 ];
+f_maxlist = [0.006667 0.008667 0.011267 0.014647 0.01904  0.02475 ];
 % how many iterations with the same source?
-change_freq_every = 10;          % how many iterations with the same freq?
+change_freq_every = 15;          % how many iterations with the same freq?
 
 
 
@@ -226,43 +211,6 @@ nrec = 16;
 rec_x= (1: 1: nrec) * (Lx/(nrec+1));
 dz = Lz/(nz-1);
 rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)
-
-% %- a circle of receivers with the centre at centre
-% centre=[Lx/2 Lz/2];
-% numrec=6;
-% circlesize = 0.25*min(Lx,Lz);
-% 
-% rec_x=zeros(1,numrec);
-% rec_z=zeros(1,numrec);
-% 
-% n=1;
-% for phi=-pi+dphi/2 : dphi : pi-dphi/2 ;
-%     rec_x(n)=centre(1) + circlesize*cos(phi);
-%     rec_z(n)=centre(2) + circlesize*sin(phi);
-%     n=n+1;
-% end
-
-% a set of receivers in 1/3 circle around the source (hardcoded distances!)
-% rec_x=zeros(1,6);
-% rec_z=zeros(1,6);
-% n=1;
-% for phi=-pi/4:pi/10:pi/2
-%     rec_x(n)=src_x(1)+2.5e5*cos(phi);
-%     rec_z(n)=src_z(1)+2.5e5*sin(phi);
-%     n=n+1;
-% end
-
-%- a large number of receivers in an open rectangular configuration
-%rec_x=[50.0 50.0 50.0 50.0 50.0 50.0 50.0 50.0 50.0  50.0  50.0  50.0  60.0 70.0 80.0 90.0 100.0 110.0 120.0 130.0 60.0  70.0  80.0  90.0  100.0 110.0 120.0 130.0];
-%rec_z=[70.0 80.0 90.0 100.0 110.0 120.0 130.0 140.0 150.0 160.0 170.0 180.0 70.0 70.0 70.0 70.0 70.0  70.0  70.0  70.0  180.0 180.0 180.0 180.0 180.0 180.0 180.0 180.0];
-
-%- just one receiver
-% rec_x=[1.6e5];
-% rec_z=[0.7e5];
-
-%- a large number of receivers in a closed rectangular configuration
-%rec_x=[50.0  50.0  50.0  50.0  50.0   50.0    70.0  90.0 110.0 130.0   70.0  90.0 110.0 130.0  150.0 150.0 150.0 150.0 150.0  150.0];
-%rec_z=[70.0  90.0 110.0 130.0 150.0  170.0    70.0  70.0  70.0  70.0  170.0 170.0 170.0 170.0   70.0  90.0 110.0 130.0 150.0  170.0];
 
 
 %==========================================================================
@@ -290,7 +238,7 @@ simulation_mode='forward';
 % absorbing boundaries
 %==========================================================================
 
-width=250000.0;     % width of the boundary layer in m
+width = 500.0e3;        % width of the boundary layer in m 
 
 absorb_left=1;  % absorb waves on the left boundary
 absorb_right=1; % absorb waves on the right boundary
@@ -304,11 +252,10 @@ absorb_bottom=0;% absorb waves on the bottom boundary
 % plot every 'plot every'th image (otherwise computationally rather heavy)
 plot_every=nt*2; % value larger than nt, so that no plotting takes place
 % plot_every = 40;
-% plot_every = 100;
-% plot_every = 10;
 
 plot_forward_frames='PSV';   % 'X-Y-Z' or 'X-Y' or 'PSV-SH' or 'PSV' 
                              % which frames should be plotted in the forward calculation
+
 % some test about plotting the frames differently
 % plot_frame.PSV='no';
 % plot_frame.SH='yes';
