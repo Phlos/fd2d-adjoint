@@ -11,10 +11,10 @@ function [gm] = eval_grad_objective(m, ModRandString, usr_par)
 % gm : gradient (vector of same size as m)
 %
 % See also EVAL_OBJECTIVE and EVAL_OBJECTIVE_AND_GRADIENT.
-
+%
 % [jm, gm] = eval_objective_and_gradient(m, usr_par);
 
-disp('----evaluating gradient only');
+% disp('----evaluating gradient only');
 
 %% initialise stuff
 input_parameters; 
@@ -67,8 +67,8 @@ Model = Model1;
 % gravity
 if strcmp(use_grav,'yes')
     %- calculate gravity kernels
-    disp ' ';
-    disp(['calculating gravity kernel']);
+%     disp ' ';
+%     disp(['calculating gravity kernel']);
     
     % calculating the gravity kernel
     [Kg_temp] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
@@ -83,7 +83,7 @@ end
 % seismic
 if strcmp(use_seis, 'yesseis')
     disp ' ';
-    disp(['calculating seismic kernels']);
+%     disp(['calculating seismic kernels']);
     [Kseis_temp, sEventKnls_iter] = run_adjoint_persource(Model, sEventAdstfIter);
     
     % normalise kernels
@@ -143,6 +143,9 @@ K_rel = calculate_relative_kernels(K_reparam, Model_bg);
 % filter kernels
 K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
 
+%% convert the obtained gradient back to same struc as m
+gm = map_gradparameters_to_gradm(K_rel, usr_par);
+
 %% move matfiles back to model folder
 
 for ii = 1:numel(blips)
@@ -152,11 +155,10 @@ for ii = 1:numel(blips)
     movefile(oldfile,newfile);
 end; 
 
-%% convert the obtained gradient back to same struc as m
-gm = map_gradparameters_to_gradm(K_rel, usr_par);
-
-% usr_par.Kseis(iter)   = Kseis;
-% usr_par.Kg{iter}      = Kg;
-% usr_par.K_total(iter) = K_total;
+%% save variables of current iteration to file
+currentKnls.Kseis       = Kseis;
+currentKnls.Kg          = Kg;
+currentKnls.K_total     = K_total;
+save([ModFolder,'currentIter.kernels.mat'], 'currentKnls', '-v6');
 
 end

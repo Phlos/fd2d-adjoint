@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Circles.test-004c.deriv-check';
+project_name='Circles.test-005c.actually-fixing-velocities';
 
 %==========================================================================
 % inversion properties
@@ -27,7 +27,7 @@ parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rh
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'no'; % 'yes' or 'no'
+fix_velocities = 'yes'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -53,7 +53,7 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
 % stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-stepInit = 5e-3;
+stepInit = 1e-3;
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -63,7 +63,7 @@ smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
                 
 % store forward wavefield every .. timesteps
-store_fw_every = 1; 
+store_fw_every = 10; 
 
 
 %==========================================================================
@@ -100,9 +100,9 @@ use_matfile_startingmodel = 'no';
 % starting_model = '../output/Model_0.03Hz.mat';
 starting_model = '';
 
-bg_model_type = 50;     % PREM (for plotting)
+bg_model_type = 84;     % PREM + vs, vp circles (for calculating relative kernels)
 true_model_type = 82;   % PREM + solid circles in all parameters
-model_type=50;          % PREM
+model_type=84;          % starting model: PREM + vs and vp circles
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -123,6 +123,9 @@ model_type=50;          % PREM
 % 50= PREM background values model (will be selected at true height above cmb)
 % 60 = PREM bg + random rho2 AND vs AND vp, 1% anomalies
 % 61 = PREM bg + ONLY random vs & vp anomalies, 1%
+% 82 = small solid non-overlapping hard-edged circles in rho, vs, and vp
+% 83 = same as 82, but only rho circles
+% 84 = same as 82, but only vs, vp circles
 % 100= layered: left = high rho0, right = low rho0
 % 101= homogeneous model (Tromp like) with tiny rho anomaly
 % 102= Ring shaped model (Evangelos): vp=5000, vs=3000, rho=2600 | outside: 5000,1,2600

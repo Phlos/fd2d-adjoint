@@ -15,6 +15,7 @@ function [usr_par] = new_iteration( it, m, ModRandString, jm, gm, usr_par)
 
 %% initialise
 input_parameters;
+Model_real = update_model(true_model_type);
 iter = (usr_par.whichFrq-1) * (change_freq_every) + it +1;
 
 disp ' ';
@@ -45,7 +46,9 @@ Model_bg    = usr_par.Model_bg;
 K_rel   = map_gradm_to_gradparameters(gm, usr_par);
 
 %% inversion output
-InvProps.misfit = jm;
+% InvProps.misfit(iter) = jm;
+% InvProps.misfitseis(iter) = NaN;
+% InvProps.misfitgrav(iter) = NaN;
 
 % % useful output
 % if strcmp(use_grav,'no')
@@ -191,7 +194,51 @@ print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 % end
 
 
-%% save output
+%% save stuff to usr_par
+
+% iter specific info
+usr_par.Model(iter) = Model;
+usr_par.K_rel(iter) = K_rel;
+usr_par.misfit(iter) = jm;
+usr_par.cumulative_iter = iter;
+
+%% plot inversion result 
+
+% set previous to NaN if it doesn't exist
+if iter == 1
+    usr_par.previous = NaN;
+end
+
+% set real model to NaN if it doens't exist
+if ~exist('Model_real', 'var')
+    Model_real = NaN;
+end
+
+% load 'current iter' variables from file
+ModFolder = [output_path,'/fwd_temp/',ModRandString,'/'];
+load([ModFolder,'currentIter.misfits.mat']);
+load([ModFolder,'currentIter.kernels.mat']);
+blips = fieldnames(currentKnls);
+currentIter = currentMisfits;
+for ii = 1:numel(blips)
+    currentIter.(blips{ii}) = currentKnls.(blips{ii});
+end
+
+% calculate some inversion output numbers: kernel magnitudes, model
+% diffferences, angles between kernels, and then plot that.
+InvProps = calc_inversion_output_InvTlbx(iter, currentIter, usr_par.previous, InvProps, usr_par.K_rel, usr_par.Model, jm, gm, Model_real);
+if iter > 1
+    fig_invres = plot_inversion_result_InvTlbx(InvProps, iter);
+    titel = [project_name,' - iter ',num2str(iter), ' inversion result'];
+    mtit(fig_invres,titel, 'xoff', 0.001, 'yoff', 0.04);
+    figname = [output_path,'/inversion_result.png'];
+    print(fig_invres,'-dpng','-r400',figname); close(fig_invres);
+end
+
+usr_par.InvProps = InvProps;
+
+
+%% save output to file
 
 % if ~exist([output_path,'/iter',num2str(iter,'%03d'),'.all-vars.mat'],'file')
 disp 'saving all current variables...'
@@ -212,36 +259,25 @@ for ii = 1:numel(blips)
 end
 
 
-%% save stuff to usr_par
 
-% iter specific stuff
-usr_par.cumulative_iter = iter;
-usr_par.Model(iter) = Model;
-usr_par.K_rel(iter) = K_rel;
-usr_par.misfit(iter) = jm;
 
-% % frequency specific stuff (used for next iters)
-% usr_par.sEventInfo  = sEventInfo;
-% usr_par.sEventObs   = sEventObs;
-
+%% prepare usr_par for new information from the next iter.
+% !!! NOTE IT DOES NOT WORK LIKE THIS IF A NEW FREQ IS INITIATED!!
+%     because then, previous is overwritten, with information of a model
+%     that is otherwise never used. Will have to think about that, but it
+%     will cause WRONG results in calculating e.g. the angles between prev
+%     & current model just after the frequency has changed...
+%             -- Nienke Blom, 7 August 2015
+usr_par.previous = currentIter;
+% rmfield(usr_par, 'current');
 
 %% throw away temp folder
 
 TempDir = [output_path,'/fwd_temp'];
 if (exist(TempDir, 'dir'))
-    rmdir([output_path,'/fwd_temp'], 's');
+    rmdir(TempDir, 's');
 end
 
-% %% initialise new frequency if necessary
-% 
-% cfe = change_freq_every;
-% whichFrq = floor((iter-1)/cfe)+1;
-% if whichFrq > length(sObsPerFreq)
-%     whichFrq = length(sObsPerFreq);
-% end
-% 
-% sEventInfo = usr_par.sObsPerFreq(whichFrq).sEventInfo;
-% sEventObs   = usr_par.sObsPerFreq(whichFrq).sEventObs;
 
 %% new iteration
 
@@ -249,7 +285,6 @@ end
 disp ' ';
 disp '=====================================';
 disp(['==== starting iteration ',num2str(iter+1)]);
-% disp(['==== finished calculations for iter ',num2str(iter)]);
 disp '=====================================';
 disp ' ';
 

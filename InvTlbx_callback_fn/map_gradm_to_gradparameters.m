@@ -17,36 +17,51 @@ input_parameters;
 
 parametrisation = usr_par.parametrisation;
 
-%% cut gradient 
+%% reparametrise gm to relative kernels in physical parameters
 
-% determine which part of the m vector is which parameters
-switch parametrisation
-    case 'rhomulambda'
-        
-        % cut gradient into 3 params
-        gm1 = gm(          1 :   nx*nz);
-        gm2 = gm(  nx*nz + 1 : 2*nx*nz);
-        gm3 = gm(2*nx*nz + 1 : 3*nx*nz);
-        
-        % reshape
-        Kernel.rho.total     = reshape(gm1, nx, nz);
-        Kernel.mu.total      = reshape(gm2, nx, nz);
-        Kernel.lambda.total  = reshape(gm3, nx, nz);
-        
-    case 'rhovsvp'
-        
-        gm4 = m(          1 :   nx*nz);
-        gm5 = m(  nx*nz + 1 : 2*nx*nz);
-        gm6 = m(2*nx*nz + 1 : 3*nx*nz);
-        
-        % reshape
-        Kernel.rho2.total = reshape(gm4, nx, nz);
-        Kernel.vs2.total  = reshape(gm5, nx, nz);
-        Kernel.vp2.total  = reshape(gm6, nx, nz);
-        
+% fixing vs and vp: there are only 1*nx*nz free parameters: rho
+if strcmp(fix_velocities,'yes')
+    
+    if strcmp(parametrisation, 'rhomulambda')
+       
+        Kernel.rho.total     = reshape(gm, nx, nz);
+        Kernel.mu.total      = zeros(size(Kernel.rho.total));
+        Kernel.lambda.total  = zeros(size(Kernel.rho.total));
+    else
+        error('parametrisation must be rhomulambda if fixing velocities');
+    end
+
+% no fixing of parameters: there are 3*nx*nz free parameters
+else
+
+    % determine which part of the m vector is which parameters
+    switch parametrisation
+        case 'rhomulambda'
+            
+            % cut gradient into 3 params
+            gm1 = gm(          1 :   nx*nz);
+            gm2 = gm(  nx*nz + 1 : 2*nx*nz);
+            gm3 = gm(2*nx*nz + 1 : 3*nx*nz);
+            
+            % reshape
+            Kernel.rho.total     = reshape(gm1, nx, nz);
+            Kernel.mu.total      = reshape(gm2, nx, nz);
+            Kernel.lambda.total  = reshape(gm3, nx, nz);
+            
+        case 'rhovsvp'
+            
+            gm4 = m(          1 :   nx*nz);
+            gm5 = m(  nx*nz + 1 : 2*nx*nz);
+            gm6 = m(2*nx*nz + 1 : 3*nx*nz);
+            
+            % reshape
+            Kernel.rho2.total = reshape(gm4, nx, nz);
+            Kernel.vs2.total  = reshape(gm5, nx, nz);
+            Kernel.vp2.total  = reshape(gm6, nx, nz);
+            
+    end
+
 end
-
-
 
 
 

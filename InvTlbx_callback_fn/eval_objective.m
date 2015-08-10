@@ -12,7 +12,7 @@ function [jm] = eval_objective(m, ModRandString, usr_par)
 %
 % See also EVAL_GRAD_OBJECTIVE and EVAL_OBJECTIVE_AND_GRADIENT.
 
-disp('----evaluating objective only');
+% disp('----evaluating objective only');
 
 %% initialise stuff
 misfit_init = usr_par.misfit_init;
@@ -63,13 +63,11 @@ end; clearvars blips;
 %% OUTPUT to Inversion Toolbox structure
 jm = misfit_total;
 
-% usr_par.g_src           = g_src;
-% usr_par.sEventRecIter   = sEventRecIter;
-% usr_par.sEventAdstfIter = sEventAdstfIter;
+%% save variables of current iteration to file
+currentMisfits.misfit      = misfit_total;
+currentMisfits.misfit_seis = misfit_seis;
+currentMisfits.misfit_grav = misfit_grav;
+save([ModFolder,'currentIter.misfits.mat'], 'currentMisfits', '-v6');
 
-% usr_par.InvProps = InvProps;
-% usr_par.misfit_total  = misfit_total;
-% usr_par.misfit_seis   = misfit_seis;
-% usr_par.misfit_grav   = misfit_grav;
 
 end

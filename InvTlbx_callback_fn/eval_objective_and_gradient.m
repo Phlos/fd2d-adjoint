@@ -13,9 +13,9 @@ function [jm, gm] = eval_objective_and_gradient(m, ModRandString, usr_par)
 %
 % See also EVAL_OBJECTIVE and EVAL_GRAD_OBJECTIVE.
 
-disp ' ';
-disp('----evaluating objective AND gradient');
-disp ' ';
+% disp ' ';
+% disp('----evaluating objective AND gradient');
+% disp ' ';
 
 %% initialise stuff
 input_parameters;
@@ -144,31 +144,25 @@ K_reparam = change_parametrisation_kernels('rhomulambda', parametrisation, K_tot
 K_rel = calculate_relative_kernels(K_reparam, Model_bg);
 
 % filter kernels
-disp('WARNING! Kernels are not being filtered!!');
-% K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
+% disp('WARNING! Kernels are not being filtered!!');
+K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
 
 %% OUTPUT to Inversion Toolbox structure
 
 jm = misfit_total;
 
-switch parametrisation
-    case 'rhomulambda'
-        gm = [K_rel.rho.total(:); ...
-            K_rel.mu.total(:); ...
-            K_rel.lambda.total(:)];
-    case 'rhovsvp'
-        gm = [K_rel.rho2.total(:); ...
-            K_rel.vs2.total(:); ...
-            K_rel.vp2.total(:)];
-end
+gm = map_gradparameters_to_gradm(K_rel, usr_par);
 
-% usr_par.Kseis(iter)   = Kseis;
-% usr_par.Kg{iter}      = Kg;
-% usr_par.K_total(iter) = K_total;
-% usr_par.InvProps      = InvProps;
-% usr_par.misfit_total  = misfit_total;
-% usr_par.misfit_seis   = misfit_seis;
-% usr_par.misfit_grav   = misfit_grav;
+%% save variables of current iteration to file
+currentMisfits.misfit      = misfit_total;
+currentMisfits.misfit_seis = misfit_seis;
+currentMisfits.misfit_grav = misfit_grav;
+currentKnls.Kseis       = Kseis;
+currentKnls.Kg          = Kg;
+currentKnls.K_total     = K_total;
+save([ModFolder,'currentIter.misfits.mat'], 'currentMisfits', '-v6');
+save([ModFolder,'currentIter.kernels.mat'], 'currentKnls', '-v6');
+
 
 %% move saved matfiles to model specific folder
 

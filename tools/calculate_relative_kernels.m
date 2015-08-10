@@ -13,7 +13,7 @@ function K_rel = calculate_relative_kernels(K, varargin)
 %           will then be calculated with the help of input_parameters
 % - Model   the model, struct of shape Model.rho, .mu, .lambda
 % --> if no modelnr of Model is supplied, the modelnr will be determined
-%     from input_parameters.
+%     from the starting model defined in input_parameters.
 %
 % OUTPUT:
 % - K_rel   the kernels of the same shape as K, but now relative to the
@@ -31,32 +31,22 @@ elseif isfield(Model, 'rho') && isfield(Model, 'mu') && isfield(Model, 'lambda')
     Model.vs2 = Model_rvv.vs;
     Model.vp2 = Model_rvv.vp;
 end
-% Model
         
-fn_params = fieldnames(K);
-% whos('fn_params')
 
+% loop over model parameters
+fn_params = fieldnames(K);
 for i = 1:length(fn_params)
-%     disp ' ';
-%     disp(['PARAMETER NR. ',num2str(i), ': ',fn_params{i} ]);
-    
+
+    % loop over parameter components
     fn_comps = fieldnames(K.(fn_params{i}));
     for j = 1:length(fn_comps)
-%         disp(['component nr. ',num2str(j), ': ',fn_comps{j} ]);
-        
-%         bips.(fn_params{i}).(fn_comps{j}) = [i, j];
         
         % calculate the relative kernel
         K_rel.(fn_params{i}).(fn_comps{j}) = K.(fn_params{i}).(fn_comps{j}) .* Model.(fn_params{i});
-%         which K_rel.(fn_params{i}).(fn_comps{j})
+
     end
 end
 
-% disp 'in calculate_relative_kernels: '
-% K_rel
-% max(K_rel.rho.total(:))
-% K_rel.mu
-% K_rel.lambda
 
 end
 
