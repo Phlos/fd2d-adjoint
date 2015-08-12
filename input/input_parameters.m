@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Circles.test-007.like-5-but-Psrc-off-Ssrc';
+project_name='Circles.test-008.like-5-but-extra-UM-circles';
 
 %==========================================================================
 % inversion properties
@@ -100,9 +100,9 @@ use_matfile_startingmodel = 'no';
 % starting_model = '../output/Model_0.03Hz.mat';
 starting_model = '';
 
-bg_model_type = 84;     % PREM + vs, vp circles (for calculating relative kernels)
-true_model_type = 82;   % PREM + solid circles in all parameters
-model_type=84;          % starting model: PREM + vs and vp circles
+bg_model_type = 50;     % PREM
+true_model_type = 85;   % PREM + LM and UM solid circles (all params)
+model_type=86;          % PREM + LM/UM solid circles in vp, vs only
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -126,6 +126,8 @@ model_type=84;          % starting model: PREM + vs and vp circles
 % 82 = small solid non-overlapping hard-edged circles in rho, vs, and vp
 % 83 = same as 82, but only rho circles
 % 84 = same as 82, but only vs, vp circles
+% 85 = PREM + LM and UM solid circles (all params)
+% 86 = PREM + LM and UM solid circles -- only vs and vp
 % 100= layered: left = high rho0, right = low rho0
 % 101= homogeneous model (Tromp like) with tiny rho anomaly
 % 102= Ring shaped model (Evangelos): vp=5000, vs=3000, rho=2600 | outside: 5000,1,2600

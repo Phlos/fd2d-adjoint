@@ -12,7 +12,7 @@ function fig_mod = plot_model(varargin)
 % - fig_mod = plot_model(Model, middle, outparam);
 %
 % INPUT:
-% Model:    struct containing .rho .mu .lambda
+% Model:    struct containing .rho .mu .lambda -OR- modelnr.
 % outparam: string, 'rhomulambda', 'rhovsvp' (future: 'rhomukappa'?)
 %           parametrisation of output plot (also parametrisation of middle)
 % middle:   1x3 array w/ colour scale centre values for [param1, param2, param3]; 
@@ -24,14 +24,41 @@ function fig_mod = plot_model(varargin)
 
 
 [Model, middle] = checkargs(varargin);
+plot_UM_separate = true;
 
-
+%% preparation
 input_parameters;
-[X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
+
 set_figure_properties_bothmachines;
+if plot_UM_separate
+    pos_mod = pos_mod .* [1 0.75 1.5 1.5];
+end
 
 load 'propagation/cm_model.mat';
 
+
+%% recalculation of lengths
+[X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
+
+% convert distances to km & set Z to depth below surface
+surface_level = 2890; % only valid in PREM
+X = X ./ 1000;
+Z = Z ./ 1000;
+Z = surface_level - (Z);
+for k=1:length(src_info)
+    src_x(k) = src_info(k).loc_x / 1000;
+    src_z(k) = src_info(k).loc_z / 1000;
+    src_z(k) = surface_level - src_z(k);
+end
+
+for k=1:length(rec_x)
+    rec_x(k) = rec_x(k) ./ 1000;
+    rec_z(k) = rec_z(k) ./ 1000;
+    rec_z(k) = surface_level - rec_z(k);
+end
+
+
+%% figure
 fig_mod = figure;
 set(fig_mod,'OuterPosition',pos_mod) 
 % set(gca,'FontSize',14)
@@ -48,7 +75,15 @@ for params = fieldnames(Model)';
 % %     p(4) = p(4)*1.50;  % Add 10 percent to height
 %     set(g, 'position', p);
 
-    subplot(1,3,j);
+    %% plot whole mantle
+    
+    if plot_UM_separate
+        subplot(2,3,3+j);
+    else
+        subplot(1,3,j);
+    end
+%     subplot(4,3,[3+j 6+j]);
+    set(gca, 'YDir', 'reverse');
     
     hold on
     pcolor(X,Z,param');
@@ -103,20 +138,54 @@ for params = fieldnames(Model)';
     
     caxis([cmin cmax]);
     
-    
-    for k=1:length(src_info)
-        plot(src_info(k).loc_x,src_info(k).loc_z,'kx','LineWidth',0.3,'MarkerSize',4)
-    end
-    
-    for k=1:length(rec_x)
-        plot(rec_x(k),rec_z(k),'ko','LineWidth',0.3,'MarkerSize',4)
-    end
+    % plot sources and receivers
+    plot(src_x,src_z,'kx','LineWidth',0.3,'MarkerSize',4)
+    plot(rec_x,rec_z,'ko','LineWidth',0.3,'MarkerSize',4)
+
     colormap(cm_model);
     axis image
     shading flat
+    if ~plot_UM_separate
+        switch params{1}
+            case 'rho'
+                title([params{1}, ' [kg/m^3]'])
+            case {'vs', 'vp'}
+                title([params{1}, ' [m/s]'])
+            case {'mu', 'lambda'}
+                title([params{1}, ' [N/m^2]'])
+            otherwise
+                title([params{1}, ' [unit??]'])
+        end
+    end
+    xlabel('x [km]');
+    ylabel('z [km]');
+    colorbar
+    hold off;
+    
+    % plot description
+    if plot_UM_separate
+        text(0.5, 0.1, ['whole mantle'], ...
+            'Units', 'normalized', 'HorizontalAlignment','center');
+    end
+    
+    %% plot UM zoom in
+%     subplot(4,3,j)
+if plot_UM_separate
+    subplot(2,3,j);
+    set(gca, 'YDir', 'reverse');
+    hold on
+    pcolor(X,Z,param');
+    caxis([cmin cmax]);
+    % plot sources and receivers
+    plot(src_x,src_z,'kx','LineWidth',0.3,'MarkerSize',4)
+    plot(rec_x,rec_z,'ko','LineWidth',0.3,'MarkerSize',4)
+    
+    colormap(cm_model);
+    %     axis image
+    shading flat
     switch params{1}
         case 'rho'
-        title([params{1}, ' [kg/m^3]'])
+            title([params{1}, ' [kg/m^3]'])
         case {'vs', 'vp'}
             title([params{1}, ' [m/s]'])
         case {'mu', 'lambda'}
@@ -124,17 +193,26 @@ for params = fieldnames(Model)';
         otherwise
             title([params{1}, ' [unit??]'])
     end
-    xlabel('x [m]');
-    ylabel('z [m]');
+    ylim([0 660]);
+    xlim([min(X(:)), max(X(:))]);
+    %     xlabel('x [km]');
+    ylabel('z [km]');
     colorbar
-    hold off;
     
+    % plot description
+    text(0.5, 0.1, ['upper mantle (vertical stretch)'], ...
+        'Units', 'normalized', 'HorizontalAlignment','center');
+end
+    
+%     % plot histogram
 %     subplot(4,3,6+j)
 %     
 %      hist(Model.(params{1})(:),100)
 %      h = findobj(gca,'Type','patch');
 %      set(h,'FaceColor',[.9 .9 .9],'EdgeColor',[.9 .9 .9])
     
+
+    %% next plot
     j = j+1;
     
 %     disp(['cmin: ',num2str(cmin,'%5.5e'),'   cmax: ', num2str(cmax,'%5.5e')]);
@@ -151,6 +229,17 @@ function [Model, middle, outparam] = checkargs(arg)
 narg = length(arg);
 
 
+% % loop over input arguments
+% for ii = 1:narg
+%     if isstruct(arg{ii})
+%         Model = arg{1};
+%         if length(Model) > 1
+%             error('You supplied more than one models (i.e. a struct w/ multiple models?)');
+%         end
+%     elseif isnumeric(arg{ii}) && numel(arg{1}) == 1
+%         modelnr = arg{ii};
+%         Model = update_model(modelnr);
+%     elseif isnumeric(arg{ii}) && numel(arg{ii}) == 3
 
 switch narg
     
