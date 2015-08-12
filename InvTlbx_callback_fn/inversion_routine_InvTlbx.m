@@ -37,7 +37,6 @@ if strcmp(use_seis , 'yesseis')
 else
     disp '-- using seis? ..... no'
 end
-disp '-- using seis? ..... YES!!'
 if strcmp(use_grav , 'yes')
     disp '-- using grav? ..... YES!!'
 else

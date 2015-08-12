@@ -51,6 +51,12 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
         wolfe_condition_satisfied = false; 
     end
     
+    sig_armijo = sig;
+    x_armijo = xn;
+    g_armijo = gn;
+    f_armijo = fn;
+    string_armijo = xn_string;
+    
     
     % If sig=sig0 satisfies Armijo then try sig=2^k*sig0
     % until sig satisfies also the Wolfe condition
@@ -80,12 +86,35 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
         sigp=2*sig;
 
         % Perform bisection until sig satisfies also the Wolfe condition
+        it_bisec = 0; bisec_max = 5;
         while (gn'*s>theta*stg)
+            
+            % stop bisection after 5 iterations
+            if it_bisec >= bisec_max
+                if sig > 0.01
+                    
+                    fprintf( 'Hurrah! get out of here! fucking bisection!\n' );
+                    
+                    % assign the step that satisfies Armijo
+                    sig = sig_armijo;
+                    xn  = x_armijo;
+                    gn  = g_armijo;
+                    fn  = f_armijo;
+                    xn_string = string_armijo;
+                    
+                    % and exit the bisection loop
+                    break
+                else
+                    % here, I should recalculate a step length instead of
+                    error('Seems we''re stuck in bisection...');
+                end
+            end
+            
             sigb=0.5*(sig+sigp);
             xb=xj-sigb*s;
             xb_string = optlib_generate_random_string(8);
             if (verbose)
-                fprintf( 'inside bisection loop \n' );
+                fprintf( 'inside bisection loop: %d of %d \n', it_bisec, bisec_max );
                 fprintf( 'requesting new misfit to test Wolfe condition.\n' );
                 fprintf( 'testing step length %f...\n',  sigb);
             end
@@ -100,6 +129,7 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
             else
                 sigp=sigb;
             end
+            it_bisec = it_bisec + 1;
         end
 
     end

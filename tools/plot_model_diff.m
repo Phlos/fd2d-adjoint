@@ -3,6 +3,13 @@ function [fig_mod, Model_diff] = plot_model_diff(Model1, Model2, varargin)
 % function that plots the difference model between Model 1 and Model 2
 % Model_diff = Model1 - Model2
 
+if isnumeric(Model1)
+    Model1 = update_model(Model1);
+end
+if isnumeric(Model2)
+    Model2 = update_model(Model2);
+end
+
 % varargin{:}
 outparam = checkargs(varargin);
 

@@ -13,14 +13,6 @@ initialise_dynamic_fields;  % this just makes all dynamic field (v, stress,
 absbound=ones(nx,nz);
 init_absbound;
 
-% figure;
-% pcolor(X,Z,absbound');
-% shading interp
-% axis image
-% colorbar
-% title('absorbing boundaries?');
-% 
-% disp(['absbound min: ', num2str(min(absbound(:))), ', max: ', num2str(max(absbound(:)))]);
 
 
 %%
@@ -53,7 +45,8 @@ fprintf(1, [reverseStr, prevmsg]);
 for n=1:nt
     % little trick to change the 'Percentage completed' inline
     if (mod(n,floor(nt/10)) == 0)
-        fprintf(1,'\b\b\b\b\b\b%6.0f',n/nt*100);
+        blips = sprintf('\b\b\b\b\b\b%6.0f',n/nt*100);
+        fprintf(1,blips);
     end
     
     %- compute divergence of current stress tensor ------------------------
@@ -256,4 +249,11 @@ for n=1:nt
     end
     
 end
-disp ' ';
+blaps = [prevmsg, blips];
+reverseStr = repmat(sprintf('\b'), 1, length(blaps));
+if exist('prevmsg') reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
+else reverseStr = '';
+end
+fprintf(1, reverseStr); 
+
+% disp ' ';

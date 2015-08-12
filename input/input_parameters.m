@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Circles.test-005c.actually-fixing-velocities';
+project_name='Circles.test-007.like-5-but-Psrc-off-Ssrc';
 
 %==========================================================================
 % inversion properties
@@ -140,31 +140,31 @@ model_type=84;          % starting model: PREM + vs and vp circles
 
 nsrc = 8;
 
-%- line of sources that have P and S sources in the same places - only possible w/ even nsrc
-pos_x= (1: 1: nsrc/2) * (Lx/(nsrc/2+1));
-% src_x = pos_x
-for ii = 1:nsrc
-    if mod(ii,2)==0 % even
-        src_info(ii).loc_x = pos_x(ii/2);
-    else % odd
-        src_info(ii).loc_x = pos_x((ii-1)/2 + 1);
-    end
-    src_x(ii) = src_info(ii).loc_x;
-        
-    src_info(ii).loc_z = (Lz - 500e3); % sources at 500 km depth
-    src_z(ii) = src_info(ii).loc_z;
-end
-
-
-% %- line of sources near top/bot of the domain
-% src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
-% dz = 1/16 * Lz;
-% % src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
-% src_z=ones(size(src_x)) * (2*dz); % at the bottom, 2*dz from the bottom ivm absbound
+% %- line of sources that have two sources in the same place - only possible w/ even nsrc
+% pos_x= (1: 1: nsrc/2) * (Lx/(nsrc/2+1));
+% % src_x = pos_x
 % for ii = 1:nsrc
-%     src_info(ii).loc_x = src_x(ii);
-%     src_info(ii).loc_z = src_z(ii);
+%     if mod(ii,2)==0 % even
+%         src_info(ii).loc_x = pos_x(ii/2);
+%     else % odd
+%         src_info(ii).loc_x = pos_x((ii-1)/2 + 1);
+%     end
+%     src_x(ii) = src_info(ii).loc_x;
+%         
+%     src_info(ii).loc_z = (Lz - 500e3); % sources at 500 km depth
+%     src_z(ii) = src_info(ii).loc_z;
 % end
+
+
+%- line of sources near top/bot of the domain
+src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
+dz = 1/16 * Lz;
+src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
+% src_z=ones(size(src_x)) * (2*dz); % at the bottom, 2*dz from the bottom ivm absbound
+for ii = 1:nsrc
+    src_info(ii).loc_x = src_x(ii);
+    src_info(ii).loc_z = src_z(ii);
+end
 
 
 %==========================================================================

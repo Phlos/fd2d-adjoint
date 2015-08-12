@@ -197,6 +197,9 @@ function [useGivenModel, GivenModel, stf] = checkargs(arg)
 
 narg = length(arg);
 
+input_parameters;
+
+
 if narg == 2;
     useGivenModel = 'yes';
     GivenModel = arg{1};
@@ -216,6 +219,8 @@ elseif narg == 1;
 else
     useGivenModel = 'no';
     GivenModel = 0;
+    stf = zeros(1,nt); stf(1) = 1; 
+    warning('using dummy delta function stf!!!');
 %     disp(['number of input arguments to run_forward: ', num2str(narg)]);
     return
     

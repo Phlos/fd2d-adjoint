@@ -2,7 +2,7 @@
 
 % number of iterations
 InvProps.niter = 100;
-istart = 16;
+istart = 1;
 
 niter = InvProps.niter;
 
