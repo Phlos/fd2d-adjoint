@@ -125,13 +125,13 @@ function [misfit_total, misfit_seis, misfit_grav, ...
     end
     
     %     if strcmp(textornot,'yestext')
-    %         if strcmp(use_grav,'yes')
-    %             disp(['seismic misfit:  ', num2str(misfit_seis,'%3.2e')])
-    %             disp(['gravity misfit:  ', num2str(misfit_grav,'%3.2e')])
-    %             disp(['total misfit:    ', num2str(misfit_total,'%3.2e')])
-    %         else
-    %             disp(['total (=seis) misfit: ', num2str(misfit_total,'%3.2e')]);
-    %         end
+    if strcmp(use_seis, 'yesseis')
+        disp(['seismic misfit:  ', num2str(misfit_seis,'%3.2e')])
+    end
+    if strcmp(use_grav, 'yesgrav')
+        disp(['gravity misfit:  ', num2str(misfit_grav,'%3.2e')])
+    end
+    disp(['total misfit:    ', num2str(misfit_total,'%3.2e')])
     %     end
     
 end

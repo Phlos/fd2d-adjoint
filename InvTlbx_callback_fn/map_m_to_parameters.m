@@ -19,16 +19,20 @@ input_parameters;
 
 parametrisation = usr_par.parametrisation;
 Model_bg        = usr_par.Model_bg;
+Model_start     = usr_par.Model_start;
+
 
 % fixing vs and vp: there are only 1*nx*nz free parameters: rho
 if strcmp(fix_velocities,'yes')
-    vs_bg = sqrt(Model_bg.mu ./ Model_bg.rho);
-    vp_bg = sqrt( (Model_bg.lambda + 2*Model_bg.mu) ./ Model_bg.rho);
+%     vs_bg = sqrt(Model_bg.mu ./ Model_bg.rho);
+%     vp_bg = sqrt( (Model_bg.lambda + 2*Model_bg.mu) ./ Model_bg.rho);
+    vs_st = sqrt(Model_start.mu ./ Model_start.rho);
+    vp_st = sqrt( (Model_start.lambda + 2*Model_start.mu) ./ Model_start.rho);
     
     if strcmp(parametrisation, 'rhomulambda')
         rho = Model_bg.rho .* (1 + reshape(m, nx, nz));
-        mu  = vs_bg .^2 .* rho;
-        lambda = (vp_bg.^2 - 2* vs_bg.^2) .* rho;
+        mu  = vs_st .^2 .* rho;
+        lambda = (vp_st.^2 - 2* vs_st.^2) .* rho;
             
     else
         error('parametrisation must be rhomulambda if fixing velocities');

@@ -119,11 +119,11 @@ if istart == 1
     % if 1st iter model @ matfile, load matfile
     if strcmp(use_matfile_startingmodel,'yes')
         load(starting_model)
-        Model(1) = Model_out;
+        Model_start = Model_out;
         clearvars Model_out;
-    else
-        Model(1) = Model_start;
     end
+    
+    Model(1) = Model_start;
     
 %     % model
 %     disp 'plotting initial model'
@@ -149,7 +149,7 @@ if  (~exist('misfit_init', 'var') && exist(init_misfit_file, 'file'))
     load(init_misfit_file);
 elseif ~exist('misfit_init', 'var')
     disp 'calculating initial misfits'
-    misfit_init = calc_initial_misfits(Model(1), sObsPerFreq, g_obs);
+    misfit_init = calc_initial_misfits(Model_start, sObsPerFreq, g_obs);
     save(init_misfit_file, 'misfit_init', '-v6');
 else
     disp 'initial misfits already present... proceeding...';
@@ -174,7 +174,7 @@ sEventObs   = sObsPerFreq(whichFrq).sEventObs;
 % perpare usr_par
 
 usr_par.InvProps        = InvProps;
-usr_par.Model(1)        = Model(1);
+usr_par.Model_start        = Model_start;
 usr_par.sObsPerFreq     = sObsPerFreq;
 usr_par.misfit_init     = misfit_init;
 usr_par.whichFrq        = whichFrq;
@@ -203,7 +203,7 @@ end
 
 % call steepest gradient, L-BFGS, something else.
 
-m = map_parameters_to_m(Model(1), usr_par);
+m = map_parameters_to_m(Model_start, usr_par);
 
 
 

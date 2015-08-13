@@ -275,7 +275,8 @@ elseif strcmp(HostName, 'UBUNTU') % phloptop
 elseif strcmp(HostName,'doffer.geo.uu.nl') || strcmp(HostName,'DOFFER.GEO.UU.NL')
     if strcmp(version('-release'),'2014b')
 %         pos_invres = [1          34        1308        1047];
-    pos_invres = [-1080        -439        1080        1543];
+    %pos_invres = [-1080        -439        1080        1543];
+    pos_invres = [0        0        1000        1080];
     else
 %         pos_invres = [1          34        1308        1047];
     pos_invres = [-1080        -439        1080        1543];

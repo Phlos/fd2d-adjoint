@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Circles.test-008.like-5-but-extra-UM-circles';
+project_name='Circles.test-008b.like-8-but-fix-starting-vs-bg-model';
 
 %==========================================================================
 % inversion properties

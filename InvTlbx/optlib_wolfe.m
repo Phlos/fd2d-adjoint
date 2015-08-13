@@ -96,11 +96,11 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
                     fprintf( 'Hurrah! get out of here! fucking bisection!\n' );
                     
                     % assign the step that satisfies Armijo
-                    sig = sig_armijo;
-                    xn  = x_armijo;
-                    gn  = g_armijo;
-                    fn  = f_armijo;
-                    xn_string = string_armijo;
+                    sig = sig_armijo;           % step
+                    xn  = x_armijo;             % model
+                    gn  = g_armijo;             % gradient
+                    fn  = f_armijo;             % objective
+                    xn_string = string_armijo;  % model name
                     
                     % and exit the bisection loop
                     break
