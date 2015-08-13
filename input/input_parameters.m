@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Circles.test-008b.like-8-but-fix-starting-vs-bg-model';
+project_name='Circles.test-009.like-8-but-no-smoothing';
 
 %==========================================================================
 % inversion properties
@@ -59,6 +59,7 @@ stepInit = 1e-3;
 % % smoothing (= filtering) seismograms before adstf
 % max_freq = 0.2; % Hz
 % smoothing kernels
+smoothing  = 'nosmooth'; % 'yessmooth' or 'nosmooth'
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
                 

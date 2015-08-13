@@ -141,7 +141,11 @@ K_reparam = change_parametrisation_kernels('rhomulambda', parametrisation, K_tot
 K_rel = calculate_relative_kernels(K_reparam, Model_bg);
 
 % filter kernels
-K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
+if strcmp(smoothing, 'nosmooth')
+    disp('WARNING! Kernels are not being filtered!!');
+else
+    K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
+end
 
 %% convert the obtained gradient back to same struc as m
 gm = map_gradparameters_to_gradm(K_rel, usr_par);

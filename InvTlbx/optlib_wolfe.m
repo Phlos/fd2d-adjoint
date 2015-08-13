@@ -25,11 +25,15 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
         fprintf( 'requesting new misfit to test Armijo-Goldstein condition.\n' );
         fprintf( 'testing step length %f...\n', sig);
     end
+    
     [fn] = eval_objective(xn, xn_string, usr_par);
      
     % Determine maximal sig=sig0/2^k satisfying Armijo
     while (f-fn<del*sig*stg)
         sig=0.5*sig;
+        if sig < 0.001 * sig0
+            error('seems that we''re not in a descent direction at all...');
+        end
         xn=xj-sig*s;
         xn_string = optlib_generate_random_string(8);
         if (verbose)
@@ -86,11 +90,11 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
         sigp=2*sig;
 
         % Perform bisection until sig satisfies also the Wolfe condition
-        it_bisec = 0; bisec_max = 5;
+        it_bisec = 1; bisec_max = 5;
         while (gn'*s>theta*stg)
             
             % stop bisection after 5 iterations
-            if it_bisec >= bisec_max
+            if it_bisec > bisec_max
                 if sig > 0.01
                     
                     fprintf( 'Hurrah! get out of here! fucking bisection!\n' );
