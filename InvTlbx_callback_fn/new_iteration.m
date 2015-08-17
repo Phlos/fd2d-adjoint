@@ -43,7 +43,7 @@ Model_bg    = usr_par.Model_bg;
 
 % convert model to usable format
 [Model] = map_m_to_parameters(m, usr_par);
-K_rel   = map_gradm_to_gradparameters(gm, usr_par);
+K_abs   = map_gradm_to_gradparameters(gm, usr_par);
 
 %% inversion output
 % InvProps.misfit(iter) = jm;
@@ -131,6 +131,7 @@ close(fig_grav_comp); clearvars('fig_grav_comp');
 % 
 
 % total kernel in (relative) rhomulambda
+K_rel = calculate_relative_kernels(K_abs, Model_bg);
 fig_knl = plot_kernels(K_rel, 'rhomulambda', Model, 'total', 'same', 99.95);
 titel = [project_name,' - iter ',num2str(iter), ' TOTAL kernels (rel rho-mu-lambda)'];
 mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
@@ -198,7 +199,7 @@ print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 
 % iter specific info
 usr_par.Model(iter) = Model;
-usr_par.K_rel(iter) = K_rel;
+usr_par.K_abs(iter) = K_abs;
 usr_par.misfit(iter) = jm;
 usr_par.cumulative_iter = iter;
 
@@ -226,7 +227,7 @@ end
 
 % calculate some inversion output numbers: kernel magnitudes, model
 % diffferences, angles between kernels, and then plot that.
-InvProps = calc_inversion_output_InvTlbx(iter, currentIter, usr_par.previous, InvProps, usr_par.K_rel, usr_par.Model, jm, gm, Model_real);
+InvProps = calc_inversion_output_InvTlbx(iter, currentIter, usr_par.previous, InvProps, usr_par.K_abs, usr_par.Model, jm, gm, Model_real);
 if iter > 1
     fig_invres = plot_inversion_result_InvTlbx(InvProps, iter);
     titel = [project_name,' - iter ',num2str(iter), ' inversion result'];
@@ -245,7 +246,13 @@ disp 'saving all current variables...'
 clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
     'filenm_old', 'filenm_new', 'fig_knl');
 savename = [output_path,'/iter',num2str(iter,'%03d'),'.all-vars.mat'];
-save(savename, '-regexp', '^(?!(u_fw|v_fw)$).');
+
+excludedVars = {'sObsPerFreq', 'currentIter', ...
+                'currentKnls', 'K_rel', 'K_abs', 'gm', ...
+                'Model_real', 'Model_bg', 'Model', 'm', ...
+                'X', 'Z'};
+
+save_except(savename, excludedVars{1:end});
 % end
 
     

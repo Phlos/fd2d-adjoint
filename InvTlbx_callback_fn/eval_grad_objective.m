@@ -134,21 +134,22 @@ else
     error('help, NO data?!');
 end
 
-% reparametrising Kernel to inversion parametrisation
-K_reparam = change_parametrisation_kernels('rhomulambda', parametrisation, K_total, Model);
-
-% calculate relative kernels
-K_rel = calculate_relative_kernels(K_reparam, Model_bg);
-
-% filter kernels
-if strcmp(smoothing, 'nosmooth')
-    disp('WARNING! Kernels are not being filtered!!');
-else
-    K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
-end
+% % reparametrising Kernel to inversion parametrisation
+% K_reparam = change_parametrisation_kernels('rhomulambda', parametrisation, K_total, Model);
+% 
+% % calculate relative kernels
+% K_rel = calculate_relative_kernels(K_reparam, Model_bg);
+% 
+% % filter kernels
+% if strcmp(smoothing, 'nosmooth')
+%     disp('WARNING! Kernels are not being filtered!!');
+% else
+%     K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
+% end
 
 %% convert the obtained gradient back to same struc as m
-gm = map_gradparameters_to_gradm(K_rel, usr_par);
+usr_par.Mod_current = Model;
+gm = map_gradparameters_to_gradm(K_total, usr_par);
 
 %% move matfiles back to model folder
 

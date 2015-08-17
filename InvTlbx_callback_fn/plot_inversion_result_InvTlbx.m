@@ -120,7 +120,9 @@ Langle = plot(iters(2:imax), angletot(2:imax) ./ pi .* 180, 'k',...
     set(Langle(3), 'LineWidth',1)
 end
 xlim([min(iters), iters(imax)]);
-ylim([0 90]);
+ax = gca;
+ax.YTick = 0:30:180;
+ylim([0 180]);
 grid on
     text(0.5, 0.9, 'angle between consecutive kernels(\circ)', ...
     'Units', 'normalized', 'HorizontalAlignment','center');

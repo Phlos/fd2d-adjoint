@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Circles.test-009.like-8-but-no-smoothing';
+project_name='Circles.test-011.like-10-but-no-bottom-5-rows-kernel';
 
 %==========================================================================
 % inversion properties
@@ -53,19 +53,22 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
 % stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-stepInit = 1e-3;
+stepInit = 1e-3;        % L-BFGS with kernels corrected (July 2015)
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
 % max_freq = 0.2; % Hz
+
 % smoothing kernels
 smoothing  = 'nosmooth'; % 'yessmooth' or 'nosmooth'
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
                 
+% zero out the bottom 5 rows of the kernel:
+zero_bottom_rows = 'yeszerobottom'; % 'yeszerobottom' or 'nozerobottom'
+                
 % store forward wavefield every .. timesteps
 store_fw_every = 10; 
-
 
 %==========================================================================
 % set basic simulation parameters
@@ -76,19 +79,25 @@ wave_propagation_type='PSV';   % can be 'PSV' or 'SH' or 'both'
 Lx=6000e3;     % model extension in x-direction [m]
 Lz=2890e3;     % model extension in z-direction [m] ! PREM: don't exceed 2891
 
-% nx=901;     % grid points in x-direction
-% nz=430;     % grid points in z-direction
-nx = 241;
-nz = 116;
+% nx=901;     % grid points in x-direction --> PREM: dx = 6.67 km
+% nz=430;     % grid points in z-direction --> PREM: dz = 6.72 km
+% nx = 241;   % PREM: dx = 25 km
+% nz = 116;   % PREM: dz = 25 km
+% nx = 601;   % PREM: dx = 10 km
+% nz = 290;   % PREM: dz = 10 km
+nx = 301;   % PREM: dx = 20 km
+nz = 145;   % PREM: dz = 20 km
 % nx = 1201;
 % nz = 581;
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
-dt=1.0;      % time step [s] % PREM model, dx=dz=25km
+% dt=1.0;      % time step [s] % PREM model, dx=dz=25km
+dt = 0.8;
 % dt=0.1;       % time step [s] 0.5 explodes, 0.4 suffices @PREM dx=dz=10km
 tmax = 1200;    % length of run [s] -- 1200 should be enough for ScS (=935 s) (PcP = 510)
 nt = ceil(tmax/dt); % number of iterations
+nt=store_fw_every*round(nt/store_fw_every);
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
@@ -161,7 +170,8 @@ nsrc = 8;
 
 %- line of sources near top/bot of the domain
 src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
-dz = 1/16 * Lz;
+% dz = 1/16 * Lz;
+dz = 50e3;
 src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
 % src_z=ones(size(src_x)) * (2*dz); % at the bottom, 2*dz from the bottom ivm absbound
 for ii = 1:nsrc
@@ -203,7 +213,7 @@ f_minlist = [0.006667 0.006667 0.006667 0.006667 0.006667 0.006667];
 % f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
 f_maxlist = [0.006667 0.008667 0.011267 0.014647 0.01904  0.02475 ];
 % how many iterations with the same source?
-change_freq_every = 15;          % how many iterations with the same freq?
+change_freq_every = 20;          % how many iterations with the same freq?
 
 
 

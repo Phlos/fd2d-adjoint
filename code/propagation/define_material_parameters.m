@@ -991,7 +991,7 @@ elseif (model_type==85) % CIRCLES and small UM circles:
     
     % anomaly properties
     anom.strength = 1.0 * 1/100; % 1 procent
-    anom.radius = 0.35 * min(nx/(3+1), nz/(2+1));
+    anom.radius = 0.30 * min(nx/(3+1), nz/(2+1));
 %     anom.radius = 0.25 * min( locX(2)-locX(1), locZ(2)-locZ(1) ); % (2)-(1) so that I can still pad the outside of the domain
     anomUM.strength = anom.strength;
     anomUM.radius = 0.5 * anom.radius;
@@ -1108,7 +1108,7 @@ elseif (model_type==86) % CIRCLES and small UM circles - ONLY VS AND VP:
     
     % anomaly properties
     anom.strength = 1.0 * 1/100; % 1 procent
-    anom.radius = 0.35 * min(nx/(3+1), nz/(2+1));
+    anom.radius = 0.30 * min(nx/(3+1), nz/(2+1));
 %     anom.radius = 0.25 * min( locX(2)-locX(1), locZ(2)-locZ(1) ); % (2)-(1) so that I can still pad the outside of the domain
     anomUM.strength = anom.strength;
     anomUM.radius = 0.5 * anom.radius;

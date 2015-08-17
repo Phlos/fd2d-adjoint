@@ -71,7 +71,7 @@ elseif (~exist('sObsPerFreq','var') || ~exist('t_obs','var') || ...
     if istart == 1
         disp 'no OBS present, preparing obs...';
         [Model_real, sObsPerFreq, t_obs, props_obs, g_obs] = prepare_obs(output_path,true_model_type);
-        save(savename, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v6');
+        save(obs_file, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v6');
     else
         error('iter > 1 but there are no observed properties!')
     end
@@ -104,17 +104,8 @@ Model_bg = update_model(bg_model_type);
 % middle.lambda = mode(Model_start.lambda(:));
 
 
-% plot initial model
+% 1st model in a matfile?
 if istart == 1
-%     disp 'plotting initial model'
-%     fig_mod = plot_model_diff(Model_start,Model_bg,param_plot);
-%     set(fig_mod,'Renderer','painters');
-%     titel = [project_name,': starting model'];
-%     mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-%     figname = [output_path,'/iter0.starting-model.',param_plot,'.png'];
-%     print(fig_mod,'-dpng','-r400',figname);
-%     close(fig_mod);
-    
     
     % if 1st iter model @ matfile, load matfile
     if strcmp(use_matfile_startingmodel,'yes')
@@ -122,20 +113,7 @@ if istart == 1
         Model_start = Model_out;
         clearvars Model_out;
     end
-    
-    Model(1) = Model_start;
-    
-%     % model
-%     disp 'plotting initial model'
-%     iter = 1;
-%     fig_mod = plot_model_diff(Model(iter),Model_bg,param_plot);
-%     titel = [project_name,': model diff of iter ', num2str(iter), ' and bg model'];
-%     mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
-%     figname = [output_path,'/iter',num2str(iter,'%03d'),'.model-diff.',param_plot,'.png'];
-%     print(fig_mod,'-dpng','-r400',figname);
-%     close(fig_mod);
-%     clearvars('fig_mod');
-    
+    Model(1) = Model_start;    
     
 end
 
@@ -174,7 +152,7 @@ sEventObs   = sObsPerFreq(whichFrq).sEventObs;
 % perpare usr_par
 
 usr_par.InvProps        = InvProps;
-usr_par.Model_start        = Model_start;
+usr_par.Model_start     = Model_start;
 usr_par.sObsPerFreq     = sObsPerFreq;
 usr_par.misfit_init     = misfit_init;
 usr_par.whichFrq        = whichFrq;

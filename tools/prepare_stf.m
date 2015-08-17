@@ -28,6 +28,8 @@ function sEventInfo = prepare_stf()
 input_parameters;
 [~,~,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
+sfe = store_fw_every;
+nt=sfe*round(nt/sfe);
 t = 0:dt:dt*(nt-1);
 
 for ii = 1:length(src_info)

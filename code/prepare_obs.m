@@ -17,8 +17,7 @@ Model_real = checkargs(varargin(:));
 % close(fig_mod_real);
 
 % real - background model
-Mbg = update_model(bg_model_type);
-fig_mod_diff = plot_model_diff(Model_real, Mbg, 'rhovsvp');
+fig_mod_diff = plot_model_diff(Model_real, bg_model_type, 'rhovsvp');
 mtit(fig_mod_diff, 'real - bg model -- rho-vs-vp parametrisation');
 figname = [output_path,'/obs.model-real-diff-bg.rhovsvp.png'];
 print(fig_mod_diff, '-dpng', '-r400', figname);

@@ -39,10 +39,12 @@ if nprev > 0
         
         % previous model and gradient under consideration
         Mod_iprev = usr_par.Model(end - iprev);
-        Knl_iprev = usr_par.K_rel(end - iprev);
+        Knl_iprev = usr_par.K_abs(end - iprev);
         
         % load model nr countback into m
         m = map_parameters_to_m(Mod_iprev, usr_par);
+        
+        usr_par.Mod_current = usr_par.Model(end);
         gm = map_gradparameters_to_gradm(Knl_iprev, usr_par);
         
         % add m to previous_models

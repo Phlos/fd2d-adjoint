@@ -22,7 +22,7 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
     xn_string = optlib_generate_random_string(8);
     
     if (verbose)
-        fprintf( 'requesting new misfit to test Armijo-Goldstein condition.\n' );
+        fprintf( 'requesting misfit to test Armijo-Goldstein condition.\n' );
         fprintf( 'testing step length %f...\n', sig);
     end
     
@@ -31,8 +31,8 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
     % Determine maximal sig=sig0/2^k satisfying Armijo
     while (f-fn<del*sig*stg)
         sig=0.5*sig;
-        if sig < 0.001 * sig0
-            error('seems that we''re not in a descent direction at all...');
+        if sig < 0.01 * sig0
+            error(['seems that we''re not in a descent direction at all... sig = ', num2str(sig)]);
         end
         xn=xj-sig*s;
         xn_string = optlib_generate_random_string(8);
@@ -44,7 +44,7 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
     end
     if (verbose)
             fprintf( 'step length %f satisfies Armijo-Goldstein condition.\n', sig );
-            fprintf( 'requesting new gradient to test Wolfe condition...\n' );
+            fprintf( 'requesting gradient to test Wolfe condition...\n' );
     end
     [gn] = eval_grad_objective(xn, xn_string, usr_par);
 
@@ -82,7 +82,7 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
                 xnn_string = optlib_generate_random_string(8);
                 if (verbose)
                     fprintf( 'requesting new misfit to test Wolfe condition.\n' );
-                    fprintf( 'testing step length %f...\n', 2*sig);
+                    fprintf( 'testing step length %f...\n', sig);
                 end
                 [fnn,gnn] = eval_objective_and_gradient(xnn, xnn_string, usr_par);            
             end
