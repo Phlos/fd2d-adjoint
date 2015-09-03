@@ -23,14 +23,8 @@ num_mod_grad_stored = 5;
 % (because usr_par.Model(end) = current model
 %      and usr_par.K_rel(end) = current gradient )
 
-% % determine length of usr_par.Model, usr_par.Kernel
+% determine length of usr_par.Model, usr_par.Kernel
 nprev = numel(usr_par.Model) - 1;
-% length_mod = numel(usr_par.Model);
-% if isfield(usr_par, 'K_rel')
-%     length_grad  = numel(usr_par.K_rel);
-% else
-%     length_grad  = 0;
-% end
 
 % loop over the last 5 models to fill in previous models
 if nprev > 0

@@ -79,7 +79,7 @@ load([ModFolder,'iter-rec.mat']);
 % gravity difference
 fig_grav_comp = plot_gravity_quivers(usr_par.rec_g, g_recIter, usr_par.g_obs, ...
                 X, Z, Model.rho);
-figname = [output_path,'/iter.',num2str(iter,'%03d'),'.gravity_difference.png'];
+figname = [output_path,'/iter',num2str(iter,'%03d'),'.gravity_difference.png'];
 titel = ['gravity diff of model - real model (iter ', num2str(iter), ')'];
 mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.00001);
 print(fig_grav_comp, '-dpng', '-r400', figname);

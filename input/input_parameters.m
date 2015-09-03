@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Circles.test-011.like-10-but-no-bottom-5-rows-kernel';
+project_name='compare-coarse-fine-grid.test-001';
 
 %==========================================================================
 % inversion properties
@@ -16,18 +16,17 @@ apply_hc = 'no';   % 'yes' or 'no'
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'yes'; % 'yes' or 'no'
+use_grav = 'no'; % 'yes' or 'no'
 use_seis = 'yesseis'; % 'yesseis' or 'noseis'
 
 % what misfit functional are we using
-misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift'
-
+misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift
 % inversion parametrisation
 parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'yes'; % 'yes' or 'no'
+fix_velocities = 'no'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -53,13 +52,13 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
 % stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-stepInit = 1e-3;        % L-BFGS with kernels corrected (July 2015)
+stepInit = 5e-4;        % L-BFGS with kernels corrected (July 2015)
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
 % max_freq = 0.2; % Hz
 
-% smoothing kernels
+% smoothing kernels?
 smoothing  = 'nosmooth'; % 'yessmooth' or 'nosmooth'
 smoothgwid = 5; % width of the gaussian in the smoothing filter (pixels)
                 % used to be 9 w/ conv2 
@@ -84,20 +83,26 @@ Lz=2890e3;     % model extension in z-direction [m] ! PREM: don't exceed 2891
 % nx = 241;   % PREM: dx = 25 km
 % nz = 116;   % PREM: dz = 25 km
 % nx = 601;   % PREM: dx = 10 km
-% nz = 290;   % PREM: dz = 10 km
-nx = 301;   % PREM: dx = 20 km
-nz = 145;   % PREM: dz = 20 km
+% % nz = 290;   % PREM: dz = 10 km
+% nx = 301;   % PREM: dx = 20 km
+% nz = 145;   % PREM: dz = 20 km
+nx = 430;   % PREM: dx = ~14 km  (13.99)
+nz = 207;   % PREM: dz = ~14 km  (14.03)
+% nx = 215;
+% nz = 104;
 % nx = 1201;
 % nz = 581;
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
-% dt=1.0;      % time step [s] % PREM model, dx=dz=25km
-dt = 0.8;
+% dt=1.0;      % time step [s] - PREM model, dx=dz=25km
+% dt = 0.8;    % time step [s] - dx=dz= 20 km
+dt = 0.5;     % time step [s] - dx=dz = 14 km
 % dt=0.1;       % time step [s] 0.5 explodes, 0.4 suffices @PREM dx=dz=10km
 tmax = 1200;    % length of run [s] -- 1200 should be enough for ScS (=935 s) (PcP = 510)
 nt = ceil(tmax/dt); % number of iterations
 nt=store_fw_every*round(nt/store_fw_every);
+% nt = 100;
 
 order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
@@ -110,9 +115,9 @@ use_matfile_startingmodel = 'no';
 % starting_model = '../output/Model_0.03Hz.mat';
 starting_model = '';
 
-bg_model_type = 50;     % PREM
-true_model_type = 85;   % PREM + LM and UM solid circles (all params)
-model_type=86;          % PREM + LM/UM solid circles in vp, vs only
+bg_model_type = 10;     % PREM
+true_model_type = 10;   % PREM + LM and UM solid circles (all params)
+model_type=10; %(start) % PREM + LM/UM solid circles in vp, vs only
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -150,11 +155,18 @@ model_type=86;          % PREM + LM/UM solid circles in vp, vs only
 % sources -- positions
 %==========================================================================
 
-nsrc = 8;
+nsrc = 1;
+src_info.loc_x = 1000e3;
+src_info.loc_z = 1500e3;
 
+src_x = src_info.loc_x;
+src_z = src_info.loc_z;
+
+% nsrc = 8;
+% src_depth = 50e3; % source depth beneath surface (m)
+% 
 % %- line of sources that have two sources in the same place - only possible w/ even nsrc
-% pos_x= (1: 1: nsrc/2) * (Lx/(nsrc/2+1));
-% % src_x = pos_x
+% pos_x = (1: 1: nsrc/2) * (Lx/(nsrc/2+1));
 % for ii = 1:nsrc
 %     if mod(ii,2)==0 % even
 %         src_info(ii).loc_x = pos_x(ii/2);
@@ -163,22 +175,22 @@ nsrc = 8;
 %     end
 %     src_x(ii) = src_info(ii).loc_x;
 %         
-%     src_info(ii).loc_z = (Lz - 500e3); % sources at 500 km depth
+%     src_info(ii).loc_z = (Lz - src_depth); % sources at 50 km depth
 %     src_z(ii) = src_info(ii).loc_z;
 % end
 
 
-%- line of sources near top/bot of the domain
-src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
-% dz = 1/16 * Lz;
-dz = 50e3;
-src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
-% src_z=ones(size(src_x)) * (2*dz); % at the bottom, 2*dz from the bottom ivm absbound
-for ii = 1:nsrc
-    src_info(ii).loc_x = src_x(ii);
-    src_info(ii).loc_z = src_z(ii);
-end
-
+% %- line of sources near top/bot of the domain
+% src_x= (1: 1: nsrc) * (Lx/(nsrc+1));
+% % dz = 1/16 * Lz;
+% dz = 50e3;
+% src_z=ones(size(src_x)) * (Lz - 2*dz); % -2*dz necessary as a result of b.c.)
+% % src_z=ones(size(src_x)) * (2*dz); % at the bottom, 2*dz from the bottom ivm absbound
+% for ii = 1:nsrc
+%     src_info(ii).loc_x = src_x(ii);
+%     src_info(ii).loc_z = src_z(ii);
+% end
+clearvars src_depth pos_x;
 
 %==========================================================================
 % sources -- source-time functions
@@ -195,7 +207,7 @@ for ii = 1:nsrc
     
     % needed for 'delta_bp'    
     src_info(ii).f_min=0.006667;          % minimum stf frequency [Hz]
-    src_info(ii).f_max=0.03;              % maximum stf frequency [Hz]
+    src_info(ii).f_max=1.0;               % maximum stf frequency [Hz]
 
     if mod(ii,2)==0; % even
         src_info(ii).stf_PSV = [1 0]; % [x z] --> S waves radiate up/down
@@ -208,10 +220,10 @@ for ii = 1:nsrc
 end
                     
                     
-%- source filtering
-f_minlist = [0.006667 0.006667 0.006667 0.006667 0.006667 0.006667];
-% f_maxlist = [0.006667 0.008667 0.01267 0.01465 0.01904 0.02475 0.03218 0.04183];
-f_maxlist = [0.006667 0.008667 0.011267 0.014647 0.01904  0.02475 ];
+%- source filtering - 8 frequency bands increasing by a factor 1.25 each time
+f_minlist = [0.00667];% 0.00667 0.00667 0.00667 0.00667 0.00667 0.00667 0.00667];
+f_maxlist = [0.00667];% 0.00833 0.01042 0.01302 0.01628 0.02035 0.02543 0.03179];
+
 % how many iterations with the same source?
 change_freq_every = 20;          % how many iterations with the same freq?
 
@@ -221,20 +233,23 @@ change_freq_every = 20;          % how many iterations with the same freq?
 % receiver positions
 %==========================================================================
 
-%- a line of receivers just below the top boundary
-nrec = 16;
-% nrec = 1;
-rec_x= (1: 1: nrec) * (Lx/(nrec+1));
-dz = Lz/(nz-1);
-rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)
+% %- a line of receivers just below the top boundary
+% nrec = 16;
+% % nrec = 1;
+% rec_x= (1: 1: nrec) * (Lx/(nrec+1));
+% dz = Lz/(nz-1);
+% rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)
 
+nrec = 1;
+rec_x = 3500e3;
+rec_z = 1500e3;
 
 %==========================================================================
 % gravity measurement positions
 %==========================================================================
 
 %- a line of gravity receivers above the domain
-rec_height = 20000; % m
+rec_height = 20e3; % [m]
 nrec_g = 50;
 rec_g.x= (0: 1: nrec_g) * (Lx/nrec_g);
 rec_g.z=ones(size(rec_g.x)) * (Lz + rec_height);
@@ -258,8 +273,8 @@ width = 500.0e3;        % width of the boundary layer in m
 
 absorb_left=1;  % absorb waves on the left boundary
 absorb_right=1; % absorb waves on the right boundary
-absorb_top=0;   % absorb waves on the top boundary
-absorb_bottom=0;% absorb waves on the bottom boundary
+absorb_top=1;   % absorb waves on the top boundary
+absorb_bottom=1;% absorb waves on the bottom boundary
 
 %==========================================================================
 % plotting

@@ -3,7 +3,7 @@
 %% preparation
 
 % number of iterations
-InvProps.niter = 100;
+InvProps.niter = 120;
 istart = 1;
 
 niter = InvProps.niter;

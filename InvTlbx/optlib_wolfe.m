@@ -70,6 +70,8 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
         if (sig==sig0)
             xnn=xj-2*sig*s;
             xnn_string = optlib_generate_random_string(8);
+            fprintf( 'requesting new misfit to test Wolfe condition.\n' );
+            fprintf( 'testing step length %f...\n', 2*sig);
             [fnn,gnn] = eval_objective_and_gradient(xnn, xnn_string, usr_par);
 
             while (gn'*s>theta*stg)&&(f-fnn>=2*del*sig*stg)
@@ -82,7 +84,7 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
                 xnn_string = optlib_generate_random_string(8);
                 if (verbose)
                     fprintf( 'requesting new misfit to test Wolfe condition.\n' );
-                    fprintf( 'testing step length %f...\n', sig);
+                    fprintf( 'testing step length %f...\n', 2*sig);
                 end
                 [fnn,gnn] = eval_objective_and_gradient(xnn, xnn_string, usr_par);            
             end

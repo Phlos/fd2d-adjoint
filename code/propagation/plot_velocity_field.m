@@ -25,8 +25,8 @@ path(path,'./tools')
 figure(fig_vel)
 clf
 
-% Check what is calculated and what needs to be plotted
-% if(strcmp(plot_forward_frames,'X-Y-Z'))
+%% Plotting prep - check what is calculated and what needs to be plotted
+
     
 if(strcmp(wave_propagation_type,'SH'))
     nplots=1;
@@ -160,16 +160,37 @@ elseif(strcmp(wave_propagation_type,'both'))
     end
     
 end
-    
-%- plot X, Z and Y velocity fields in a loop -----------------------------
+ 
+
+% convert distances to km & set Z to depth below surface
+surface_level = 2890; % [km] only valid in PREM
+X_new = X ./ 1000;
+Z_new = Z ./ 1000;
+Z_new = surface_level - (Z_new);
+for k=1:length(src_info)
+    src_x_new(k) = src_info(k).loc_x / 1000;
+    src_z_new(k) = src_info(k).loc_z / 1000;
+    src_z_new(k) = surface_level - src_z_new(k);
+end
+
+for k=1:length(rec_x)
+    rec_x_new(k) = rec_x(k) ./ 1000;
+    rec_z_new(k) = rec_z(k) ./ 1000;
+    rec_z_new(k) = surface_level - rec_z_new(k);
+end
+
+%% - plot X, Z and Y velocity fields in a loop -----------------------------
 
 for i=1:nplots
     
     subplot(1,nplots,i)
     hold on
     
+    % make sure that the Y axis points downwards
+    set(gca, 'YDir', 'reverse');
+    
     %- actual plotting -
-    pcolor(X,Z,plotting(i).v');
+    pcolor(X_new,Z_new,plotting(i).v');
     axis image
     
     %- colour scale -------------------------------------------------------
@@ -184,8 +205,8 @@ for i=1:nplots
     
     %- axis labels and titles ---------------------------------------------
     
-    xlabel('x [m]');
-    ylabel('z [m]');
+    xlabel('x [km]');
+    ylabel('z [km]');
     
     title(plotting(i).title);
     
@@ -202,18 +223,18 @@ for i=1:nplots
     
     timestamp=['t [s] = ',num2str(floor(n*dt),'%4.0f')];
     timestamp_text = text(0.05*Lx,0.92*Lz,timestamp) ;
-    text(0.95*Lx,0.92*Lz,['max = \pm', num2str(plotting(i).scale,'%3.1e')], ...
-        'HorizontalAlignment','right')
+    text(0.95,0.92, ['max = \pm', num2str(plotting(i).scale,'%3.1e')], ...
+        'HorizontalAlignment','right', 'Units', 'normalized')
     
     
     for p=1:5
         
-        for k=1:length(src_x)
-            plot(src_x(k),src_z(k),'kx')
+        for k=1:length(src_x_new)
+            plot(src_x_new(k),src_z_new(k),'kx')
         end
         
-        for k=1:length(rec_x)
-            plot(rec_x(k),rec_z(k),'ko')
+        for k=1:length(rec_x_new)
+            plot(rec_x_new(k),rec_z_new(k),'ko')
         end
         
     end
@@ -223,209 +244,9 @@ for i=1:nplots
 end
 
 hold off
-    
-    
-    
-    
-% elseif(strcmp(plot_forward_frames,'PSV-SH'))
-%     if(strcmp(wave_propagation_type,'SH'))
-%         nplots=1;
-%     elseif(strcmp(wave_propagation_type,'PSV'))
-%         nplots=1;
-%     elseif(strcmp(wave_propagation_type,'both'))
-%         nplots=2;
-%     end
-%     
-%     %- plot P-SV and SH velocity fields in a loop -----------------------------
-%     
-%     % P-SV velocity is just magnitude not direction (i.e. all positive)
-%     vPSV = sqrt(vx.^2 + vz.^2);
-%     
-%     for i=1:nplots
-%         subplot(1,nplots,i)
-%         hold on
-%         if(i==1)
-%             if(strcmp(wave_propagation_type,'SH'))
-%                 pcolor(X,Z,vy');
-%             elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-%                 pcolor(X,Z,vPSV');
-%             end
-%         elseif(i==2)
-%             pcolor(X,Z,vy');
-%         end
-%         axis image
-%         
-%         %- colour scale -------------------------------------------------------
-%         
-%         if(i==1)
-%             if(strcmp(wave_propagation_type,'SH'))
-%                 scale=prctile(abs(vy(:)),99.97);
-%             elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-%                 scale=prctile(abs(vPSV(:)),99.97);
-%             end
-%         elseif(i==2)
-%             scale=prctile(abs(vy(:)),99.97);
-%         end
-% 
-%         
-%         caxis([-scale scale]);
-%         % flipud: colormap reverse to blue=down, red=up - it's not tomography..
-%         colormap(flipud(cm));
-%         shading interp
-%         
-%         
-%         %- axis labels and titles ---------------------------------------------
-%         
-%         xlabel('x [m]');
-%         ylabel('z [m]');
-%         
-%         if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green'))
-%             if(i==1)
-%                 if(strcmp(wave_propagation_type,'SH'))
-%                     title('SH velocity field [m/s]');
-%                 elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-%                     title('P-SV velocity field [m/s]');
-%                 end
-%             elseif(i==2)
-%                 title('Y (SH) velocity field [m/s]');
-%             end
-%         elseif (strcmp(simulation_mode,'correlation') && t(n)<0)
-%             title('acausal correlation field');
-%         elseif (strcmp(simulation_mode,'correlation') && t(n)>=0)
-%             title('causal correlation field');
-%         end
-%         
-%         
-%         
-%         %======================================================================
-%         %- plot timestamp and source and receiver positions -------------------
-%         
-%         timestamp=['t [s] = ',num2str(n*dt,'%4.0f')];
-%         timestamp_text = text(0.05*Lx,0.92*Lz,timestamp) ;
-%         text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
-%             'HorizontalAlignment','right')
-%         
-%         
-%         for p=1:5
-%             
-%             for k=1:length(src_x)
-%                 plot(src_x(k),src_z(k),'kx')
-%             end
-%             
-%             for k=1:length(rec_x)
-%                 plot(rec_x(k),rec_z(k),'ko')
-%             end
-%             
-%         end
-%         
-%         
-%         
-%     end
-%     
-%     hold off
-%     
-% elseif(strcmp(plot_forward_frames,'X-Y'))
-%     
-%     if(strcmp(wave_propagation_type,'SH'))
-%         nplots=1;
-%     elseif(strcmp(wave_propagation_type,'PSV'))
-%         nplots=1;
-%         vPSV=[vx vz];
-%     elseif(strcmp(wave_propagation_type,'both'))
-%         nplots=2;
-%         vPSV=[vx vz];
-%     end
-%     
-%     %- plot X, Z and Y velocity fields in a loop -----------------------------
-%     
-%     for i=1:nplots
-%         subplot(1,nplots,i)
-%         hold on
-%         if(i==1)
-%             if(strcmp(wave_propagation_type,'SH'))
-%                 pcolor(X,Z,vy');
-%             elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-%                 pcolor(X,Z,vx');
-%             end
-%         elseif(i==2)
-%             pcolor(X,Z,vy');
-%         end
-%         axis image
-%         
-%         %- colour scale -------------------------------------------------------
-%         
-%         if(i==1)
-%             if(strcmp(wave_propagation_type,'SH'))
-%                 scale=prctile(abs(vy(:)),99.97);
-%             elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-%                 scale=prctile(abs(vPSV(:)),99.97);
-%             end
-%         elseif(i==2)
-%             scale=prctile(abs(vPSV(:)),99.97);
-%         elseif(i==3)
-%             scale=prctile(abs(vy(:)),99.97);
-%         end
-%         caxis([-scale scale]);
-%         
-%         % flipud: colormap reverse to blue=down, red=up - it's not tomography..
-%         colormap(flipud(cm));
-%         shading interp
-%         
-%         
-%         %- axis labels and titles ---------------------------------------------
-%         
-%         xlabel('x [m]');
-%         ylabel('z [m]');
-%         
-%         if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green'))
-%             if(i==1)
-%                 if(strcmp(wave_propagation_type,'SH'))
-%                     title('Y (SH) velocity field [m/s]');
-%                 elseif(strcmp(wave_propagation_type,'PSV') || strcmp(wave_propagation_type,'both'))
-%                     title('X velocity field [m/s]');
-%                 end
-%             elseif(i==2)
-%                 title('Y (SH) velocity field [m/s]');
-%             end
-%         elseif (strcmp(simulation_mode,'correlation') && t(n)<0)
-%             title('acausal correlation field');
-%         elseif (strcmp(simulation_mode,'correlation') && t(n)>=0)
-%             title('causal correlation field');
-%         end
-%         
-%         
-%         
-%         %======================================================================
-%         %- plot timestamp and source and receiver positions -------------------
-%         
-%         timestamp=['t [s] = ',num2str(n*dt,'%4.0f')];
-%         timestamp_text = text(0.05*Lx,0.92*Lz,timestamp) ;
-%         text(0.95*Lx,0.92*Lz,['max = \pm', num2str(scale,'%3.1e')], ...
-%             'HorizontalAlignment','right')
-%         
-%         
-%         for p=1:5
-%             
-%             for k=1:length(src_x)
-%                 plot(src_x(k),src_z(k),'kx')
-%             end
-%             
-%             for k=1:length(rec_x)
-%                 plot(rec_x(k),rec_z(k),'ko')
-%             end
-%             
-%         end
-%         
-%         
-%         
-%     end
-    
-    hold off
-    
-% end
 
 
-%- record movie -------------------------------------------------------
+%% - record movie -------------------------------------------------------
 
 if strcmp(make_movie,'yes')
     
@@ -440,7 +261,7 @@ if strcmp(make_movie,'yes')
 end
 
 
-%- save snapshot of wave propagation ----------------------------------
+%% - save snapshot of wave propagation ----------------------------------
 
 temps = n*dt;
 

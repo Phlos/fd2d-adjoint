@@ -83,6 +83,8 @@ for params = fieldnames(Model)';
         subplot(1,3,j);
     end
 %     subplot(4,3,[3+j 6+j]);
+
+    % make sure that the Y axis points downwards
     set(gca, 'YDir', 'reverse');
     
     hold on

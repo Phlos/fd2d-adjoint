@@ -31,13 +31,14 @@ K_rel = calculate_relative_kernels(K_reparam, Model_bg);
 % set bottom five rows to zero if requested (5 rows = width FD stencil
 % ( this is to avoid irritating focusing at the bottom of the domain due to
 %   numerical instabilities of the FD scheme at boundary conditions )
+n0rows = 1+5;
 if strcmp(zero_bottom_rows, 'yeszerobottom')
     % set bottom rows to zero
     params = fieldnames(K_rel);
     for ii = 1:numel(params)
         comps = fieldnames(K_rel.(params{ii}));
         for jj = 1:numel(comps)
-            K_rel.(params{ii}).(comps{jj})(:,1:5) = 0;
+            K_rel.(params{ii}).(comps{jj})(:,1:n0rows) = 0;
         end
     end
 end
