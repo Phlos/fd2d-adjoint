@@ -1,6 +1,7 @@
 function [Model_real, sObsPerFreq, t_obs, props_obs, g_obs] = prepare_obs(output_path, varargin)
 
 input_parameters;
+[~, ~, dx, dz] = define_computational_domain(Lx, Lz, nx, nz);
 nfr = length(f_maxlist);
 
 
@@ -95,7 +96,7 @@ if ~onlyseis
     save(savename, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v6');
 end
 
-close all;
+% close all;
 
 end
 

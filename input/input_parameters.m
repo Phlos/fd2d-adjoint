@@ -86,18 +86,18 @@ Lz=2890e3;     % model extension in z-direction [m] ! PREM: don't exceed 2891
 % % nz = 290;   % PREM: dz = 10 km
 % nx = 301;   % PREM: dx = 20 km
 % nz = 145;   % PREM: dz = 20 km
-nx = 430;   % PREM: dx = ~14 km  (13.99)
-nz = 207;   % PREM: dz = ~14 km  (14.03)
-% nx = 215;
-% nz = 104;
+% nx = 430;   % PREM: dx = ~14 km  (13.99)
+% nz = 207;   % PREM: dz = ~14 km  (14.03)
+nx = 215;   %  dz = 28 km
+nz = 104;   %  dz = 28 km
 % nx = 1201;
 % nz = 581;
 
 % The necesssary time step (in order to obtain a stable model run) may vary
 % according to the chosen gridding. 
-% dt=1.0;      % time step [s] - PREM model, dx=dz=25km
+dt=1.0;      % time step [s] - PREM model, dx=dz=25km
 % dt = 0.8;    % time step [s] - dx=dz= 20 km
-dt = 0.5;     % time step [s] - dx=dz = 14 km
+% dt = 0.5;     % time step [s] - dx=dz = 14 km
 % dt=0.1;       % time step [s] 0.5 explodes, 0.4 suffices @PREM dx=dz=10km
 tmax = 1200;    % length of run [s] -- 1200 should be enough for ScS (=935 s) (PcP = 510)
 nt = ceil(tmax/dt); % number of iterations
@@ -207,7 +207,8 @@ for ii = 1:nsrc
     
     % needed for 'delta_bp'    
     src_info(ii).f_min=0.006667;          % minimum stf frequency [Hz]
-    src_info(ii).f_max=1.0;               % maximum stf frequency [Hz]
+    src_info(ii).f_max=0.1;               % maximum stf frequency [Hz]
+                                          % !!! don't make too high !!!
 
     if mod(ii,2)==0; % even
         src_info(ii).stf_PSV = [1 0]; % [x z] --> S waves radiate up/down
@@ -218,6 +219,7 @@ for ii = 1:nsrc
                         % propagation. The final stf will be normalised
                         % such that its original amplitude is preserved.
 end
+source_amplitude = 1e9;
                     
                     
 %- source filtering - 8 frequency bands increasing by a factor 1.25 each time

@@ -11,6 +11,7 @@ function stf = make_source_time_function(t,stf_type,varargin)
 
 % adapted on 20-3-2015, Nienke Blom
 
+% dt = t(2) - t(1);
 [f_min, f_max, tauw_0, tauw, tee_0] = checkargs(stf_type, varargin(:));
 
 switch stf_type
@@ -18,9 +19,12 @@ switch stf_type
 % if (strcmp(stf_type,'delta_bp'))
     
         stf=zeros(1,length(t));
-        stf(1)=3e1;
+        stf(1)=1;
         stf=butterworth_lp(stf,t,5,f_max,'silent');
         stf=butterworth_hp(stf,t,3,f_min,'silent');
+        
+        % normalise amplitude
+        stf = stf ./ max(abs(stf));
     
 % elseif (strcmp(stf_type,'ricker'))
     case 'ricker'
@@ -29,7 +33,7 @@ switch stf_type
         stf = ( -2*alfa^3 / pi) * (t-tee_0) .* exp( -alfa^2 * (t-tee_0).^2);
         
         % normalise amplitude
-        stf = stf ./ max(stf);
+        stf = stf ./ max(abs(stf));
         
     case 'heaviside_bp'
         

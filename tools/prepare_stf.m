@@ -57,7 +57,10 @@ for ii = 1:length(src_info)
     % should make this into a plot all srces x and z (and y)
     fig_stf = plot_source_time_function(t,stfn);
     
+
     % prefactor = so that the stf is a spatial delta function (integral 1)
+    % correct for point-source-ness of source: divide by dx dz to
+    % make independent of grid size
     prefac = 1.0 / dx / dz;
     
     %- insert source time function into x y z with proper magnitudes
