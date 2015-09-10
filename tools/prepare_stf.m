@@ -53,6 +53,7 @@ for ii = 1:length(src_info)
         case 'ricker'
             stfn = make_source_time_function(t,stf_type,tauw_0, tauw, tee_0);
     end
+    stfn = source_amplitude * stfn;
     
     % should make this into a plot all srces x and z (and y)
     fig_stf = plot_source_time_function(t,stfn);
@@ -62,11 +63,12 @@ for ii = 1:length(src_info)
     % correct for point-source-ness of source: divide by dx dz to
     % make independent of grid size
     prefac = 1.0 / dx / dz;
+    stfn = prefac * stfn;
     
     %- insert source time function into x y z with proper magnitudes
-    sEventInfo(ii).stf.x = prefac* stfn .* stf_PSV(1)./norm(stf_PSV);  % x direction
-    sEventInfo(ii).stf.y = prefac* stfn;                             % y direction
-    sEventInfo(ii).stf.z = prefac* stfn .* stf_PSV(2)./norm(stf_PSV);  % z direction
+    sEventInfo(ii).stf.x = stfn .* stf_PSV(1)./norm(stf_PSV);  % x direction
+    sEventInfo(ii).stf.y = stfn;                             % y direction
+    sEventInfo(ii).stf.z = stfn .* stf_PSV(2)./norm(stf_PSV);  % z direction
     
     sEventInfo(ii).t = t;
 
