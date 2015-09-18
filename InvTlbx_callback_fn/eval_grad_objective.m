@@ -161,8 +161,12 @@ for ii = 1:numel(blips)
 end; 
 
 %% save variables of current iteration to file
-currentKnls.Kseis       = Kseis;
-currentKnls.Kg          = Kg;
+if strcmp(use_seis, 'yesseis');
+    currentKnls.Kseis       = Kseis;
+end
+if strcmp(use_grav, 'yes')
+    currentKnls.Kg          = Kg;
+end
 currentKnls.K_total     = K_total;
 save([ModFolder,'currentIter.kernels.mat'], 'currentKnls', '-v6');
 

@@ -35,13 +35,13 @@ end
 props_obs = calculate_model_properties(Model_real.rho, 'x');
 
 % gravity field of real model
-    [g_obs, fig_grav_obs] = calculate_gravity_field(Model_real.rho, rec_g);
+[g_obs, fig_grav_obs] = calculate_gravity_field(Model_real.rho, rec_g);
 if ~onlyseis
     figname = [output_path,'/obs.gravityrecordings.png'];
     mtit(fig_grav_obs, 'gravity field of real model');
     print(fig_grav_obs, '-dpng', '-r400', figname);
-    close(fig_grav_obs);
 end
+close(fig_grav_obs);
 
 %% source time function
 sEventInfoUnfilt = prepare_stf();
@@ -70,17 +70,25 @@ for ifr = 1:nfr
     end
     
     % run forward per source
-    [sEventObs, fig_seis] = run_forward_persource(Model_real, sEventInfo, 'yesplot');
+    [sEventObs, ~] = run_forward_persource(Model_real, sEventInfo, 'noplot');
     
     % plot & save each figure fig_seis
     for isrc = 1:nsrc
+        vobs = sEventObs(isrc).vel;
+        v0 = make_seismogram_zeros(sEventObs(isrc).vel);
+        t   = sEventObs(isrc).t;
+        recs = 1:length(vobs);
+        % determine how many seismograms are actually plotted
+        if length(vobs) > 8; recs = [2:2:length(vobs)]; end
+        % actual plotting
+        fig_seis = plot_seismogram_difference(vobs, v0, t, recs);
         titel = ['src ', num2str(isrc),' - observed seismograms freq range: ', ...
             num2str(sObsPerFreq(ifr).f_min), '-',num2str(sObsPerFreq(ifr).f_max), ' Hz'];
-        mtit(fig_seis(isrc), titel, 'xoff', 0.001, 'yoff', -0.05);
+        mtit(fig_seis, titel, 'xoff', 0.001, 'yoff', -0.05);
         figname = [output_path,'/obs.seis.fmax-',num2str(sObsPerFreq(ifr).f_max,'%.2e'),...
                                '.src-',num2str(isrc,'%02d'),'.png'];
-        print(fig_seis(isrc),'-dpng','-r400',figname);
-        close(fig_seis(isrc));
+        print(fig_seis,'-dpng','-r400',figname);
+        close(fig_seis);
     end
     
     sObsPerFreq(ifr).sEventInfo = sEventInfo;

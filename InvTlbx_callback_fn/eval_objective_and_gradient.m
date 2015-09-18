@@ -150,8 +150,12 @@ gm = map_gradparameters_to_gradm(K_total, usr_par);
 currentMisfits.misfit      = misfit_total;
 currentMisfits.misfit_seis = misfit_seis;
 currentMisfits.misfit_grav = misfit_grav;
-currentKnls.Kseis       = Kseis;
-currentKnls.Kg          = Kg;
+if strcmp(use_seis, 'yesseis');
+    currentKnls.Kseis       = Kseis;
+end
+if strcmp(use_grav, 'yes')
+    currentKnls.Kg          = Kg;
+end
 currentKnls.K_total     = K_total;
 save([ModFolder,'currentIter.misfits.mat'], 'currentMisfits', '-v6');
 save([ModFolder,'currentIter.kernels.mat'], 'currentKnls', '-v6');

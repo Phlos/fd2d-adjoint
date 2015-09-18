@@ -11,10 +11,14 @@ function stf = make_source_time_function(t,stf_type,varargin)
 
 % adapted on 20-3-2015, Nienke Blom
 
-% dt = t(2) - t(1);
+dt = t(2) - t(1);
 [f_min, f_max, tauw_0, tauw, tee_0] = checkargs(stf_type, varargin(:));
 
 switch stf_type
+    case 'delta'
+        stf = zeros(1, length(t));
+        stf(1) = 1 / dt;
+    
     case 'delta_bp'
 % if (strcmp(stf_type,'delta_bp'))
     
@@ -64,6 +68,12 @@ function [fmin, fmax, tauw_0, tauw, tee_0] = checkargs(stf_type, args)
 % outputs the needed parameters for simulation
 
 switch stf_type
+    case 'delta'
+        fmin = NaN;
+        fmax = NaN;
+        tauw_0 = NaN;
+        tauw = NaN;
+        tee_0 = NaN;
     case 'delta_bp'
 %         disp 'delta_bp'
         fmin = args{1};

@@ -33,6 +33,7 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
         sig=0.5*sig;
         if sig < 0.01 * sig0
             error(['seems that we''re not in a descent direction at all... sig = ', num2str(sig)]);
+%             return;
         end
         xn=xj-sig*s;
         xn_string = optlib_generate_random_string(8);
@@ -113,6 +114,7 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
                 else
                     % here, I should recalculate a step length instead of
                     error('Seems we''re stuck in bisection...');
+%                     return;
                 end
             end
             

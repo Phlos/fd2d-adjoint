@@ -59,6 +59,7 @@ end
 
 
 %% figure
+% fig_mod = figure('Visible', 'off');
 fig_mod = figure;
 set(fig_mod,'OuterPosition',pos_mod) 
 % set(gca,'FontSize',14)

@@ -17,6 +17,7 @@ function [usr_par] = new_iteration( it, m, ModRandString, jm, gm, usr_par)
 input_parameters;
 Model_real = update_model(true_model_type);
 iter = (usr_par.whichFrq-1) * (change_freq_every) + it +1;
+% iter = usr_par.cumulative_iter + 1;
 
 disp ' ';
 disp(['---- generating output for iteration ', num2str(iter)]);
@@ -68,6 +69,7 @@ fig_mod = plot_model_diff(Model,Model_bg,param_plot);
 titel = [project_name,': model diff of iter ', num2str(iter), ' and bg model'];
 mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
 figname = [output_path,'/iter',num2str(iter,'%03d'),'.model-diff.',param_plot,'.png'];
+% print(fig_mod,'-dpng', '-r0', figname);
 print(fig_mod,'-dpng','-r400',figname);
 close(fig_mod);
 clearvars('fig_mod');
@@ -82,6 +84,7 @@ fig_grav_comp = plot_gravity_quivers(usr_par.rec_g, g_recIter, usr_par.g_obs, ..
 figname = [output_path,'/iter',num2str(iter,'%03d'),'.gravity_difference.png'];
 titel = ['gravity diff of model - real model (iter ', num2str(iter), ')'];
 mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.00001);
+% print(fig_grav_comp, '-dpng', '-r0', figname);
 print(fig_grav_comp, '-dpng', '-r400', figname);
 close(fig_grav_comp); clearvars('fig_grav_comp');
 
@@ -136,6 +139,7 @@ fig_knl = plot_kernels(K_rel, 'rhomulambda', Model, 'total', 'same', 99.95);
 titel = [project_name,' - iter ',num2str(iter), ' TOTAL kernels (rel rho-mu-lambda)'];
 mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
 figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernels-total.rel.rho-mu-lambda.png'];
+% print(fig_knl,'-dpng','-r0', figname); close(fig_knl);
 print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 
 % fig_knl = plot_kernels(K_total, 'rhovsvp',Model, 'total', 'own', 99.95);
@@ -233,6 +237,7 @@ if iter > 1
     titel = [project_name,' - iter ',num2str(iter), ' inversion result'];
     mtit(fig_invres,titel, 'xoff', 0.001, 'yoff', 0.04);
     figname = [output_path,'/inversion_result.png'];
+%     print(fig_invres,'-dpng','-r0', figname); close(fig_invres);
     print(fig_invres,'-dpng','-r400',figname); close(fig_invres);
 end
 

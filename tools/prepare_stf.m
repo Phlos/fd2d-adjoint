@@ -48,6 +48,8 @@ for ii = 1:length(src_info)
     %% stf calculation
     % make the actual source time functions for each source
     switch stf_type
+        case {'delta'}
+            stfn = make_source_time_function(t, stf_type);
         case {'delta_bp', 'heaviside_bp'}
             stfn = make_source_time_function(t,stf_type,f_min,f_max);
         case 'ricker'
