@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-003.like-1j-but-no-fix-vel';
+project_name='Systematic.test-004.2.4.like-1j-but-only-grav';
 
 %==========================================================================
 % inversion properties
@@ -17,7 +17,7 @@ axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
 use_grav = 'yes'; % 'yes' or 'no'
-use_seis = 'yesseis'; % 'yesseis' or 'noseis'
+use_seis = 'noseis'; % 'yesseis' or 'noseis'
 
 % what misfit functional are we using
 misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift
@@ -26,7 +26,7 @@ parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rh
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'no'; % 'yes' or 'no'
+fix_velocities = 'yes'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'

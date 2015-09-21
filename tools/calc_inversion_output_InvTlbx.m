@@ -103,9 +103,10 @@ if (length(K_total) > 1 && iter > 1)
     par = fieldnames(K_total);
     KnlTot_now = [Ktotal_iter.(par{1}).total Ktotal_iter.(par{2}).total Ktotal_iter.(par{3}).total];
     KnlTot_prv = [Ktotal_prev.(par{1}).total Ktotal_prev.(par{2}).total Ktotal_prev.(par{3}).total];
-    KnlS_now = [Kseis_iter.(par{1}).total Kseis_iter.(par{2}).total Kseis_iter.(par{3}).total];
-    KnlS_prv = [Kseis_prev.(par{1}).total Kseis_prev.(par{2}).total Kseis_prev.(par{3}).total];
-    
+    if strcmp(use_seis,'yesseis')
+        KnlS_now = [Kseis_iter.(par{1}).total Kseis_iter.(par{2}).total Kseis_iter.(par{3}).total];
+        KnlS_prv = [Kseis_prev.(par{1}).total Kseis_prev.(par{2}).total Kseis_prev.(par{3}).total];
+    end
     totNtimesP                  = KnlTot_prv(:)' * KnlTot_now(:);
     totNorm                     = norm(KnlTot_prv(:))*norm(KnlTot_now(:));
     InvProps.angle.Ktotal(iter) = acos(totNtimesP / totNorm);

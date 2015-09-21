@@ -141,8 +141,13 @@ cfe = change_freq_every;
 cumulative_iter = 1;
 nfreq = numel(sObsPerFreq);
 
-sEventInfo = sObsPerFreq(whichFrq).sEventInfo;
-sEventObs   = sObsPerFreq(whichFrq).sEventObs;
+if strcmp(use_seis, 'yesseis')
+    sEventInfo = sObsPerFreq(whichFrq).sEventInfo;
+    sEventObs   = sObsPerFreq(whichFrq).sEventObs;
+else
+    sEventInfo = 'noSeismicInfoUsed';
+    sEventObs = 'noSeismicInfoUsed';
+end
 
 
 
@@ -198,9 +203,11 @@ for ifreq = 1:nfreq
     
     
     % change freq-dependend info @ usr_par.
-    usr_par.whichFrq = ifreq;
-    usr_par.sEventInfo = sObsPerFreq(ifreq).sEventInfo;
-    usr_par.sEventObs  = sObsPerFreq(ifreq).sEventObs;
+    if strcmp(use_seis, 'yesseis')
+        usr_par.whichFrq = ifreq;
+        usr_par.sEventInfo = sObsPerFreq(ifreq).sEventInfo;
+        usr_par.sEventObs  = sObsPerFreq(ifreq).sEventObs;
+    end
     
     if usr_par.cumulative_iter == 1
         stap = InvProps.stepInit;
@@ -220,8 +227,12 @@ for ifreq = 1:nfreq
     
     % run L-BFGS
     [flag, mfinal, usr_par]=optlib_lbfgs(m, options, usr_par);
-    
+
     m = mfinal;
+    
+        % save optlib output for later use (if crash between freqs)
+    save([output_path, '/freq-', num2str(ifreq, '%00d'), '.optlib_output.mat'], ...
+        'ifreq', 'flag', 'm' , 'usr_par')
 end
 
-
+disp(['Finished inversion ', project_name, '!']);

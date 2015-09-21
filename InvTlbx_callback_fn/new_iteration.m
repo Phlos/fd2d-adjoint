@@ -141,6 +141,7 @@ mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
 figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernels-total.rel.rho-mu-lambda.png'];
 % print(fig_knl,'-dpng','-r0', figname); close(fig_knl);
 print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
+clearvars fig_knl titel figname;
 
 % fig_knl = plot_kernels(K_total, 'rhovsvp',Model, 'total', 'own', 99.95);
 % titel = [project_name,' - iter ',num2str(iter), ' TOTAL kernels (abs rho-vs-vp)'];
@@ -231,6 +232,7 @@ if iter > 1
     figname = [output_path,'/inversion_result.png'];
 %     print(fig_invres,'-dpng','-r0', figname); close(fig_invres);
     print(fig_invres,'-dpng','-r400',figname); close(fig_invres);
+    clearvars fig_invres titel figname
 end
 
 usr_par.InvProps = InvProps;
@@ -239,17 +241,34 @@ usr_par.InvProps = InvProps;
 %% save output to file
 
 % if ~exist([output_path,'/iter',num2str(iter,'%03d'),'.all-vars.mat'],'file')
-disp 'saving all current variables...'
-clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
-    'filenm_old', 'filenm_new', 'fig_knl');
+disp 'saving current iter variables...'
+
+% selective saving (NEW):
+% iter-specific variables 
 savename = [output_path,'/iter',num2str(iter,'%03d'),'.all-vars.mat'];
+if strcmp(use_seis, 'yesseis')
+    sEventRecIter = usr_par.sEventRecIter;
+    whichFrq = usr_par.whichFrq;
+    save(savename, 'iter', 'sEventRecIter', 'g_recIter', 'whichFrq');
+else
+    save(savename, 'iter', 'g_recIter');
+end
 
-excludedVars = {'sObsPerFreq', 'currentIter', ...
-                'currentKnls', 'K_rel', 'K_abs', 'gm', ...
-                'Model_real', 'Model_bg', 'Model', 'm', ...
-                'X', 'Z'};
+% cumulative variables
+savename = [output_path,'/inversion.cumulative-vars.mat'];
+save(savename, 'iter', 'InvProps', 'Model', 'K_abs');
 
-save_except(savename, excludedVars{1:end});
+% % simply saving everything (OLD):
+% clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
+%     'filenm_old', 'filenm_new', 'fig_knl');
+% savename = [output_path,'/iter',num2str(iter,'%03d'),'.all-vars.mat'];
+% excludedVars = {'sObsPerFreq', 'currentIter', ...
+%                 'currentKnls', 'K_rel', 'K_abs', 'gm', ...
+%                 'previous', ...
+%                 'Model_real', 'Model_bg', 'Model', 'm', ...
+%                 'X', 'Z', 'ii', 'savename'};
+% save_except(savename, excludedVars{1:end});
+
 % end
 
     
@@ -261,6 +280,7 @@ for ii = 1:numel(blips)
     newfile = [output_path,strrep(blips(ii).name,'iter.current',['iter',num2str(iter,'%03d')])];
     movefile(oldfile,newfile);
 end
+clearvars blips bestand oldfile newfile;
 
 
 
