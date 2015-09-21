@@ -100,6 +100,10 @@ function fig_knl = plot_kernels(K, varargin)
     
     fig_knl = figure;
     set(fig_knl,'OuterPosition',pos_knl)
+    if (feature('showfigurewindows') == 0)
+        set(fig_knl, 'PaperUnits', 'points');
+        set(fig_knl, 'PaperPosition', pos_knl);
+    end
     % P-SV or 'total'
     for ii = 1:length(params); % loop over rows = parameters
         for jj = 1:ncols % loop over columns = which_waves fields ('PSV', 'SH', 'total')

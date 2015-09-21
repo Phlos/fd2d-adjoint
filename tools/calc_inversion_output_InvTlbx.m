@@ -4,15 +4,32 @@ function [InvProps] = calc_inversion_output_InvTlbx(iter, currentIterFields, pre
 % inversion development.
 
 
-input_parameters; 
+input_parameters;
 Model_real = checkargs(varargin(:));
 Ktotal_iter = K_total(iter);
-Kseis_iter = currentIterFields.Kseis;
-Kg_iter = currentIterFields.Kg;
+if strcmp(use_seis, 'yesseis')
+    Kseis_iter = currentIterFields.Kseis;
+else
+    Kseis_iter = NaN;
+end
+if strcmp(use_grav, 'yes')
+    Kg_iter = currentIterFields.Kg;
+else
+    Kg_iter = NaN;
+end
 if iter > 1
     Ktotal_prev = K_total(iter-1);
-    Kseis_prev = prevIterFields.Kseis;
-    Kg_prev     = prevIterFields.Kg;
+    if strcmp(use_seis, 'yesseis')
+        Kseis_prev = prevIterFields.Kseis;
+    else
+        Kseis_prev = NaN;
+    end
+    if strcmp(use_grav, 'yes')
+        Kg_prev     = prevIterFields.Kg;
+    else
+        Kg_prev = NaN;
+    end
+    
 end
 
 %% MISFITS
@@ -48,23 +65,29 @@ end
 %% KERNEL NORM
 % L2 norm of current kernels:
 % if iter < InvProps.niter
-    InvProps.norm.Kseis(iter) = norm(currentIterFields.Kseis.rho.total(:)) + ...
-                               norm(currentIterFields.Kseis.mu.total(:)) + ...
-                               norm(currentIterFields.Kseis.lambda.total(:));
-    InvProps.norm.Kg(iter) = norm(currentIterFields.Kg(:));
-%     InvProps.norm.Kseis(iter)  = NaN;
-%     InvProps.norm.Kg(iter)     = NaN;
-    if strcmp(parametrisation, 'rhomulambda');
-        InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.rho.total(:)) + ...
-            norm(Ktotal_iter.mu.total(:)) + ...
-            norm(Ktotal_iter.lambda.total(:));
-    elseif strcmp(parametrisation, 'rhovsvp');
-        InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.rho2.total(:)) + ...
-            norm(Ktotal_iter.vs2.total(:)) + ...
-            norm(Ktotal_iter.vp2.total(:));
-    else
-        error('calc_inversion_output_InvTlbx: parametrisation of knls not recognised');
-    end
+if strcmp(use_seis, 'yesseis');
+    InvProps.norm.Kseis(iter) = norm(Kseis_iter.rho.total(:)) + ...
+                               norm(Kseis_iter.mu.total(:)) + ...
+                               norm(Kseis_iter.lambda.total(:));
+else
+    InvProps.norm.Kseis(iter) = NaN;
+end
+if strcmp(use_grav, 'yes')
+    InvProps.norm.Kg(iter) = norm(Kg_iter);
+else
+    InvProps.norm.Kg(iter) = NaN;
+end
+if strcmp(parametrisation, 'rhomulambda');
+    InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.rho.total(:)) + ...
+        norm(Ktotal_iter.mu.total(:)) + ...
+        norm(Ktotal_iter.lambda.total(:));
+elseif strcmp(parametrisation, 'rhovsvp');
+    InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.rho2.total(:)) + ...
+        norm(Ktotal_iter.vs2.total(:)) + ...
+        norm(Ktotal_iter.vp2.total(:));
+else
+    error('calc_inversion_output_InvTlbx: parametrisation of knls not recognised');
+end
 % else
 %     InvProps.norm.Kseis(iter) = NaN;
 %     InvProps.norm.Kg(iter) = NaN;

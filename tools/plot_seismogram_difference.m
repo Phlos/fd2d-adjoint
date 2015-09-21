@@ -30,7 +30,10 @@ function fig_seisdif = plot_seismogram_difference(v_obs, v_rec, t, varargin)
 fig_seisdif = figure;
 set_figure_properties_bothmachines;
 set(fig_seisdif, 'OuterPosition', pos_seis);
-
+if (feature('showfigurewindows') == 0)
+    set(fig_seisdif, 'PaperUnits', 'points');
+    set(fig_seisdif, 'PaperPosition', pos_seis);
+end
 [recs_given, recs_in, plot_diff] = check_args(varargin(:));
 
 

@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-001j.like-1b-but-smoothing-as-1h';
+project_name='Systematic.test-003.like-1j-but-no-fix-vel';
 
 %==========================================================================
 % inversion properties
@@ -26,7 +26,7 @@ parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rh
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'yes'; % 'yes' or 'no'
+fix_velocities = 'no'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -211,8 +211,10 @@ end
 source_amplitude = 1e9;                 
                     
 %- source filtering - 8 frequency bands increasing by a factor 1.25 each time
-f_minlist = [0.00667 0.00667 0.00667];% 0.00667 0.00667 0.00667 0.00667 0.00667];
-f_maxlist = [0.00667 0.00833 0.01042];% 0.01302 0.01628 0.02035 0.02543 0.03179];
+% f_minlist = [0.00667 0.00667 0.00667];% 
+f_minlist = [0.00667 0.00667 0.00667 0.00667 0.00667];
+% f_maxlist = [0.00667 0.00833 0.01042];% 
+f_maxlist = [0.01302 0.01628 0.02035 0.02543 0.03179];
 
 % how many iterations with the same source?
 change_freq_every = 20;          % how many iterations with the same freq?

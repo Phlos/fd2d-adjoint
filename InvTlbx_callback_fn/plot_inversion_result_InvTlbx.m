@@ -76,7 +76,10 @@ iters = 1:niter;
 %- prepare figure
 fig_invres = figure;
 set(fig_invres,'OuterPosition',pos_invres);
-
+if (feature('showfigurewindows') == 0)
+    set(fig_invres, 'PaperUnits', 'points');
+    set(fig_invres, 'PaperPosition', pos_invres);
+end
 
 % s(1) = 
 

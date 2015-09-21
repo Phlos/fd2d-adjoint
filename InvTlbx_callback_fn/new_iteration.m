@@ -188,14 +188,6 @@ print(fig_knl,'-dpng','-r400',figname); close(fig_knl);
 %         print(fig_inv2,'-dpng','-r400',[figname,'.png']);
 %         print(fig_inv2,'-depsc','-r400',[figname,'.eps']);
 %         close(fig_inv2)
-%         
-%         fig_invres = plot_inversion_result(InvProps, iter);
-%         titel = [project_name,': inversion results'];
-%         mtit(fig_invres,titel, 'xoff', 0.0000001, 'yoff', 0.03);
-%         figname = [output_path,'/inversion_result.',project_name];
-%         print(fig_invres,'-dpng','-r400',[figname,'.png']);
-%         print(fig_invres,'-depsc','-r400',[figname,'.eps']);
-%         close(fig_invres)
 % end
 
 

@@ -61,7 +61,11 @@ end
 %% figure
 % fig_mod = figure('Visible', 'off');
 fig_mod = figure;
-set(fig_mod,'OuterPosition',pos_mod) 
+    set(fig_mod,'OuterPosition',pos_mod)
+if (feature('showfigurewindows') == 0)
+    set(fig_mod, 'PaperUnits', 'points');
+    set(fig_mod, 'PaperPosition', pos_mod);
+end
 % set(gca,'FontSize',14)
 
 j=1;
