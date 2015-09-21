@@ -38,7 +38,14 @@ end
             end
             prevmsg = sprintf( 'saving u_fw, v_fw output to file...');
             fprintf(prevmsg);
-            save([output_path,'/fwd_temp/forwardfield.src-',num2str(isrc),'.mat'], 'u_fw', 'v_fw', '-v6');
+            varInfo = whos('u_fw', 'v_fw');
+            size_together = varInfo(1).bytes + varInfo(2).bytes;
+            if size_together < 2.1472e9
+                save([output_path,'/fwd_temp/forwardfield.src-',num2str(isrc),'.mat'], 'u_fw', 'v_fw', '-v6');
+            else
+                warning('MAT-file size exceeds maximum for -v6 -- will save as v7.3');
+                save([output_path,'/fwd_temp/forwardfield.src-',num2str(isrc),'.mat'], 'u_fw', 'v_fw', '-v7.3');
+            end
             reverseStr = repmat(sprintf('\b'), 1, length(prevmsg));
             fprintf(reverseStr);
             clearvars u_fw v_fw;
