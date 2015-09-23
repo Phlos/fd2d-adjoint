@@ -15,7 +15,7 @@ function [usr_par] = new_iteration( it, m, ModRandString, jm, gm, usr_par)
 
 %% initialise
 input_parameters;
-Model_real = update_model(true_model_type);
+% Model_real = update_model(true_model_type);
 iter = (usr_par.whichFrq-1) * (change_freq_every) + it +1;
 % iter = usr_par.cumulative_iter + 1;
 
@@ -32,9 +32,11 @@ Model_bg    = usr_par.Model_bg;
 % Kseis       = usr_par.Kseis(iter);
 % K_total     = usr_par.K_total(iter);
  InvProps    = usr_par.InvProps;
-% if isfield(usr_par, 'Model_real')
-%     Model_real = usr_par.Model_real;
-% end
+if isfield(usr_par, 'Model_real')
+    Model_real = usr_par.Model_real;
+else
+    Model_real = update_model(true_model_type);
+end
 % 
 % 
 %% preparation
@@ -43,8 +45,8 @@ Model_bg    = usr_par.Model_bg;
 [X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
 
 % convert model to usable format
-[Model] = map_m_to_parameters(m, usr_par);
-K_abs   = map_gradm_to_gradparameters(gm, usr_par);
+[Model_iter] = map_m_to_parameters(m, usr_par);
+K_abs_iter   = map_gradm_to_gradparameters(gm, usr_par);
 
 %% inversion output
 % InvProps.misfit(iter) = jm;
@@ -65,7 +67,7 @@ K_abs   = map_gradm_to_gradparameters(gm, usr_par);
 %% plot stuff
 
 % model
-fig_mod = plot_model_diff(Model,Model_bg,param_plot);
+fig_mod = plot_model_diff(Model_iter,Model_bg,param_plot);
 titel = [project_name,': model diff of iter ', num2str(iter), ' and bg model'];
 mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
 figname = [output_path,'/iter',num2str(iter,'%03d'),'.model-diff.',param_plot,'.png'];
@@ -80,7 +82,7 @@ load([ModFolder,'iter-rec.mat']);
 
 % gravity difference
 fig_grav_comp = plot_gravity_quivers(usr_par.rec_g, g_recIter, usr_par.g_obs, ...
-                X, Z, Model.rho);
+                X, Z, Model_iter.rho);
 figname = [output_path,'/iter',num2str(iter,'%03d'),'.gravity_difference.png'];
 titel = ['gravity diff of model - real model (iter ', num2str(iter), ')'];
 mtit(fig_grav_comp, titel, 'xoff', 0.001, 'yoff', 0.00001);
@@ -134,8 +136,8 @@ close(fig_grav_comp); clearvars('fig_grav_comp');
 % 
 
 % total kernel in (relative) rhomulambda
-K_rel = calculate_relative_kernels(K_abs, Model_bg);
-fig_knl = plot_kernels(K_rel, 'rhomulambda', Model, 'total', 'same', 99.95);
+K_rel = calculate_relative_kernels(K_abs_iter, Model_bg);
+fig_knl = plot_kernels(K_rel, 'rhomulambda', Model_iter, 'total', 'same', 99.95);
 titel = [project_name,' - iter ',num2str(iter), ' TOTAL kernels (rel rho-mu-lambda)'];
 mtit(fig_knl,titel, 'xoff', 0.001, 'yoff', 0.04);
 figname = [output_path,'/iter',num2str(iter,'%03d'),'.kernels-total.rel.rho-mu-lambda.png'];
@@ -195,8 +197,8 @@ clearvars fig_knl titel figname;
 %% save stuff to usr_par
 
 % iter specific info
-usr_par.Model(iter) = Model;
-usr_par.K_abs(iter) = K_abs;
+usr_par.Model(iter) = Model_iter;
+usr_par.K_abs(iter) = K_abs_iter;
 usr_par.misfit(iter) = jm;
 usr_par.cumulative_iter = iter;
 
@@ -247,16 +249,21 @@ disp 'saving current iter variables...'
 % iter-specific variables 
 savename = [output_path,'/iter',num2str(iter,'%03d'),'.all-vars.mat'];
 if strcmp(use_seis, 'yesseis')
-    sEventRecIter = usr_par.sEventRecIter;
     whichFrq = usr_par.whichFrq;
-    save(savename, 'iter', 'sEventRecIter', 'g_recIter', 'whichFrq');
+    save(savename, 'project_name', 'iter', 'g_recIter', ...
+        'whichFrq', 'sEventRecIter');
 else
-    save(savename, 'iter', 'g_recIter');
+    save(savename, 'project_name', 'iter', 'g_recIter');
 end
 
 % cumulative variables
 savename = [output_path,'/inversion.cumulative-vars.mat'];
-save(savename, 'iter', 'InvProps', 'Model', 'K_abs');
+Model       = usr_par.Model;
+Model_start = usr_par.Model_start;
+Model_real  = usr_par.Model_real;
+K_abs       = usr_par.K_abs;
+save(savename, 'project_name', 'iter', 'InvProps', 'Model', ...
+    'Model_start', 'Model_real', 'K_abs');
 
 % % simply saving everything (OLD):
 % clearvars('figname', 'savename', 'fig_seisdif', 'fig_mod', ...
@@ -287,7 +294,7 @@ clearvars blips bestand oldfile newfile;
 
 %% prepare usr_par for new information from the next iter.
 % !!! NOTE IT DOES NOT WORK LIKE THIS IF A NEW FREQ IS INITIATED!!
-%     because then, previous is overwritten, with information of a model
+%     because then, 'previous' is overwritten, with information of a model
 %     that is otherwise never used. Will have to think about that, but it
 %     will cause WRONG results in calculating e.g. the angles between prev
 %     & current model just after the frequency has changed...

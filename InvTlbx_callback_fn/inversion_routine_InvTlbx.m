@@ -92,8 +92,8 @@ end
 
 disp 'preparing inversion starting model...'
 
-% save initial model (from input_parameters)
-Model_start = update_model();
+% % save initial model (from input_parameters)
+% Model_start = update_model();
 
 % save background model (for plotting purposes)
 Model_bg = update_model(bg_model_type);
@@ -105,17 +105,21 @@ Model_bg = update_model(bg_model_type);
 
 
 % 1st model in a matfile?
-if istart == 1
+% if istart == 1
     
     % if 1st iter model @ matfile, load matfile
     if strcmp(use_matfile_startingmodel,'yes')
-        load(starting_model)
-        Model_start = Model_out;
-        clearvars Model_out;
+        startmod = load(starting_model);
+        Model_start = startmod.Model;
+        fig_mod_start = plot_model_diff(Model_start, Model_bg, 'rhovsvp');
+        close(fig_mod_start);
+        clearvars startmod fig_mod_start;
+    else
+        Model_start = update_model();
     end
-    Model(1) = Model_start;    
+  
     
-end
+% end
 
 %% calculate initial model misfit per frequency (if not present yet)
 
@@ -154,8 +158,10 @@ end
 
 %% preparing input for the Inversion Toolbox
 
-% perpare usr_par
+% output log
+output_log = [output_path,'/lbfgs_output_log.txt'];
 
+% prepare usr_par
 usr_par.InvProps        = InvProps;
 usr_par.Model_start     = Model_start;
 usr_par.sObsPerFreq     = sObsPerFreq;
@@ -175,8 +181,8 @@ if exist('Model_real', 'var')
     usr_par.Model_real  = Model_real;
 end
 
-
-%% calling onto the Inversion Toolbox
+% starting model
+m = map_parameters_to_m(Model_start, usr_par);
 
 % remove old fwd fields
 TempFolder = [output_path,'/fwd_temp'];
@@ -184,13 +190,8 @@ if (exist(TempFolder, 'dir'))
     rmdir(TempFolder, 's');
 end
 
-% call steepest gradient, L-BFGS, something else.
 
-m = map_parameters_to_m(Model_start, usr_par);
-
-
-
-output_log = [output_path,'/lbfgs_output_log.txt'];
+%% calling onto the Inversion Toolbox
 
 % loop over L-BFGS calls at different frequencies
 for ifreq = 1:nfreq

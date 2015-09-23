@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-004.2.4.like-1j-but-only-grav';
+project_name='Systematic.test-005.4.2.1.like-1j-but-starting-model-99pct';
 
 %==========================================================================
 % inversion properties
@@ -17,7 +17,7 @@ axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
 use_grav = 'yes'; % 'yes' or 'no'
-use_seis = 'noseis'; % 'yesseis' or 'noseis'
+use_seis = 'yesseis'; % 'yesseis' or 'noseis'
 
 % what misfit functional are we using
 misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift
@@ -108,9 +108,9 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 %==========================================================================
 
 % starting model from matfile
-use_matfile_startingmodel = 'no';
+use_matfile_startingmodel = 'yes';
 % starting_model = '../output/Model_0.03Hz.mat';
-starting_model = '';
+starting_model = './models/Model86_perc99all.mat';
 
 bg_model_type = 50;     % PREM
 true_model_type = 85;   % PREM + LM and UM solid circles (all params)
