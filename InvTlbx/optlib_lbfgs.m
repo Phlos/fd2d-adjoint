@@ -8,6 +8,8 @@ if (options.verbose)
     options
 end
 
+% options.grad_step_length
+
 fid = fopen(options.output_file,'a+');
 it=0;
 
@@ -113,6 +115,8 @@ while (model.normg > options.tolerance *normg0 && ...
         % TODO: provide alternative guess of the initial step length based
         % on relative model perturbations
         sigma=options.init_step_length;
+    elseif strcmp(step, 'Grad')
+        sigma = options.grad_step_length;
     else
         sigma = 1.0;
     end

@@ -4,6 +4,10 @@ function [options] = optlib_init_default_parameters_lbfgs(options)
        options.init_step_length = 1.0; 
     end
 
+    if (~isfield (options, 'grad_step_length') )
+        options.grad_step_length = 1.0;
+    end
+    
     if (~isfield (options, 'initial_step_length_rule') )
         options.initial_step_size_rule = 'quadratic_interpolation';
     end
@@ -48,7 +52,5 @@ function [options] = optlib_init_default_parameters_lbfgs(options)
         options.tolerance = 1e-3;
     end
     
-    if (~isfield (options, 'grad_step_length') )
-        
 
 end
