@@ -38,7 +38,7 @@ function [misfit_total, misfit_seis, misfit_grav, ...
     end
     
     %- calculate gravity misfit:
-    [g_src, misf_g_test] = make_gravity_sources(g_try, g_obs);
+    [g_src, misf_g_test] = make_gravity_sources(g_try, g_obs, which_grav);
     % disp(['misfit_g_test.total ', misf_g_test.total]);
     misfit_grav = norm_misfit(misf_g_test.total, normalise_misfits, ...
         misfit_grav_initial, g_obs);

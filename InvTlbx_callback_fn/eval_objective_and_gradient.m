@@ -50,10 +50,6 @@ disp(['calculating current misfit']);
                   sEventInfo, sEventObs, misfit_init(whichFrq).seis, ...
                   'yessavefields','noplot','yessaveplots');
 
-% InvProps.misfit(iter) = misfit_total;
-% InvProps.misfitseis(iter) = misfit_seis;
-% InvProps.misfitgrav(iter) = misfit_grav;
-
 % save model and forward field info to file
 TempFolder = [output_path,'/fwd_temp/'];
 ModFolder = [output_path,'/fwd_temp/',ModRandString,'/'];
@@ -74,7 +70,7 @@ if strcmp(use_grav,'yes')
     disp(['calculating gravity kernel']);
     
     % calculating the gravity kernel
-    [Kg_temp] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
+    [Kg_temp] = compute_kernels_gravity(g_src,rec_g,which_grav,'noplot'); % 'noplot' is for plotting gravity kernel update
 
     % normalising the gravity kernel
     Kg = norm_kernel(Kg_temp, normalise_misfits, ...

@@ -38,10 +38,6 @@ disp(['calculating current misfit']);
                   sEventInfo, sEventObs, misfit_init(whichFrq).seis, ...
                   'yessavefields','noplot', 'nosaveplots');
 
-% InvProps.misfit(iter) = misfit_total;
-% InvProps.misfitseis(iter) = misfit_seis;
-% InvProps.misfitgrav(iter) = misfit_grav;
-
 % save model and forward field info to file
 TempFolder = [output_path,'/fwd_temp/'];
 ModFolder = [output_path,'/fwd_temp/',ModRandString,'/'];
@@ -51,6 +47,7 @@ save([ModFolder,'model-adstf.mat'], ...
 save([ModFolder,'iter-rec.mat'], ...
     'ModRandString', 'Model', 'sEventRecIter', 'g_recIter', '-v6');
 
+%% move saved matfiles to model specific folder
 blips = dir([TempFolder,'*.mat']);
 for ii = 1:numel(blips)
     bestand = blips(ii).name;

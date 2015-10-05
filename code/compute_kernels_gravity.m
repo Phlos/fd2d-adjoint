@@ -1,7 +1,14 @@
-function [Kg] = compute_kernels_gravity(g_src, rec_grav, varargin)
+function [Kg] = compute_kernels_gravity(g_src, rec_grav, which_grav, varargin)
 
 % calculation of gravity kernels based on the gravity source (obtained in
 % e.g. calculate_gravity_misfit) and on domain properties.
+%
+% [Kg] = compute_kernels_gravity(g_src, rec_grav, which_grav)
+% [Kg] = compute_kernels_gravity(g_src, rec_grav, which_grav, 'yesplot')
+%        - plots the gravity kernel buildup (takes a lot of time)
+% [Kg] = compute_kernels_gravity(g_src, rec_grav, which_grav, 'noplot')
+%        - doesn't plot the gravity kernel buildup
+%
 
 %- PREPARATION
 
@@ -10,10 +17,10 @@ function [Kg] = compute_kernels_gravity(g_src, rec_grav, varargin)
 plotornot = checkargs(varargin(:)); % plots figures by default
 
 %- prepare necessary information
-path(path,'./input');
-path(path,'./tools');
-path(path,'./code');
-path(path,'./code/propagation');
+% path(path,'./input');
+% path(path,'./tools');
+% path(path,'./code');
+% path(path,'./code/propagation');
 set_figure_properties_doffer;
 
 % input
@@ -31,7 +38,7 @@ nrec = size(rec_grav.x,2);
 %- COMPUTATION
 
 
-if(strcmp(plotornot,'yes'))
+if(strcmp(plotornot,'yesplot'))
     fig_grav_src = figure;
     recs = [1:nrec];
     plot(recs, g_src.x, recs, g_src.z);
@@ -49,22 +56,33 @@ for i = 1:nrec % separate kernel per receiver
     % calculate length or the vectors r for each point
     r{i}.length = sqrt(r{i}.x.^2 + r{i}.z.^2);
     
-    % THIS IS FOR GRAVITY DUE TO A 'SHEET' IN THE X-Z PLANE!!
-    % gravity kernel per component per receiver
-    Kg_rec{i}.x = -2 * dx * dz * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
-    Kg_rec{i}.z = -2 * dx * dz * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
-%    Kg_rec{i}.x = -1 * dx *dz * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
-%    Kg_rec{i}.z = -1 * dx *dz * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
-%     Kg_rec{i}.x = -1 * normfac * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
-%     Kg_rec{i}.z = -1 * normfac * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
-    
-%     % FOR GRAVITY WITH Y STRETCHING TO INFINITY AT BOTH SIDES
-%     % gravity kernel per component per receiver
-%     Kg_rec{i}.x = -1 * normfac * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3    .* 2 .* r{i}.length;
-%     Kg_rec{i}.z = -1 * normfac * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3    .* 2 .* r{i}.length;
-    
-    % gravity kernel per receiver
-    Kg_rec{i}.total = Kg_rec{i}.x + Kg_rec{i}.z;
+    if strcmp(which_grav, 'g_vector')
+        % THIS IS FOR GRAVITY DUE TO A 'SHEET' IN THE X-Z PLANE!!
+        % gravity kernel per component per receiver
+        % includes discretisation compensation factor dx*dz
+        % NOT normalised by initial misfit (this is done in separate
+        % function norm_kernels)
+        Kg_rec{i}.x = -2 * dx * dz * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3;
+        Kg_rec{i}.z = -2 * dx * dz * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3;
+        
+        %     % FOR GRAVITY WITH Y STRETCHING TO INFINITY AT BOTH SIDES
+        %     % gravity kernel per component per receiver
+        %     Kg_rec{i}.x = -2 * G * g_src.x(i) * r{i}.x ./ r{i}.length .^ 3    .* 2 .* r{i}.length;
+        %     Kg_rec{i}.z = -2 * G * g_src.z(i) * r{i}.z ./ r{i}.length .^ 3    .* 2 .* r{i}.length;
+        
+        % gravity kernel per receiver
+        Kg_rec{i}.total = Kg_rec{i}.x + Kg_rec{i}.z;
+        
+    elseif strcmp(which_grav, 'g_potential')
+        % gravity potential kernel per receiver
+        % includes discretisation compensation factor dx*dz
+        % NOT normalised by initial misfit (this is done in separate
+        % function norm_kernels)
+        Kg_rec{i}.pot = - 2 * dx * dz * G * g_src.pot(i) ./ r{i}.length;
+        Kg_rec{i}.total = Kg_rec{i}.pot;
+    else
+        error('HELP! which_grav not defined!');
+    end
     
 end
 
@@ -75,9 +93,9 @@ end
 % initialisation
 Kg = zeros(size(Kg_rec{1}.total));
 
-% initialise plot
-if(strcmp(plotornot,'yes'))
-load '../code/propagation/cm_velocity.mat';
+% initialise plot (if wanted)
+if(strcmp(plotornot,'yesplot'))
+    load './code/propagation/cm_velocity.mat';
     totalkernel = figure;
     set(totalkernel,'OuterPosition',pos_gravknl_buildup)
     % receiverkernels = figure;
@@ -87,13 +105,13 @@ for i = 1:nrec
     % kernel calculation
     Kg = Kg + Kg_rec{i}.total;
         
-    if(strcmp(plotornot,'yes'))
+    if(strcmp(plotornot,'yesplot'))
         
         % plot total kernel buildup
         % top left
         figure(totalkernel)
         subplot(2,2,1)
-        Kg_sm = filter_kernels(Kg, smoothgwid);
+        Kg_sm = filter_kernels(Kg, parametrisation, smoothgwid);
         pcolor(X,Z, Kg_sm')
         colormap(cm);
         shading interp
@@ -153,7 +171,7 @@ for i = 1:nrec
     
 end
 
-if(strcmp(plotornot,'yes'))
+if(strcmp(plotornot,'yesplot'))
     close(fig_grav_src, totalkernel);
 % else
 %     disp ' ';
@@ -167,7 +185,7 @@ end
 
 function [plotornot] = checkargs(arg)
 % NEW VERSION AS OF 19-3-2015
-% determine whether the kernels should be plotted (default: 1, and 'yes')
+% determine whether the kernels should be plotted (default: 1, and 'noplot')
 
 % size(arg)
 narg = size(arg,1);
@@ -175,7 +193,7 @@ narg = size(arg,1);
 if ( narg == 1 && ischar(arg{1}) )
         plotornot = arg{1};
 elseif narg == 0
-    plotornot = 'yes';
+    plotornot = 'noplot';
 else
     error('input to compute_kernels_gravity was not understood.')
 end
@@ -185,7 +203,7 @@ end
 % function [normalise, plotornot] = checkargs(arg)
 % % determine whether the kernels should be normalised by some number
 % % (for instance when the gravity misfit is normalised by the initial
-% % misfit) and whether the kernels should be plotted (default: 1, and 'yes')
+% % misfit) and whether the kernels should be plotted (default: 1, and 'yesplot')
 % 
 % % size(arg)
 % narg = size(arg,1);
@@ -199,11 +217,11 @@ end
 %         normalise = 1.0;
 %     elseif isnumeric(arg{1})
 %         normalise = arg{1};
-%         plotornot = 'yes';
+%         plotornot = 'yesplot';
 %     end
 %         
 % elseif narg == 0
-%     plotornot = 'yes';
+%     plotornot = 'yesplot';
 %     normalise = 1.0;
 % else
 %     error('input to compute_kernels_gravity was not understood.')

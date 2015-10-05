@@ -3,10 +3,10 @@
 %% preparation
 
 % number of iterations
-InvProps.niter = 120;
-istart = 1;
-
-niter = InvProps.niter;
+% InvProps.niter = 120;
+% istart = 1;
+% 
+% niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
 [project_name, ~, apply_hc, use_grav, use_seis, fix_velocities, ...
@@ -68,13 +68,13 @@ if ((~exist('sObsPerFreq','var') || ~exist('t_obs','var') || ...
 elseif (~exist('sObsPerFreq','var') || ~exist('t_obs','var') || ...
         ~exist('Model_real','var') || ~exist('props_obs','var') || ...
         ~exist('g_obs','var'))
-    if istart == 1
+%    if istart == 1
         disp 'no OBS present, preparing obs...';
         [Model_real, sObsPerFreq, t_obs, props_obs, g_obs] = prepare_obs(output_path,true_model_type);
         save(obs_file, 'sObsPerFreq', 't_obs', 'Model_real', 'props_obs', 'g_obs', '-v6');
-    else
-        error('iter > 1 but there are no observed properties!')
-    end
+%    else
+%        error('iter > 1 but there are no observed properties!')
+%    end
 else
     disp 'obs properties all present... proceeding...'
 end
@@ -210,6 +210,7 @@ for ifreq = 1:nfreq
         usr_par.sEventObs  = sObsPerFreq(ifreq).sEventObs;
     end
     
+    
     if usr_par.cumulative_iter == 1
         stap = InvProps.stepInit;
     else
@@ -220,6 +221,7 @@ for ifreq = 1:nfreq
     options.verbose = true;
     options.max_iterations = cfe;
     options.init_step_length = stap;
+    options.grad_step_length = InvProps.stepInit;
     options.tolerance = 1e-13;
     options.output_file = output_log;
 %     options.wolfe_try_to_increase_step_length = true;
@@ -232,7 +234,7 @@ for ifreq = 1:nfreq
     m = mfinal;
     
         % save optlib output for later use (if crash between freqs)
-    save([output_path, '/freq-', num2str(ifreq, '%00d'), '.optlib_output.mat'], ...
+    save([output_path, '/freq-', num2str(ifreq, '%03d'), '.optlib_output.mat'], ...
         'ifreq', 'flag', 'm' , 'usr_par')
 end
 

@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-005.4.2.1.like-1j-but-starting-model-99pct';
+project_name='Systematic.test-015.4.2.5.starting-model-50pct';
 
 %==========================================================================
 % inversion properties
@@ -17,6 +17,7 @@ axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
 use_grav = 'yes'; % 'yes' or 'no'
+which_grav = 'g_vector'; % 'g_vector' or 'g_potential'
 use_seis = 'yesseis'; % 'yesseis' or 'noseis'
 
 % what misfit functional are we using
@@ -110,7 +111,7 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 % starting model from matfile
 use_matfile_startingmodel = 'yes';
 % starting_model = '../output/Model_0.03Hz.mat';
-starting_model = './models/Model86_perc99all.mat';
+starting_model = './models/Model86_perc50all.mat';
 
 bg_model_type = 50;     % PREM
 true_model_type = 85;   % PREM + LM and UM solid circles (all params)
@@ -211,10 +212,8 @@ end
 source_amplitude = 1e9;                 
                     
 %- source filtering - 8 frequency bands increasing by a factor 1.25 each time
-% f_minlist = [0.00667 0.00667 0.00667];% 
-f_minlist = [0.00667 0.00667 0.00667 0.00667 0.00667];
-% f_maxlist = [0.00667 0.00833 0.01042];% 
-f_maxlist = [0.01302 0.01628 0.02035 0.02543 0.03179];
+f_minlist = [0.00667 0.00667 0.00667 0.00667 0.00667 0.00667 0.00667 0.00667];
+f_maxlist = [0.00667 0.00833 0.01042 0.01302 0.01628 0.02035 0.02543 0.03179];
 
 % how many iterations with the same source?
 change_freq_every = 20;          % how many iterations with the same freq?

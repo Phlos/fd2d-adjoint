@@ -47,5 +47,8 @@ function [options] = optlib_init_default_parameters_lbfgs(options)
     if (~isfield (options, 'tolerance') )
         options.tolerance = 1e-3;
     end
+    
+    if (~isfield (options, 'grad_step_length') )
+        
 
 end

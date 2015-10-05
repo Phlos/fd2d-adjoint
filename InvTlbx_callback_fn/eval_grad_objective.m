@@ -67,11 +67,11 @@ Model = Model1;
 % gravity
 if strcmp(use_grav,'yes')
     %- calculate gravity kernels
-%     disp ' ';
-%     disp(['calculating gravity kernel']);
+    disp ' ';
+    disp(['calculating gravity kernel']);
     
     % calculating the gravity kernel
-    [Kg_temp] = compute_kernels_gravity(g_src,rec_g,'no'); % 'no' is for plotting gravity kernel update
+    [Kg_temp] = compute_kernels_gravity(g_src,rec_g,which_grav,'noplot'); % 'noplot' is for plotting gravity kernel update
 
     % normalising the gravity kernel
     Kg = norm_kernel(Kg_temp, normalise_misfits, ...
@@ -83,7 +83,7 @@ end
 % seismic
 if strcmp(use_seis, 'yesseis')
     disp ' ';
-%     disp(['calculating seismic kernels']);
+    disp(['calculating seismic kernels']);
     [Kseis_temp, sEventKnls_iter] = run_adjoint_persource(Model, sEventAdstfIter);
     
     % normalise kernels
@@ -134,18 +134,6 @@ else
     error('help, NO data?!');
 end
 
-% % reparametrising Kernel to inversion parametrisation
-% K_reparam = change_parametrisation_kernels('rhomulambda', parametrisation, K_total, Model);
-% 
-% % calculate relative kernels
-% K_rel = calculate_relative_kernels(K_reparam, Model_bg);
-% 
-% % filter kernels
-% if strcmp(smoothing, 'nosmooth')
-%     disp('WARNING! Kernels are not being filtered!!');
-% else
-%     K_rel = filter_kernels(K_rel, parametrisation, smoothgwid);
-% end
 
 %% convert the obtained gradient back to same struc as m
 usr_par.Mod_current = Model;

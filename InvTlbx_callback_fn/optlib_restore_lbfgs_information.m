@@ -19,12 +19,11 @@ function [previous_models, previous_gradients] = optlib_restore_lbfgs_informatio
 % number of models and gradients stored
 num_mod_grad_stored = 5;
 
-% use all but the last model and gradient in usr_par:
-% (because usr_par.Model(end) = current model
-%      and usr_par.K_rel(end) = current gradient )
-
 % determine length of usr_par.Model, usr_par.Kernel
 nprev = numel(usr_par.Model) - 1;
+% using all but the last model and gradient in usr_par:
+% (because usr_par.Model(end) = current model
+%      and usr_par.K_rel(end) = current gradient )
 
 % loop over the last 5 models to fill in previous models
 if nprev > 0
