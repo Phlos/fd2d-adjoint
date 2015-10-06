@@ -24,7 +24,10 @@ function fig_mod = plot_model(varargin)
 
 
 [Model, middle] = checkargs(varargin);
-plot_UM_separate = true;
+
+if ~exist('plot_UM_separate', 'var')
+    plot_UM_separate = true;
+end
 
 %% preparation
 input_parameters;

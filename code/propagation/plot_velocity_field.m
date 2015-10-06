@@ -16,12 +16,11 @@
 % a figure with the requested velocity fields.
 %==========================================================================
 
-%%% Not happy with code structure -- too many ifs, not clear. NB 11-2-2014.
-
 %%% Updated the way things are plotted -- no more ugly ifs 
 %%%   --- Nienke Blom 18-4-2014.
     
-path(path,'./tools')
+% path(path,'./tools')
+input_parameters;
 figure(fig_vel)
 clf
 
@@ -163,7 +162,12 @@ end
  
 
 % convert distances to km & set Z to depth below surface
-surface_level = 2890; % [km] only valid in PREM
+
+if any( model_type == [50 : 1 : 89] )
+    surface_level = 2890; % [km] only valid in PREM
+else
+    surface_level = Lz / 1000;
+end
 X_new = X ./ 1000;
 Z_new = Z ./ 1000;
 Z_new = surface_level - (Z_new);
@@ -219,27 +223,36 @@ for i=1:nplots
     
     
     %======================================================================
-    %- plot timestamp and source and receiver positions -------------------
+    %- plot source and receiver positions ---------------------------------
     
-    timestamp=['t [s] = ',num2str(floor(n*dt),'%4.0f')];
-    timestamp_text = text(0.05*Lx,0.92*Lz,timestamp) ;
-    text(0.95,0.92, ['max = \pm', num2str(plotting(i).scale,'%3.1e')], ...
-        'HorizontalAlignment','right', 'Units', 'normalized')
-    
-    
-    for p=1:5
         
-        for k=1:length(src_x_new)
-            plot(src_x_new(k),src_z_new(k),'kx')
-        end
-        
-        for k=1:length(rec_x_new)
-            plot(rec_x_new(k),rec_z_new(k),'ko')
-        end
-        
+    for k=1:length(src_x_new)
+        plot(src_x_new(k),src_z_new(k),'kx')
     end
     
+    for k=1:length(rec_x_new)
+        plot(rec_x_new(k),rec_z_new(k),'ko')
+    end
     
+    %- plot contour of rho anomaly
+    if exist('plot_contour_rho_anom', 'var') && plot_contour_rho_anom
+        contour(X_new, Z_new, model.rho', 1, '--k');
+    end
+    
+    %- plot timestamp and velocity max value
+    timestamp_text=['t = ',num2str(floor(n*dt),'%4.0f'), ' s'];
+    timestamp_plot = text(0.05,0.92, timestamp_text, ...
+        'HorizontalAlignment','left', 'Units', 'normalized');
+%     text(0.05*Lx,0.92*Lz,timestamp_text) ;
+    max_text = ['max = \pm', num2str(plotting(i).scale,'%3.1e')];
+    text(0.95,0.92, max_text, ...
+        'HorizontalAlignment','right', 'Units', 'normalized');
+    
+    %- plot wavefield description
+    if exist('movie_label', 'var')
+    text(0.95,0.08, movie_label, ...
+        'HorizontalAlignment','right', 'Units', 'normalized');
+    end
     
 end
 
@@ -249,6 +262,8 @@ hold off
 %% - record movie -------------------------------------------------------
 
 if strcmp(make_movie,'yes')
+    
+
     
     if exist('movie_index','var')
         movie_index=movie_index+1;

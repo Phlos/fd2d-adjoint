@@ -121,6 +121,32 @@ elseif (model_type==12) % tromp05-homogeneous + rect. rho anomaly
     
     rho(left:right,bottom:top) = rho(left:right,bottom:top) + 1e3;
     
+elseif (model_type==13) % gaussian central rho2 anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % rho-vs-vp 
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    vp    = sqrt((lambda + 2*mu) ./ rho);
+    vs    = sqrt(mu ./ rho);
+    rho2 = rho;
+    
+        % rectangular rho anomaly
+    left = round(nx/2-nx/20);
+    right = round(nx/2+nx/20);
+    top = round(nz/2+nz/20);
+    bottom = round(nz/2-nz/20);
+    
+    rho2(left:right,bottom:top) = rho2(left:right,bottom:top) + 1e3;
+    
+     % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+    
 elseif (model_type==14) % gaussian central rho anomaly
     
     % Tromp et al, 2005
@@ -149,6 +175,29 @@ elseif (model_type==15) % gaussian central mu anomaly
     filt2 = filt / max(filt(:));
     mu = mu + filt2 * 1.0e10;
     
+elseif (model_type==16) % gaussian central rho2 anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % rho-vs-vp 
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    vp    = sqrt((lambda + 2*mu) ./ rho);
+    vs    = sqrt(mu ./ rho);
+    rho2 = rho;
+    
+    gwid = round(0.05 * max([nx nz]));
+    filt = fspecial('gaussian',[nx nz],gwid);
+    filt2 = filt / max(filt(:));
+    rho2 = rho2 + filt2 * 1.0e3;
+    
+     % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+
 elseif (model_type==17) % gaussian off-central rho anomaly
     
     % Tromp et al, 2005
@@ -283,10 +332,7 @@ elseif (model_type==31) % five 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
 
     end
     
-    % recalculating to rho-mu-lambda
-    rho     = rho2;
-    mu      = vs .^ 2 .* rho2;
-    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+   
     
     
 elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)

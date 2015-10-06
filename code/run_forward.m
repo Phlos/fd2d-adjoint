@@ -180,10 +180,16 @@ end
 
 if strcmp(make_movie,'yes')
     disp(['storing movie: ',movie_file]);
-    % profile needs to be 'Uncompressed AVI' on my (ubuntu) computer. 
-    % (Matlab says that win7+/mac10.x+ can do mpeg-4)
+    % profile can now be 'Motion JPEG AVI' (before 'Uncompressed AVI')
+    % much more efficient in output file size
     writerObj=VideoWriter(movie_file,'Motion JPEG AVI');  
     writerObj.FrameRate = 10;
+    open(writerObj);
+    writeVideo(writerObj,M);
+    close(writerObj);
+    % frame rate 20 fps:
+    writerObj=VideoWriter([movie_file,'.20-fps','Motion JPEG AVI');
+    writerObj.FrameRate = 20;
     open(writerObj);
     writeVideo(writerObj,M);
     close(writerObj);
