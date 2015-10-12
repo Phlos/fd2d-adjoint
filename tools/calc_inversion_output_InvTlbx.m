@@ -53,11 +53,29 @@ else
 end
 
 % L2 norm( [model(i) - model_real] / model_real )
+Model_real_rvv = change_parametrisation('rhomulambda', 'rhovsvp', Model_real);
 if(isstruct(Model_real))
-    InvProps.modeldifnFromTrue(iter) = norm( (Model(iter).rho(:) - Model_real.rho(:)) ./ Model_real.rho(:) ) ...
-        + norm( (Model(iter).mu(:)  - Model_real.mu(:))  ./ Model_real.mu(:) ) ...
-        + norm( (Model(iter).lambda(:) - Model_real.lambda(:)) ./ Model_real.lambda(:) );
+    % models
+    Model_rvv = change_parametrisation('rhomulambda', 'rhovsvp', Model(iter) );
+    % param rho-mu-lambda
+    InvProps.modeldifnFromTruePar.rho(iter) = norm( (Model(iter).rho(:) - Model_real.rho(:)) ./ Model_real.rho(:) );
+    InvProps.modeldifnFromTruePar.mu(iter) = norm( (Model(iter).mu(:)  - Model_real.mu(:))  ./ Model_real.mu(:) );
+    InvProps.modeldifnFromTruePar.lambda(iter) = norm( (Model(iter).lambda(:) - Model_real.lambda(:)) ./ Model_real.lambda(:) );
+    % param rho-vs-vp
+    InvProps.modeldifnFromTruePar.vs(iter) = norm( (Model_rvv.vs(:)  - Model_real_rvv.vs(:))  ./ Model_real_rvv.vs(:) );
+    InvProps.modeldifnFromTruePar.vp(iter) = norm( (Model_rvv.vp(:) - Model_real_rvv.vp(:)) ./ Model_real_rvv.vp(:) );
+    % total diff
+    InvProps.modeldifnFromTrue(iter) = InvProps.modeldifnFromTruePar.rho(iter) + ...
+        InvProps.modeldifnFromTruePar.mu(iter) + InvProps.modeldifnFromTruePar.lambda(iter);
 else
+    % param rho-mu-lambda
+    InvProps.modeldifnFromTruePar.rho(iter) = NaN;
+    InvProps.modeldifnFromTruePar.mu(iter) = NaN;
+    InvProps.modeldifnFromTruePar.lambda(iter) = NaN;
+    % param rho-vs-vp
+    InvProps.modeldifnFromTruePar.vs(iter) = NaN;
+    InvProps.modeldifnFromTruePar.vp(iter) = NaN;
+    % total
     InvProps.modeldifnFromTrue(iter) = NaN;
 end
 

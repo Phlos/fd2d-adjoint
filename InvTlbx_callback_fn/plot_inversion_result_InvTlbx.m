@@ -29,6 +29,13 @@ modeldifn = InvProps.modeldifn;
 if(isfield(InvProps,'modeldifnFromTrue'))
     normL2 = InvProps.modeldifnFromTrue;
 end
+if(isfield(InvProps, 'modeldifnFromTruePar'))
+    normL2Par.rho    = InvProps.modeldifnFromTruePar.rho;
+    normL2Par.mu     = InvProps.modeldifnFromTruePar.mu;
+    normL2Par.lambda = InvProps.modeldifnFromTruePar.lambda;
+    normL2Par.vs     = InvProps.modeldifnFromTruePar.vs;
+    normL2Par.vp     = InvProps.modeldifnFromTruePar.vp;
+end
 
 % kernel angles
 angletot = InvProps.angle.Ktotal;
@@ -165,32 +172,28 @@ xlabel('iteration no.');
 % model diff with real model vs. step length
 if(exist('normL2','var'))
     subplot(9,2,[8 10]);
-    LmdifReal = semilogy(iters(1:imax), normL2(1:imax),'k');
+    RmdifReal = semilogy(iters(1:imax), normL2(1:imax),'k');
     xlim([min(iters) iters(imax)]);
     grid on
-    set(LmdifReal, 'LineWidth', 1)
-    text(0.5, 0.9, '|current - real| / |real - bg|', ...
+    set(RmdifReal, 'LineWidth', 1)
+    text(0.5, 0.9, '| (current - real) / real |', ...
     'Units', 'normalized', 'HorizontalAlignment','center');
 %     title('|current - real| / |real - bg|');
 end
 
-% % angle between consecutive descent directions vs. cumulative step
-% subplot(9,2,[12 14])
-% if imax > 2
-% Rangle = plot(stepcumsum(2:imax-1), angletot(2:imax-1) ./ pi .* 180, '--ko',...
-%               stepcumsum(2:imax-1), angleseis(2:imax-1) ./ pi .* 180, '--ro', ...
-%               stepcumsum(2:imax-1), anglegrav(2:imax-1) ./ pi .* 180, '--bo');
-%     set(Rangle(1), 'LineWidth', 2)
-%     set(Rangle(2), 'LineWidth', 1)
-%     set(Rangle(3), 'LineWidth',1)
-% end
-% xlim([min(stepcumsum), stepcumsum(imax)]);
-% ylim([0 180]);
-% grid on
-% % set(Lmdifn, 'LineWidth', 1)
-% text(0.5, 0.9, 'angle between consecutive kernels (\circ)', ...
-%     'Units', 'normalized', 'HorizontalAlignment','center');
-
+% % L2 norm between current model and true model per parameter
+% %    | (current.par - true.par) / true.par |
+if(exist('normL2Par', 'var'))
+    subplot(9,2,[12 14])
+    RdifrealPar = semilogy(iters(1:imax), normL2Par.rho(1:imax), ...
+                           iters(1:imax), normL2Par.vs(1:imax), ...
+                           iters(1:imax), normL2Par.vp(1:imax)  );
+    xlim([min(iters) iters(imax)]);
+    grid on;
+    text(0.5, 0.9, '| (current - real) / real |', ...
+       'Units', 'normalized', 'HorizontalAlignment','center');
+    legend('density', 'S velocity', 'P velocity');
+end
 
 
 % kernel magnitude
@@ -207,7 +210,7 @@ text(0.5, 0.9, 'norm of kernels', ...
     'Units', 'normalized', 'HorizontalAlignment','center');
 % title('norm of kernels');
 
-xlabel('distance travelled in misfit landscape');
+xlabel('iteration no.');
 
 
 

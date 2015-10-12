@@ -1,6 +1,6 @@
 % resume iterations at frequency startfreq
 
-startfreq = 4;
+startfreq = 5;
 
 disp ' ';
 disp(['STARTFREQ = ', num2str(startfreq)]);
@@ -29,6 +29,7 @@ load([output_path, '/freq-', num2str(startfreq-1, '%03d'), '.optlib_output.mat']
 cfe = change_freq_every;
 nfreq = length(sObsPerFreq);
 output_log = [output_path,'/lbfgs_output_log.txt'];
+usr_par.cumulative_iter = (startfreq - 1) * cfe + 1;
 
 %% iterations
 % start iterations all over
@@ -37,7 +38,7 @@ for ifreq = startfreq:nfreq
     disp '=============================';
     disp '  going to a new frequency   ';
     disp(['  (frequency ',num2str(ifreq),'/',num2str(nfreq)',')']);
-    disp(['  cumulative iter: ', num2str(usr_par.cumulative_iter)]);
+    disp(['  cumulative iter: ', num2str(usr_par.cumulative_iter +1)]);
     disp '=============================';
     
     
@@ -68,6 +69,9 @@ for ifreq = startfreq:nfreq
     % run L-BFGS
     [flag, mfinal, usr_par]=optlib_lbfgs(m, options, usr_par);
 
+    % set cumulative iter to itself - 1 because we're going to recalculate
+    % the gradient of the last model at the new frequency
+    usr_par.cumulative_iter = usr_par.cumulative_iter - 1;
     m = mfinal;
     
         % save optlib output for later use (if crash between freqs)

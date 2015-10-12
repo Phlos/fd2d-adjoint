@@ -132,6 +132,13 @@ while (model.normg > options.tolerance *normg0 && ...
                                    options.verbose, ...
                                    usr_par);
 
+% added 6-10-2015:
+if model_new.m == model.m
+    flag = 2;
+    disp 'could not find a step satisfying Armijo';
+    break
+else
+
     if (options.verbose)
         disp 'new model found.';
     end
@@ -168,11 +175,14 @@ while (model.normg > options.tolerance *normg0 && ...
     usr_par = new_iteration(it, model.m, model.name, model.objective, model.gradient, usr_par);
 
 end
-
+end
 
 if (model.normg<=options.tolerance*normg0)
     fprintf(fid,'Successful termination with ||g||<%e*min(1,||g0||):\n',tolerance);
     flag = 0;
+elseif (flag == 2) % couldn't find Armijo step
+    fprintf(fid,'Unsuccessful termination of iterations - couln''t find suitable step\n');
+%     flag = 2;
 else
     fprintf(fid,'Maximum number of iterations reached.\n');
     flag = 1;

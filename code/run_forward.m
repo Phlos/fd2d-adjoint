@@ -188,7 +188,7 @@ if strcmp(make_movie,'yes')
     writeVideo(writerObj,M);
     close(writerObj);
     % frame rate 20 fps:
-    writerObj=VideoWriter([movie_file,'.20-fps','Motion JPEG AVI');
+    writerObj=VideoWriter([movie_file,'.20-fps'],'Motion JPEG AVI');
     writerObj.FrameRate = 20;
     open(writerObj);
     writeVideo(writerObj,M);

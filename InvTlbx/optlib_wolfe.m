@@ -32,8 +32,17 @@ function [sig,model]=optlib_wolfe(xj,s,stg,f,del,theta,sig0,try_larger_steps,ver
     while (f-fn<del*sig*stg)
         sig=0.5*sig;
         if sig < 0.01 * sig0
-            error(['seems that we''re not in a descent direction at all... sig = ', num2str(sig)]);
-%             return;
+            
+%             error(['seems that we''re not in a descent direction at all... sig = ', num2str(sig)]);
+            
+            disp({'seems that we''re not in a descent direction at all...'; ...
+                 ['       sig = ', num2str(sig)]; ...
+                  '       Exiting from Inversion Toolbox'});
+            model.m = xj;
+            model.gradient = NaN;
+            model.objective = f;
+            model.name = 'NaN';
+            return;
         end
         xn=xj-sig*s;
         xn_string = optlib_generate_random_string(8);

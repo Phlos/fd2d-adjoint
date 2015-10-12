@@ -142,7 +142,7 @@ end
 % set the stage for multiple frequency inv.
 whichFrq = 1;
 cfe = change_freq_every;
-cumulative_iter = 1;
+cumulative_iter = 0;
 nfreq = numel(sObsPerFreq);
 
 if strcmp(use_seis, 'yesseis')
@@ -199,7 +199,7 @@ for ifreq = 1:nfreq
     disp '=============================';
     disp '  going to a new frequency   ';
     disp(['  (frequency ',num2str(ifreq),'/',num2str(nfreq)',')']);
-    disp(['  cumulative iter: ', num2str(usr_par.cumulative_iter)]);
+    disp(['  cumulative iter: ', num2str(usr_par.cumulative_iter + 1)]);
     disp '=============================';
     
     
@@ -211,7 +211,7 @@ for ifreq = 1:nfreq
     end
     
     
-    if usr_par.cumulative_iter == 1
+    if usr_par.cumulative_iter == 0
         stap = InvProps.stepInit;
     else
         stap = 1.0;
@@ -231,6 +231,9 @@ for ifreq = 1:nfreq
     % run L-BFGS
     [flag, mfinal, usr_par]=optlib_lbfgs(m, options, usr_par);
 
+    % set cumulative iter to itself - 1 because we're going to recalculate
+    % the gradient of the last model at the new frequency
+    usr_par.cumulative_iter = usr_par.cumulative_iter - 1;
     m = mfinal;
     
         % save optlib output for later use (if crash between freqs)

@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-015.4.2.5.starting-model-50pct';
+project_name='Systematic.test-014c.4.1.2c.like-014-but-200-iters-per-freq';
 
 %==========================================================================
 % inversion properties
@@ -27,7 +27,7 @@ parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rh
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'yes'; % 'yes' or 'no'
+fix_velocities = 'no'; % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -109,13 +109,13 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 %==========================================================================
 
 % starting model from matfile
-use_matfile_startingmodel = 'yes';
+use_matfile_startingmodel = 'no';
 % starting_model = '../output/Model_0.03Hz.mat';
-starting_model = './models/Model86_perc50all.mat';
+starting_model = './models/Model86_perc_UM100_LM90.mat';
 
 bg_model_type = 50;     % PREM
 true_model_type = 85;   % PREM + LM and UM solid circles (all params)
-model_type=86; %(start) % PREM + LM/UM solid circles in vp, vs only
+model_type=50; %(start) % PREM + LM/UM solid circles in vp, vs only
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -216,7 +216,7 @@ f_minlist = [0.00667 0.00667 0.00667 0.00667 0.00667 0.00667 0.00667 0.00667];
 f_maxlist = [0.00667 0.00833 0.01042 0.01302 0.01628 0.02035 0.02543 0.03179];
 
 % how many iterations with the same source?
-change_freq_every = 20;          % how many iterations with the same freq?
+change_freq_every = 200;          % how many iterations with the same freq?
 
 
 

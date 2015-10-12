@@ -16,8 +16,8 @@ function [usr_par] = new_iteration( it, m, ModRandString, jm, gm, usr_par)
 %% initialise
 input_parameters;
 % Model_real = update_model(true_model_type);
-iter = (usr_par.whichFrq-1) * (change_freq_every) + it +1;
-% iter = usr_par.cumulative_iter + 1;
+% iter = (usr_par.whichFrq-1) * (change_freq_every) + it +1;
+iter = usr_par.cumulative_iter + 1;
 
 disp ' ';
 disp(['---- generating output for iteration ', num2str(iter)]);
