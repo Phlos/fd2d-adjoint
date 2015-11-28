@@ -49,6 +49,21 @@ for n=1:nt
         fprintf(1,blips);
     end
     
+            % store time-reversed history ----------------------------------------
+        sfe = store_fw_every;
+        if (mod(n,sfe)==0)
+            if(strcmp(wave_propagation_type,'SH'))
+                uy_forward(nt/sfe+1-n/sfe,:,:)=uy(:,:);
+            elseif(strcmp(wave_propagation_type,'PSV'))
+                ux_forward(nt/sfe+1-n/sfe,:,:)=ux(:,:);
+                uz_forward(nt/sfe+1-n/sfe,:,:)=uz(:,:);
+            elseif(strcmp(wave_propagation_type,'both'))
+                uy_forward(nt/sfe+1-n/sfe,:,:)=uy(:,:);
+                ux_forward(nt/sfe+1-n/sfe,:,:)=ux(:,:);
+                uz_forward(nt/sfe+1-n/sfe,:,:)=uz(:,:);
+            end
+        end
+    
     %- compute divergence of current stress tensor ------------------------
     %  forward -- unit of force: [kg m^-2 s^-2] = [N] 
     
@@ -198,21 +213,21 @@ for n=1:nt
             if(strcmp(wave_propagation_type,'SH'))
                 vy_forward(nt/sfe+1-n/sfe,:,:)=vy(:,:);
                 % displacement
-                uy_forward(nt/sfe+1-n/sfe,:,:)=uy(:,:);
+                %uy_forward(nt/sfe+1-n/sfe,:,:)=uy(:,:);
             elseif(strcmp(wave_propagation_type,'PSV'))
                 vx_forward(nt/sfe+1-n/sfe,:,:)=vx(:,:);
                 vz_forward(nt/sfe+1-n/sfe,:,:)=vz(:,:);
                 % displacement
-                ux_forward(nt/sfe+1-n/sfe,:,:)=ux(:,:);
-                uz_forward(nt/sfe+1-n/sfe,:,:)=uz(:,:);
+                %ux_forward(nt/sfe+1-n/sfe,:,:)=ux(:,:);
+                %uz_forward(nt/sfe+1-n/sfe,:,:)=uz(:,:);
             elseif(strcmp(wave_propagation_type,'both'))
                 vy_forward(nt/sfe+1-n/sfe,:,:)=vy(:,:);
                 vx_forward(nt/sfe+1-n/sfe,:,:)=vx(:,:);
                 vz_forward(nt/sfe+1-n/sfe,:,:)=vz(:,:);
                 % displacement
-                uy_forward(nt/sfe+1-n/sfe,:,:)=uy(:,:);
-                ux_forward(nt/sfe+1-n/sfe,:,:)=ux(:,:);
-                uz_forward(nt/sfe+1-n/sfe,:,:)=uz(:,:);
+                %uy_forward(nt/sfe+1-n/sfe,:,:)=uy(:,:);
+                %ux_forward(nt/sfe+1-n/sfe,:,:)=ux(:,:);
+                %uz_forward(nt/sfe+1-n/sfe,:,:)=uz(:,:);
             end
         end
 
