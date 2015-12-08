@@ -321,13 +321,21 @@ switch narg
         end
         
         Model = change_parametrisation('rhomulambda',outparam,Model);
+%         if middle.rho == 0 && middle.mu == 0 && middle.lambda == 0
+%             middle1.rho = 0; middle1.vs = 0; middle.vp = 0;
+%         else
         middle = change_parametrisation('rhomulambda',outparam,middle1);
-        
+%         end
 
     otherwise
         error('wrong number of variable arguments')
 end
 
-
+fn = fieldnames(middle);
+for ii = 1:3
+    if isnan(middle.(fn{ii}))
+        middle.(fn{ii}) = 0;
+    end
+end
 
 end

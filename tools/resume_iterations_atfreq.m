@@ -1,6 +1,6 @@
 % resume iterations at frequency startfreq
 
-startfreq = 5;
+startfreq = 4;
 
 disp ' ';
 disp(['STARTFREQ = ', num2str(startfreq)]);
@@ -29,7 +29,8 @@ load([output_path, '/freq-', num2str(startfreq-1, '%03d'), '.optlib_output.mat']
 cfe = change_freq_every;
 nfreq = length(sObsPerFreq);
 output_log = [output_path,'/lbfgs_output_log.txt'];
-usr_par.cumulative_iter = (startfreq - 1) * cfe + 1;
+usr_par.cumulative_iter = (startfreq - 1) * cfe;
+% usr_par.cumulative_iter = 
 
 %% iterations
 % start iterations all over
@@ -78,3 +79,6 @@ for ifreq = startfreq:nfreq
     save([output_path, '/freq-', num2str(ifreq, '%03d'), '.optlib_output.mat'], ...
         'ifreq', 'flag', 'm' , 'usr_par')
 end
+
+
+disp(['Finished inversion ', project_name, '!']);

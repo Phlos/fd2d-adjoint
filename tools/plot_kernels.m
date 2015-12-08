@@ -99,6 +99,11 @@ function fig_knl = plot_kernels(K, varargin)
     %% ACTUAL PLOTTING
     
     fig_knl = figure;
+    if ncols == 1
+        pos_knl = pos_knl .* [1 1 .5 1];
+    elseif ncols == 3
+        pos_knl = pos_knl .* [1 1 2  1];
+    end
     set(fig_knl,'OuterPosition',pos_knl)
     if (feature('showfigurewindows') == 0)
         set(fig_knl, 'PaperUnits', 'points');
@@ -193,7 +198,8 @@ function [K2, parametrisation, which_waves, sameorownpercentile, prctiel] = chec
                     prctiel = args{5};
             end
 
-            K2 = change_parametrisation_kernels('rhomulambda',parametrisation, K, Model);
+            
+%             K2 = change_parametrisation_kernels('rhomulambda',parametrisation, K, Model);
             otherwise; error('input to plot_kernels seems wrong');
     end
     

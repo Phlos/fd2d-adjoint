@@ -1,4 +1,4 @@
-function [flag,mfinal, usr_par]=optlib_lbfgs(m0, options, usr_par)
+function [flag_inv,mfinal, usr_par]=optlib_lbfgs(m0, options, usr_par)
 %
 %
 
@@ -120,6 +120,13 @@ while (model.normg > options.tolerance *normg0 && ...
     else
         sigma = 1.0;
     end
+    
+    % try larger step lengths if sigma = initial step length
+    if (sigma == options.init_step_length || sigma == options.grad_step_length)
+        try_larger_steps = true;
+    else
+        try_larger_steps = options.wolfe_try_to_increase_step_length;
+    end
 
     % TODO: use quadratic approximation to compute step-length 
     % for iteration 1
@@ -128,13 +135,13 @@ while (model.normg > options.tolerance *normg0 && ...
                                    options.wolfe_delta, ...
                                    options.wolfe_theta, ...
                                    sigma, ...
-                                   options.wolfe_try_to_increase_step_length, ...
+                                   try_larger_steps, ...
                                    options.verbose, ...
                                    usr_par);
 
 % added 6-10-2015:
 if model_new.m == model.m
-    flag = 2;
+    flag_inv = 2;
     disp 'could not find a step satisfying Armijo';
     break
 else
@@ -179,13 +186,13 @@ end
 
 if (model.normg<=options.tolerance*normg0)
     fprintf(fid,'Successful termination with ||g||<%e*min(1,||g0||):\n',tolerance);
-    flag = 0;
-elseif (flag == 2) % couldn't find Armijo step
+    flag_inv = 0;
+elseif (exist('flag_inv', 'var') && flag_inv == 2) % couldn't find Armijo step
     fprintf(fid,'Unsuccessful termination of iterations - couln''t find suitable step\n');
 %     flag = 2;
 else
     fprintf(fid,'Maximum number of iterations reached.\n');
-    flag = 1;
+    flag_inv = 1;
 end
 
 % return final model and flag

@@ -82,33 +82,6 @@ if (strcmp(simulation_mode,'forward') || strcmp(simulation_mode,'forward_green')
     [src_x_id,src_z_id,ns] = compute_indices(src_x,src_z,Lx,Lz,dx,dz);
     [rec_x_id,rec_z_id,n_receivers] = compute_indices(rec_x,rec_z,Lx,Lz,dx,dz);
     
-    %- (make and) plot source time function ---------------------------------
-
-%     if isnan(stf_in);
-%         switch stf_type
-%             case {'delta_bp', 'heaviside_bp'}
-%                 stf = make_source_time_function(t,stf_type,f_min,f_max);
-%             case 'ricker'
-%                 stf = make_source_time_function(t,stf_type,tauw_0, tauw, tee_0);
-%         end
-%     elseif isnumeric(stf_in);
-%         stf = stf_in;
-%     else
-%         error('PANIC! stf type not recognised it seems');
-%     end
-%     fig_stf = plot_source_time_function(t,stf);
-% 
-%     % add the same source time function to all the sources.    
-% %     prefactor = 1.875e5;
-% %     prefactor = 1.875e5 / dx / dz;
-%     prefactor = 1.0 / dx / dz;
-%     for i=1:ns
-%         stf_all{i}.x = prefactor* stf.*stf_PSV(1)./norm(stf_PSV);  % x direction
-%         stf_all{i}.y = prefactor* stf;                           % y direction
-%         stf_all{i}.z = prefactor* stf.*stf_PSV(2)./norm(stf_PSV);  % z direction
-%     end
-%     
-%     stf = stf_all;
 end
 
 %% check values
@@ -116,35 +89,14 @@ end
 %test_input_compatibility;
 
 
-
-% %% initialise seismograms ------------------------------------------------- % Change this to save velocity seismograms only!
-% % only for forward
-% if(strcmp(wave_propagation_type,'SH'))
-%     v_rec.y=zeros(n_receivers,nt);
-% elseif(strcmp(wave_propagation_type,'PSV'))
-%     v_rec.x    =zeros(n_receivers,nt);
-%     v_rec.z    =zeros(n_receivers,nt);
-% elseif(strcmp(wave_propagation_type,'both'))
-%     v_rec.x    =zeros(n_receivers,nt);
-%     v_rec.y    =zeros(n_receivers,nt);
-%     v_rec.z    =zeros(n_receivers,nt);
-% end
-
-
-
 %==========================================================================
 %% RUN THE ACTUAL WAVEFIELD PROPAGATION
 %==========================================================================
 run_wavefield_propagation;
 
-
-
-
 %==========================================================================
 %% output 
 %==========================================================================
-
-
 
 %- store time-reversed forward field --------------------------------------
 
@@ -166,14 +118,6 @@ if (strcmp(save_u_fw,'yes') || (strcmp(save_v_fw,'yes')) )
     disp 'saving u_fw, v_fw output to file...'
     save(['../output/forwardfield.mat'], 'u_fw', 'v_fw', '-v6');
 end
-
-
-% disp 'saving seismograms...'
-% savename = ['../output/',project_name,'.v_rec.mat'];
-% save(savename, 'v_rec', '-v7.3');
-
-
-
 
 
 %- store the movie if wanted ----------------------------------------------
@@ -231,8 +175,6 @@ else
     return
     
 end
-
-
 
 % for i = 1:length(updatables)
 %    disp(['now updating ',updatables{i} ]);

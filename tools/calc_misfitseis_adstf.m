@@ -42,6 +42,9 @@ input_parameters; % should get nrec here, also nt and dt
 [~, ~, dx, dz] = define_computational_domain(Lx, Lz, nx, nz);
 
 switch misfit_tiep
+    case 'cc_time_shift'
+        compwel = 'x';
+        error('Using standard component X to calculate misfit!');
     case 'cc_time_shift_x'
         misfit_type = 'cc_time_shift';
         compwel = 'x';

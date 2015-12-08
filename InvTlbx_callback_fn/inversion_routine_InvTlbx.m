@@ -13,7 +13,7 @@
     use_matfile_startingmodel, starting_model, bg_model_type,...
     true_model_type, ~, change_freq_every, ...
     parametrisation, param_plot, rec_g, ~, ~, ~, ...
-    ~, InvProps.stepInit, smoothgwid] = get_input_info;
+    normalise_misfits, InvProps.stepInit, smoothgwid] = get_input_info;
 
 % kernels to be added in same parametrisation as inversion.
 param_addknls = parametrisation;
@@ -58,7 +58,7 @@ disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
 
 %% OBS
 
-obs_file = [output_path,'/obs.all-vars.mat'];
+obs_file = [output_path,'/obs.all-vars.mat']
 % freq consists of freqs.v_obs and freqs.frequency
 if ((~exist('sObsPerFreq','var') || ~exist('t_obs','var') || ...
         ~exist('Model_real','var') || ~exist('props_obs','var') || ...
@@ -126,15 +126,21 @@ Model_bg = update_model(bg_model_type);
 init_misfit_file = [output_path,'/initial_misfits.mat'];
 % skip calculating initial misfits if they are already in the workspace
 % or if there's a initial misfit file in the inversion directory
-if  (~exist('misfit_init', 'var') && exist(init_misfit_file, 'file'))
-    disp 'loading initial misfit file'
-    load(init_misfit_file);
-elseif ~exist('misfit_init', 'var')
-    disp 'calculating initial misfits'
-    misfit_init = calc_initial_misfits(Model_start, sObsPerFreq, g_obs);
-    save(init_misfit_file, 'misfit_init', '-v6');
+if ~strcmp(normalise_misfits, 'no')
+    if  (~exist('misfit_init', 'var') && exist(init_misfit_file, 'file'))
+        disp 'loading initial misfit file'
+        load(init_misfit_file);
+    elseif ~exist('misfit_init', 'var')
+        disp 'calculating initial misfits'
+        misfit_init = calc_initial_misfits(Model_start, sObsPerFreq, g_obs);
+        save(init_misfit_file, 'misfit_init', '-v6');
+    else
+        disp 'initial misfits already present... proceeding...';
+    end
 else
-    disp 'initial misfits already present... proceeding...';
+    misfit_init.total = NaN;
+    misfit_init.seis = NaN; 
+    misfit_init.grav = NaN;
 end
 
 %% set initial inversion values

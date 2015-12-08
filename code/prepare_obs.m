@@ -2,7 +2,12 @@ function [Model_real, sObsPerFreq, t_obs, props_obs, g_obs] = prepare_obs(output
 
 input_parameters;
 [~, ~, dx, dz] = define_computational_domain(Lx, Lz, nx, nz);
-nfr = length(f_maxlist);
+
+if filter_stf_with_freqlist 
+    nfr = length(f_maxlist);
+else
+    nfr = 1;
+end
 
 
 %% Model
@@ -55,24 +60,32 @@ if strcmp(use_seis, 'yesseis');
     
     % make sources frequency dependent
     for ifr = 1:nfr
-        disp(['FREQUENCY NR. ',num2str(ifr),'/',num2str(nfr), ...
-            '. fmin=',num2str(f_minlist(ifr)),', fmax=',num2str(f_maxlist(ifr))]);
+        
         
         % get frequencies
-        sObsPerFreq(ifr).f_max = f_maxlist(ifr);
-        sObsPerFreq(ifr).f_min = f_minlist(ifr);
-        
-        % filter stf per src & per component
-        sEventInfo = sEventInfoUnfilt;
-        for isrc = 1:nsrc
-            comps = fieldnames(sEventInfoUnfilt(isrc).stf);
-            for icomp = 1:length(comps)
-                stf = sEventInfoUnfilt(isrc).stf.(comps{icomp});
-                t = sEventInfoUnfilt(isrc).t;
-                stf = butterworth_lp(stf,t,3,sObsPerFreq(ifr).f_max,'silent');
-                stf = butterworth_hp(stf,t,3,sObsPerFreq(ifr).f_min,'silent');
-                sEventInfo(isrc).stf.(comps{icomp}) = stf; clearvars stf;
+        if filter_stf_with_freqlist
+            disp(['FREQUENCY NR. ',num2str(ifr),'/',num2str(nfr), ...
+            '. fmin=',num2str(f_minlist(ifr)),', fmax=',num2str(f_maxlist(ifr))]);
+            sObsPerFreq(ifr).f_max = f_maxlist(ifr);
+            sObsPerFreq(ifr).f_min = f_minlist(ifr);
+            
+            % filter stf per src & per component
+            sEventInfo = sEventInfoUnfilt;
+            for isrc = 1:nsrc
+                comps = fieldnames(sEventInfoUnfilt(isrc).stf);
+                for icomp = 1:length(comps)
+                    stf = sEventInfoUnfilt(isrc).stf.(comps{icomp});
+                    t = sEventInfoUnfilt(isrc).t;
+                    stf = butterworth_lp(stf,t,3,sObsPerFreq(ifr).f_max,'silent');
+                    stf = butterworth_hp(stf,t,3,sObsPerFreq(ifr).f_min,'silent');
+                    sEventInfo(isrc).stf.(comps{icomp}) = stf; clearvars stf;
+                end
             end
+        else
+            disp 'NOT filtering stf'
+            sObsPerFreq(ifr).f_max = 'not_filtering_stf';
+            sObsPerFreq(ifr).f_min = 'not_filtering_stf';
+            sEventInfo = sEventInfoUnfilt;
         end
         
         % run forward per source

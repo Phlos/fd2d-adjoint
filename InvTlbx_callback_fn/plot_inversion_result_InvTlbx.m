@@ -185,9 +185,12 @@ end
 % %    | (current.par - true.par) / true.par |
 if(exist('normL2Par', 'var'))
     subplot(9,2,[12 14])
-    RdifrealPar = semilogy(iters(1:imax), normL2Par.rho(1:imax), ...
-                           iters(1:imax), normL2Par.vs(1:imax), ...
-                           iters(1:imax), normL2Par.vp(1:imax)  );
+    RdifrealPar_rho = semilogy(iters(1:imax), normL2Par.rho(1:imax));
+    hold on;
+    if sum(normL2Par.vs) > 1e-5*sum(normL2Par.rho)
+        RdifrealPar_vs = semilogy(iters(1:imax), normL2Par.vs(1:imax));
+        RdifrealPar_vp = semilogy(iters(1:imax), normL2Par.vp(1:imax));
+    end
     xlim([min(iters) iters(imax)]);
     grid on;
     text(0.5, 0.9, '| (current - real) / real |', ...

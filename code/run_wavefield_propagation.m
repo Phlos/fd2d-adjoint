@@ -40,7 +40,7 @@ else reverseStr = '';
 end
 prevmsg = sprintf('iterating... Percentage completed :       ');
 fprintf(1, [reverseStr, prevmsg]); 
-% fprintf(1,'Percentage completed :       ');
+
 %%
 for n=1:nt
     % little trick to change the 'Percentage completed' inline
