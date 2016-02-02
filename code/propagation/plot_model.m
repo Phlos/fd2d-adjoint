@@ -41,24 +41,9 @@ load 'propagation/cm_model.mat';
 
 
 %% recalculation of lengths
-[X,Z,dx,dz]=define_computational_domain(Lx,Lz,nx,nz);
+[X,Z,~,~]=define_computational_domain(Lx,Lz,nx,nz);
 
-% convert distances to km & set Z to depth below surface
-surface_level = 2890; % only valid in PREM
-X = X ./ 1000;
-Z = Z ./ 1000;
-Z = surface_level - (Z);
-for k=1:length(src_info)
-    src_x(k) = src_info(k).loc_x / 1000;
-    src_z(k) = src_info(k).loc_z / 1000;
-    src_z(k) = surface_level - src_z(k);
-end
-
-for k=1:length(rec_x)
-    rec_x(k) = rec_x(k) ./ 1000;
-    rec_z(k) = rec_z(k) ./ 1000;
-    rec_z(k) = surface_level - rec_z(k);
-end
+[X,Z, srcs, recs] = recalculate_to_km(X, Z, src_info, rec_x, rec_z);
 
 
 %% figure
@@ -69,7 +54,6 @@ if (feature('showfigurewindows') == 0)
     set(fig_mod, 'PaperUnits', 'points');
     set(fig_mod, 'PaperPosition', pos_mod);
 end
-% set(gca,'FontSize',14)
 
 j=1;
 for params = fieldnames(Model)';
@@ -127,7 +111,9 @@ for params = fieldnames(Model)';
         
     else
         
-        if all(abs(param-mode(param(:))) <= 1e-10*mode(param(1)))
+        refval = param(1);
+        if refval == 0; refval = 1; end
+        if all(abs(param-mode(param(:))) <= 1e-10*mode(param(:)))
             cmax = param(1) + 0.01*param(1);
             cmin = param(1) - 0.01*param(1);
 %                 disp 'bips!!! all param are the same!'
@@ -149,8 +135,8 @@ for params = fieldnames(Model)';
     caxis([cmin cmax]);
     
     % plot sources and receivers
-    plot(src_x,src_z,'kx','LineWidth',0.3,'MarkerSize',4)
-    plot(rec_x,rec_z,'ko','LineWidth',0.3,'MarkerSize',4)
+    plot(srcs.x,srcs.z,'kx','LineWidth',0.3,'MarkerSize',4)
+    plot(recs.x,recs.z,'ko','LineWidth',0.3,'MarkerSize',4)
 
     colormap(cm_model);
     axis image
@@ -187,8 +173,8 @@ if plot_UM_separate
     pcolor(X,Z,param');
     caxis([cmin cmax]);
     % plot sources and receivers
-    plot(src_x,src_z,'kx','LineWidth',0.3,'MarkerSize',4)
-    plot(rec_x,rec_z,'ko','LineWidth',0.3,'MarkerSize',4)
+    plot(srcs.x,srcs.z,'kx','LineWidth',0.3,'MarkerSize',4)
+    plot(recs.x,recs.z,'ko','LineWidth',0.3,'MarkerSize',4)
     
     colormap(cm_model);
     %     axis image
@@ -242,14 +228,19 @@ narg = length(arg);
 % % loop over input arguments
 % for ii = 1:narg
 %     if isstruct(arg{ii})
-%         Model = arg{1};
+%         Model = arg{ii};
 %         if length(Model) > 1
 %             error('You supplied more than one models (i.e. a struct w/ multiple models?)');
 %         end
-%     elseif isnumeric(arg{ii}) && numel(arg{1}) == 1
+%     elseif isnumeric(arg{ii}) && numel(arg{ii}) == 1
 %         modelnr = arg{ii};
 %         Model = update_model(modelnr);
 %     elseif isnumeric(arg{ii}) && numel(arg{ii}) == 3
+%         middle = arg{ii};
+%     elseif islogical(arg{ii})
+%         plot_UM_separate = arg{ii};
+%     end
+% end
 
 switch narg
     
@@ -321,21 +312,52 @@ switch narg
         end
         
         Model = change_parametrisation('rhomulambda',outparam,Model);
-%         if middle.rho == 0 && middle.mu == 0 && middle.lambda == 0
-%             middle1.rho = 0; middle1.vs = 0; middle.vp = 0;
-%         else
-        middle = change_parametrisation('rhomulambda',outparam,middle1);
-%         end
+        if middle1.rho == 0 && middle1.mu == 0 && middle1.lambda == 0
+            if strcmp(outparam, 'rhovsvp')
+                middle.rho = 0; middle.vs = 0; middle.vp = 0;
+            else
+                error('unknown output parametrisation');
+            end
+        else
+            middle = change_parametrisation('rhomulambda',outparam,middle1);
+        end
 
     otherwise
         error('wrong number of variable arguments')
 end
 
-fn = fieldnames(middle);
-for ii = 1:3
-    if isnan(middle.(fn{ii}))
-        middle.(fn{ii}) = 0;
-    end
+% fn = fieldnames(middle);
+% for ii = 1:3
+%     if isnan(middle.(fn{ii}))
+%         middle.(fn{ii}) = 0;
+%     end
+% end
+
 end
+
+function [X, Z, srcs, recs] = recalculate_to_km(X, Z, src_info, rec_x, rec_z);
+    
+    % convert distances to km & set Z to depth below surface
+surface_level = 2890; % only valid in PREM
+X = X ./ 1000;
+Z = Z ./ 1000;
+Z = surface_level - (Z);
+for k=1:length(src_info)
+    src_x(k) = src_info(k).loc_x / 1000;
+    src_z(k) = src_info(k).loc_z / 1000;
+    src_z(k) = surface_level - src_z(k);
+end
+
+for k=1:length(rec_x)
+    rec_x(k) = rec_x(k) ./ 1000;
+    rec_z(k) = rec_z(k) ./ 1000;
+    rec_z(k) = surface_level - rec_z(k);
+end
+
+srcs.x = src_x;
+srcs.z = src_z;
+
+recs.x = rec_x;
+recs.z = rec_z;
 
 end

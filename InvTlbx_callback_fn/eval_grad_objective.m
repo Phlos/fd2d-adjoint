@@ -117,7 +117,7 @@ if strcmp(use_grav,'yes') && strcmp(use_seis, 'yesseis')
 
     clearvars('Ktest', 'Ktest1');
 elseif ~strcmp(use_grav,'yes') && strcmp(use_seis, 'yesseis')
-    K_total = Kseis(iter);
+    K_total = Kseis;
 elseif strcmp(use_grav,'yes') && ~strcmp(use_seis, 'yesseis')
     switch parametrisation
         case 'rhomulambda'

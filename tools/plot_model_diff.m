@@ -11,7 +11,7 @@ if isnumeric(Model2)
 end
 
 % varargin{:}
-outparam = checkargs(varargin);
+[outparam, plot_UM_separate] = checkargs(varargin);
 
 switch outparam
     case 'rhomulambda'
@@ -42,21 +42,35 @@ end
 
 
 
-function [outparam] = checkargs(arg)
+function [outparam, plot_UM_separate] = checkargs(arg)
 
 % defines the output parametrisation based on whether any is given (default
 % is 'rhomulambda')
 
 narg = length(arg);
 
+% default values
+outparam = 'rhomulambda';
+plot_UM_separate = false;
 
-switch narg
-    case 1
-        outparam = arg{1};
-    case 0
-        outparam = 'rhomulambda';
-    otherwise
-        warning(['wrong number of arguments: ', num2str(narg)]);
+for ii = 1:narg
+    if ischar(arg{ii})
+        outparam = arg{ii};
+    elseif islogical(arg{ii})
+        plot_UM_separate = arg{ii};
+    else
+        error('input argument not recognised')
+    end
 end
+
+
+% switch narg
+%     case 1
+%         outparam = arg{1};
+%     case 0
+%         outparam = 'rhomulambda';
+%     otherwise
+%         warning(['wrong number of arguments: ', num2str(narg)]);
+% end
 
 end

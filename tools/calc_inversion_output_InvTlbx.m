@@ -52,22 +52,40 @@ else
     InvProps.modeldifn(iter) = NaN;
 end
 
-% L2 norm( [model(i) - model_real] / model_real )
-Model_real_rvv = change_parametrisation('rhomulambda', 'rhovsvp', Model_real);
+
+
 if(isstruct(Model_real))
-    % models
-    Model_rvv = change_parametrisation('rhomulambda', 'rhovsvp', Model(iter) );
+    
+    % models / abbrev:
+    MR = Model_real;
+    Mi = Model(iter);
+    MB = Model_bg;
+    MRR = change_parametrisation('rhomulambda', 'rhovsvp', MR);
+    MiR = change_parametrisation('rhomulambda', 'rhovsvp', Mi );
+    MBR = change_parametrisation('rhomulambda', 'rhovsvp', MB);
+    
+    % L2 norm (abs): [model(i) - model_real] / model_real
     % param rho-mu-lambda
-    InvProps.modeldifnFromTruePar.rho(iter) = norm( (Model(iter).rho(:) - Model_real.rho(:)) ./ Model_real.rho(:) );
-    InvProps.modeldifnFromTruePar.mu(iter) = norm( (Model(iter).mu(:)  - Model_real.mu(:))  ./ Model_real.mu(:) );
-    InvProps.modeldifnFromTruePar.lambda(iter) = norm( (Model(iter).lambda(:) - Model_real.lambda(:)) ./ Model_real.lambda(:) );
+    InvProps.modeldifnFromTruePar.rho(iter) = norm( (Mi.rho(:) - MR.rho(:)) ./ MR.rho(:) );
+    InvProps.modeldifnFromTruePar.mu(iter) = norm( (Mi.mu(:)  - MR.mu(:))  ./ MR.mu(:) );
+    InvProps.modeldifnFromTruePar.lambda(iter) = norm( (Mi.lambda(:) - MR.lambda(:)) ./ MR.lambda(:) );
     % param rho-vs-vp
-    InvProps.modeldifnFromTruePar.vs(iter) = norm( (Model_rvv.vs(:)  - Model_real_rvv.vs(:))  ./ Model_real_rvv.vs(:) );
-    InvProps.modeldifnFromTruePar.vp(iter) = norm( (Model_rvv.vp(:) - Model_real_rvv.vp(:)) ./ Model_real_rvv.vp(:) );
+    InvProps.modeldifnFromTruePar.vs(iter) = norm( (MiR.vs(:)  - MRR.vs(:))  ./ MRR.vs(:) );
+    InvProps.modeldifnFromTruePar.vp(iter) = norm( (MiR.vp(:) - MRR.vp(:)) ./ MRR.vp(:) );
     % total diff
     InvProps.modeldifnFromTrue(iter) = InvProps.modeldifnFromTruePar.rho(iter) + ...
         InvProps.modeldifnFromTruePar.mu(iter) + InvProps.modeldifnFromTruePar.lambda(iter);
+    
+    % L2 norm (new): |[model(i) - model_real]| / |[model_real - model_start]| )
+    L2nnew.rho    = norm( (Mi.rho(:) - MR.rho(:)) , 2)  ./ norm( (MR.rho(:) - MB.rho(:))  , 2);
+    L2nnew.mu     = norm( (Mi.mu(:) - MR.mu(:)) , 2)  ./ norm( (MR.mu(:) - MB.mu(:))  , 2);
+    L2nnew.lambda = norm( (Mi.lambda(:) - MR.lambda(:)) , 2)  ./ norm( (MR.lambda(:) - MB.lambda(:))  , 2);
+    L2nnew.vs     = norm( (MiR.vs(:) - MRR.vs(:)) , 2)  ./ norm( (MRR.vs(:) - MBR.vs(:))  , 2);
+    L2nnew.vs     = norm( (MiR.vp(:) - MRR.vp(:)) , 2)  ./ norm( (MRR.vp(:) - MBR.vp(:))  , 2);
+    L2nnew.total  = L2nnew.rho + L2nnew.vs + L2nnew.vp;
 else
+    
+    % L2 norm (old)
     % param rho-mu-lambda
     InvProps.modeldifnFromTruePar.rho(iter) = NaN;
     InvProps.modeldifnFromTruePar.mu(iter) = NaN;
@@ -77,7 +95,22 @@ else
     InvProps.modeldifnFromTruePar.vp(iter) = NaN;
     % total
     InvProps.modeldifnFromTrue(iter) = NaN;
+    
+     % L2 norm new
+    L2nnew.rho    = NaN;
+    L2nnew.mu     = NaN;
+    L2nnew.lambda = NaN;
+    L2nnew.vs     = NaN;
+    L2nnew.vs     = NaN;
 end
+
+InvProps.L2norm_normd.rho(iter)    = L2nnew.rho;
+InvProps.L2norm_normd.mu(iter)     = L2nnew.mu;
+InvProps.L2norm_normd.lambda(iter) = L2nnew.lambda;
+InvProps.L2norm_normd.vs(iter)     = L2nnew.vs;
+InvProps.L2norm_normd.vp(iter)     = L2nnew.vp;
+InvProps.L2norm_normd.total_rvv(iter)  = (L2nnew.rho + L2nnew.vs + L2nnew.vp)/3;
+
 
 
 %% KERNEL NORM

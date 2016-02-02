@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-020.like-1j-grav-at-GOCE-height';
+project_name='Systematic.test-026.fix-rho-free-velocities';
 
 %==========================================================================
 % inversion properties
@@ -16,7 +16,7 @@ apply_hc = 'no';   % 'yes' or 'no'
 axrot = 'x';     % 'x' or 'z' at the moment.
 
 % use gravity?
-use_grav = 'yes'; % 'yes' or 'no'
+use_grav = 'no'; % 'yes' or 'no'
 which_grav = 'g_vector'; % 'g_vector' or 'g_potential'
 use_seis = 'yesseis'; % 'yesseis' or 'noseis'
 
@@ -27,7 +27,8 @@ parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rh
 param_plot = 'rhovsvp';
 
 % fix velocities?
-fix_velocities = 'yes'; % 'yes' or 'no'
+fix_velocities = 'no'; % 'yes' or 'no'
+fix_density    = 'yes';
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -53,7 +54,7 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
 % stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-stepInit = 0.5e-3;        % L-BFGS with kernels corrected (July 2015)
+stepInit = 0.02;          % L-BFGS with kernels corrected (July 2015)
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -109,10 +110,10 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 %==========================================================================
 
 % starting model from matfile
-use_matfile_startingmodel = 'no';
-starting_model = NaN;
+use_matfile_startingmodel = 'yes';
 % starting_model = '../output/Model_0.03Hz.mat';
-% starting_model = './models/Model86_perc90all.mat';
+% starting_model = './models/Model86_perc_UM100_LM90.mat';
+starting_model = './models/Model86_perc75all.mat';
 
 bg_model_type = 50;     % PREM
 true_model_type = 85;   % PREM + LM and UM solid circles (all params)
@@ -239,7 +240,7 @@ rec_z=ones(size(rec_x)) * (Lz-2*dz); % -2*dz necessary as a result of b.c.)
 %==========================================================================
 
 %- a line of gravity receivers above the domain
-rec_height = 268e3; % [m]  - 268 km is GOCE height
+rec_height = 20e3; % [m]
 nrec_g = 50;
 rec_g.x= (0: 1: nrec_g) * (Lx/nrec_g);
 rec_g.z=ones(size(rec_g.x)) * (Lz + rec_height);

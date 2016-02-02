@@ -1,4 +1,4 @@
-function [rho_p, props_proj, props_diff, fig_rhop, A, b] = project_mass_moi(rho, X, Z, constraints, options);
+function [rho_p, props_proj, props_diff, fig_rhop] = project_mass_moi(rho, X, Z, constraints, options);
 
 % function project_mass_moi
 %
@@ -76,7 +76,7 @@ nx = size(rho, 1); nz = size(rho,2);
 rho_p = reshape(rho_p_vec, nx, nz);
 
 % properties of output rho_p (to check)
-props_proj = calc_mass_moi(rho_p, Xn', Zn');
+props_proj = calc_mass_moi(rho_p, X, Z);
 props_diff.mass = (constraints.mass - props_proj.mass) / constraints.mass;
 props_diff.I_11 = (constraints.I_11 - props_proj.I_11) / constraints.I_11;
 props_diff.I_12 = (constraints.I_12 - props_proj.I_12) / constraints.I_12;
