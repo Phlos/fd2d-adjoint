@@ -34,11 +34,8 @@ function fig_par = plot_single_model_par(Model, Model_ref, which_param, plotopti
     
     % difference_mumax_mumin = max(mu(:)) - min(mu(:));
     
+    if plotoptions.cscale_own
     %- colour scale
-%     if all(abs(param-mode(param(:))) <= max(1e-10*mode(param()), 1e-10))
-%         cmax = param(1) + max(0.01*param(1), 1);
-%         cmin = param(1) - max(0.01*param(1), 1);
-%     else
         % max and min are calculated in this way so that the most common value
         % (i.e. the background value) is white, and that the extreme coulours
         % are determined by whichever of max and min is farthest off from the
@@ -51,10 +48,11 @@ function fig_par = plot_single_model_par(Model, Model_ref, which_param, plotopti
         cmid = centre(ix);
         cmax = cmid + max(abs(param(:) - cmid));
         cmin = cmid - max(abs(param(:) - cmid));
-        
-%     end
+        caxis([cmin cmax]);
+    else
+        caxis(plotoptions.cscale_minmax.(which_param));
+    end
     
-    caxis([cmin cmax]);
     colormap(cm_model);
     axis image
     shading flat
@@ -159,6 +157,23 @@ function plotoptions = check_options(plotoptions)
     
     if ~isfield(plotoptions, 'Mod_contours_bg')
         plotoptions.Mod_contours_bg = update_model(bg_model_type);
+    end
+    
+    if ~isfield(plotoptions, 'cscale_own')
+        plotoptions.cscale_own = false;
+    end
+    
+    if ~isfield(plotoptions, 'cscale_minmax')
+        mmrho = 53.2870;
+        mmvs  = 71.1881;
+        mmvp  = 132.9489;
+        mmmu      = 1.8932e10;
+        mmlambda  = 5.4279e9;
+        plotoptions.cscale_minmax.rho = [-mmrho mmrho];
+        plotoptions.cscale_minmax.vs  = [-mmvs mmvs];
+        plotoptions.cscale_minmax.vp  = [-mmvp mmvp];
+        plotoptions.cscale_minmax.mu  = [-mmmu mmmu];
+        plotoptions.cscale_minmax.lambda  = [-mmlambda mmlambda];
     end
     
 end

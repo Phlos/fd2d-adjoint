@@ -56,6 +56,8 @@ else
             
         case 'rhovsvp'
             
+            Model_bg = change_parametrisation('rhomulambda', 'rhovsvp', Model_bg);
+            
             m4 = m(          1 :   nx*nz);
             m5 = m(  nx*nz + 1 : 2*nx*nz);
             m6 = m(2*nx*nz + 1 : 3*nx*nz);

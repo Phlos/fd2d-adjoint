@@ -1,4 +1,4 @@
-function fig_invres = plot_inversion_result_InvTlbx(InvProps, imax)
+function fig_invres = plot_inversion_result_InvTlbx(InvProps, varargin)
 
 % plotting the results of the inversion in a good format.
 % 3 x 2 subplots with:
@@ -10,6 +10,15 @@ function fig_invres = plot_inversion_result_InvTlbx(InvProps, imax)
 % - angle vs. misfit path? or iter?!
 
 %% prepare
+
+if numel(varargin) == 0
+    imax = numel(InvProps.misfit);
+elseif numel(varargin) == 1
+    imax = varargin(1);
+else
+    error('Panic!');
+end
+    
 
 input_parameters;
 set_figure_properties_bothmachines;
@@ -26,15 +35,18 @@ misfitgrav = InvProps.misfitgrav;
 
 % norm of model differences
 modeldifn = InvProps.modeldifn;
-if(isfield(InvProps,'modeldifnFromTrue'))
-    normL2 = InvProps.modeldifnFromTrue;
-end
-if(isfield(InvProps, 'modeldifnFromTruePar'))
-    normL2Par.rho    = InvProps.modeldifnFromTruePar.rho;
-    normL2Par.mu     = InvProps.modeldifnFromTruePar.mu;
-    normL2Par.lambda = InvProps.modeldifnFromTruePar.lambda;
-    normL2Par.vs     = InvProps.modeldifnFromTruePar.vs;
-    normL2Par.vp     = InvProps.modeldifnFromTruePar.vp;
+if(isfield(InvProps,'L2norm_normd'))
+    normL2.rvv = InvProps.L2norm_normd.total_rvv;
+    if isfield(InvProps.L2norm_normd, 'total_rml')
+        normL2.rml = InvProps.L2norm_normd.total_rml;
+    else
+        normL2.rml = (InvProps.L2norm_normd.rho + InvProps.L2norm_normd.mu + InvProps.L2norm_normd.lambda) / 3;
+    end
+    normL2Par.rho    = InvProps.L2norm_normd.rho;
+    normL2Par.mu     = InvProps.L2norm_normd.mu;
+    normL2Par.lambda = InvProps.L2norm_normd.lambda;
+    normL2Par.vs     = InvProps.L2norm_normd.vs;
+    normL2Par.vp     = InvProps.L2norm_normd.vp;
 end
 
 % kernel angles
@@ -102,8 +114,10 @@ Lmisfit = semilogy(iters(1:imax), misfit(1:imax), 'k',...
     set(Lmisfit(3), 'LineWidth',1)
 xlim([min(iters), iters(imax)]);
 grid on
-legend('all data combined', 'seismic data only', 'gravity data only', ...
-       'Location', 'Northeast');
+legenda = legend('all data combined', 'seismic data only', 'gravity data only');
+lp = get(legenda, 'Position');
+set(legenda, 'Position', [lp(1)+0.2 lp(2) lp(3), lp(4)]);
+
 text(0.5, 0.9, 'misfit (normalised)', ...
     'Units', 'normalized', 'HorizontalAlignment','center');
 
@@ -137,20 +151,25 @@ grid on
     text(0.5, 0.9, 'angle between consecutive kernels(\circ)', ...
     'Units', 'normalized', 'HorizontalAlignment','center');
 
-% % step size
-% subplot(9,2,[15 17])
-% istepmax = min(length(step),imax-1);
-% Lstep = semilogy(iters(1:istepmax), step(1:istepmax),'k');
-% xlim([min(iters), iters(imax)]);
-% grid on
-% set(Lstep, 'LineWidth', 1)
-%     text(0.5, 0.9, 'step size', ...
-%     'Units', 'normalized', 'HorizontalAlignment','center');
+
+% kernel magnitude
+subplot(9,2,[15 17])
+RKnorm = semilogy(iters(1:imax), normKtot(1:imax), '-k',...
+              iters(1:imax), normKseis(1:imax), '-r',...
+              iters(1:imax), normKgrav(1:imax), '-b');
+set(RKnorm(1), 'LineWidth', 2)
+set(RKnorm(2), 'LineWidth', 1)
+set(RKnorm(3), 'LineWidth',1)
+xlim([min(iters), iters(imax)]);
+grid on;
+text(0.5, 0.9, 'norm of kernels', ...
+    'Units', 'normalized', 'HorizontalAlignment','center');
+% title('norm of kernels');
 
 % label for all plots, really, though technically belonging to Lstep
 xlabel('iteration no.');
 
-%% - right column: vs cumulative steplength
+%% - right column: other stuff
 
 % % misfit development
 % subplot(9,2,[2,6])
@@ -169,51 +188,71 @@ xlabel('iteration no.');
 %     'Units', 'normalized', 'HorizontalAlignment','center');
 % % legend('total (used) misfit', 'seismic misfit', 'gravity misfit', 'Location', 'Northeast');
 
-% model diff with real model vs. step length
+% total model diff with real model development vs iteration
 if(exist('normL2','var'))
-    subplot(9,2,[8 10]);
-    RmdifReal = semilogy(iters(1:imax), normL2(1:imax),'k');
+    subplot(9,2,[8 10]); box on;
+    hold on;
+    RmdifReal_rvv = plot(iters(1:imax), normL2.rvv(1:imax));
+    RmdifReal_rml = plot(iters(1:imax), normL2.rml(1:imax));
+    eilim = ylim;
+    ylim([0 max(1, eilim(2))]);
     xlim([min(iters) iters(imax)]);
     grid on
-    set(RmdifReal, 'LineWidth', 1)
-    text(0.5, 0.9, '| (current - real) / real |', ...
+    set(RmdifReal_rvv, 'LineWidth', 1)
+    set(RmdifReal_rml, 'LineWidth', 1)
+    text(0.5, 0.9, '| current - real | / | real - bg |', ...
     'Units', 'normalized', 'HorizontalAlignment','center');
+    legenda = legend('mean  rvv ', 'mean  rml ');
+    
+    lp = get(legenda, 'Position');
+    set(legenda, 'Position', [lp(1) lp(2)+0.075 lp(3), lp(4)]);
 %     title('|current - real| / |real - bg|');
 end
 
 % % L2 norm between current model and true model per parameter
-% %    | (current.par - true.par) / true.par |
 if(exist('normL2Par', 'var'))
-    subplot(9,2,[12 14])
-    RdifrealPar_rho = semilogy(iters(1:imax), normL2Par.rho(1:imax));
+    subplot(9,2,[12 14]); box on;
     hold on;
-    if sum(normL2Par.vs) > 1e-5*sum(normL2Par.rho)
-        RdifrealPar_vs = semilogy(iters(1:imax), normL2Par.vs(1:imax));
-        RdifrealPar_vp = semilogy(iters(1:imax), normL2Par.vp(1:imax));
-    end
+    RdifrealPar_rho = plot(iters(1:imax), normL2Par.rho(1:imax));
+%     if sum(normL2Par.vs) > 1e-5*sum(normL2Par.rho)
+        RdifrealPar_vs = plot(iters(1:imax), normL2Par.vs(1:imax));
+        RdifrealPar_vp = plot(iters(1:imax), normL2Par.vp(1:imax));
+        RdifrealPar_mu = plot(iters(1:imax), normL2Par.mu(1:imax));
+        RdifrealPar_lm = plot(iters(1:imax), normL2Par.lambda(1:imax));
+%     end
+    eilim = ylim;
+    ylim([0 max(1, eilim(2))]);
     xlim([min(iters) iters(imax)]);
+    eilim = ylim;
+    if eilim(1) < 5e-2
+        ylim([5e-2 eilim(2)]);
+    end
     grid on;
-    text(0.5, 0.9, '| (current - real) / real |', ...
+    text(0.5, 0.9, '| current - real | / | real - bg |', ...
        'Units', 'normalized', 'HorizontalAlignment','center');
-    legend('density', 'S velocity', 'P velocity');
+   
+    legenda = legend([RdifrealPar_rho, RdifrealPar_vs, RdifrealPar_vp, RdifrealPar_mu, RdifrealPar_lm], ...
+        'density', 'S velocity', 'P velocity', 'mu', 'lambda'); %, ...
+%         'Location', 'southoutside', 'orientation', 'horizontal');
+    lp = get(legenda, 'Position');
+    set(legenda, 'Position', [lp(1) lp(2)-0.2 lp(3), lp(4)]);
 end
 
 
-% kernel magnitude
-subplot(9,2,[16 18])
-RKnorm = semilogy(iters(1:imax), normKtot(1:imax), '-k',...
-              iters(1:imax), normKseis(1:imax), '-r',...
-              iters(1:imax), normKgrav(1:imax), '-b');
-set(RKnorm(1), 'LineWidth', 2)
-set(RKnorm(2), 'LineWidth', 1)
-set(RKnorm(3), 'LineWidth',1)
-xlim([min(iters), iters(imax)]);
-grid on;
-text(0.5, 0.9, 'norm of kernels', ...
-    'Units', 'normalized', 'HorizontalAlignment','center');
-% title('norm of kernels');
-
 xlabel('iteration no.');
+
+
+% % step size
+% subplot(9,2,[16 18])
+% istepmax = min(length(step),imax-1);
+% Lstep = semilogy(iters(1:istepmax), step(1:istepmax),'k');
+% xlim([min(iters), iters(imax)]);
+% grid on
+% set(Lstep, 'LineWidth', 1)
+%     text(0.5, 0.9, 'step size', ...
+%     'Units', 'normalized', 'HorizontalAlignment','center');
+
+
 
 
 

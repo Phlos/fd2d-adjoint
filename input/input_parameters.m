@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-026.fix-rho-free-velocities';
+project_name='Systematic.test-032.like-026-but-starting-model-PREM';
 
 %==========================================================================
 % inversion properties
@@ -28,7 +28,6 @@ param_plot = 'rhovsvp';
 
 % fix velocities?
 fix_velocities = 'no'; % 'yes' or 'no'
-fix_density    = 'yes';
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -54,7 +53,8 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
 % stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-stepInit = 0.02;          % L-BFGS with kernels corrected (July 2015)
+stepInit = 0.02;        % L-BFGS with kernels corrected (July 2015)
+% stepInit = 0.0025;      % L-BFGS, seis only, rho-vs-vp
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -110,14 +110,13 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 %==========================================================================
 
 % starting model from matfile
-use_matfile_startingmodel = 'yes';
+use_matfile_startingmodel = 'no';
 % starting_model = '../output/Model_0.03Hz.mat';
-% starting_model = './models/Model86_perc_UM100_LM90.mat';
-starting_model = './models/Model86_perc75all.mat';
+starting_model = '';
 
 bg_model_type = 50;     % PREM
 true_model_type = 85;   % PREM + LM and UM solid circles (all params)
-model_type=86; %(start) % PREM + LM/UM solid circles in vp, vs only
+model_type=50; %(start) % PREM + LM/UM solid circles in vp, vs only
 
 % 1=homogeneous 
 % 2=homogeneous with localised density perturbation
@@ -215,6 +214,7 @@ source_amplitude = 1e9;
                     
 %- source filtering - 8 frequency bands increasing by a factor 1.25 each time
 filter_stf_with_freqlist = true;
+butterworth_npoles = 5;
 f_minlist = [0.00667 0.00667 0.00667 0.00667 0.00667 0.00667 0.00667 0.00667];
 f_maxlist = [0.00667 0.00833 0.01042 0.01302 0.01628 0.02035 0.02543 0.03179];
 

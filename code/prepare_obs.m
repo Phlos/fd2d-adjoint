@@ -2,6 +2,9 @@ function [Model_real, sObsPerFreq, t_obs, props_obs, g_obs] = prepare_obs(output
 
 input_parameters;
 [~, ~, dx, dz] = define_computational_domain(Lx, Lz, nx, nz);
+if ~exist('butterworth_npoles', 'var');
+    butterworth_npoles = 5;
+end
 
 if filter_stf_with_freqlist 
     nfr = length(f_maxlist);
@@ -71,13 +74,14 @@ if strcmp(use_seis, 'yesseis');
             
             % filter stf per src & per component
             sEventInfo = sEventInfoUnfilt;
+            
             for isrc = 1:nsrc
                 comps = fieldnames(sEventInfoUnfilt(isrc).stf);
                 for icomp = 1:length(comps)
                     stf = sEventInfoUnfilt(isrc).stf.(comps{icomp});
                     t = sEventInfoUnfilt(isrc).t;
-                    stf = butterworth_lp(stf,t,3,sObsPerFreq(ifr).f_max,'silent');
-                    stf = butterworth_hp(stf,t,3,sObsPerFreq(ifr).f_min,'silent');
+                    stf = butterworth_lp(stf,t,butterworth_npoles, sObsPerFreq(ifr).f_max,'silent');
+                    stf = butterworth_hp(stf,t,butterworth_npoles, sObsPerFreq(ifr).f_min,'silent');
                     sEventInfo(isrc).stf.(comps{icomp}) = stf; clearvars stf;
                 end
             end

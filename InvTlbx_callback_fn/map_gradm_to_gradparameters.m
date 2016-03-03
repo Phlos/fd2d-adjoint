@@ -50,9 +50,9 @@ else
             
         case 'rhovsvp'
             
-            gm4 = m(          1 :   nx*nz);
-            gm5 = m(  nx*nz + 1 : 2*nx*nz);
-            gm6 = m(2*nx*nz + 1 : 3*nx*nz);
+            gm4 = gm(          1 :   nx*nz);
+            gm5 = gm(  nx*nz + 1 : 2*nx*nz);
+            gm6 = gm(2*nx*nz + 1 : 3*nx*nz);
             
             % reshape
             K_rel.rho2.total = reshape(gm4, nx, nz);
@@ -64,7 +64,7 @@ else
 end
 
 K_abs = calculate_unrelative_kernels(K_rel, usr_par.Model_bg);
-
+K_abs = change_parametrisation_kernels(parametrisation, 'rhomulambda', K_abs, usr_par.Model_bg);
 
 
 end

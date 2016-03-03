@@ -315,6 +315,8 @@ switch narg
         if middle1.rho == 0 && middle1.mu == 0 && middle1.lambda == 0
             if strcmp(outparam, 'rhovsvp')
                 middle.rho = 0; middle.vs = 0; middle.vp = 0;
+            elseif strcmp(outparam, 'rhomulambda')
+                middle.rho = 0; middle.mu = 0; middle.lambda = 0;
             else
                 error('unknown output parametrisation');
             end

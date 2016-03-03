@@ -111,12 +111,12 @@ while (model.normg > options.tolerance *normg0 && ...
     end
 
     % choose sigma by Powell-Wolfe stepsize rule
-    if (it==1)
+    if strcmp(step, 'Grad')
+        sigma = options.grad_step_length;
+    elseif (it==1)
         % TODO: provide alternative guess of the initial step length based
         % on relative model perturbations
         sigma=options.init_step_length;
-    elseif strcmp(step, 'Grad')
-        sigma = options.grad_step_length;
     else
         sigma = 1.0;
     end

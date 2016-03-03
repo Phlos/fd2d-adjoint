@@ -83,7 +83,7 @@ end
 if strcmp(use_seis, 'yesseis')
     disp ' ';
     disp(['calculating seismic kernels']);
-    [Kseis_temp, sEventKnls_iter] = run_adjoint_persource(Model, sEventAdstfIter);
+    [Kseis_temp, ~] = run_adjoint_persource(Model, sEventAdstfIter);
     
     % normalise kernels
     Kseis = norm_kernel(Kseis_temp, normalise_misfits, ...
@@ -109,30 +109,32 @@ if strcmp(use_grav,'yes') && strcmp(use_seis, 'yesseis')
             Ktest.rho2.total = w_Kseis * Ktest.rho2.total  +  w_Kg * Kg;
         otherwise
             error('the parametrisation in which kernels are added was unknown');
-    end
-    
-    % saving the total kernel in rho-mu-lambda
-    K_total = change_parametrisation_kernels(parametrisation,'rhomulambda', Ktest,Model);
+    end 
 
-    clearvars('Ktest', 'Ktest1');
 elseif ~strcmp(use_grav,'yes') && strcmp(use_seis, 'yesseis')
-    K_total = Kseis;
+    Ktest = Kseis;
+%     if strcmp(parametrisation, 'rhovsvp')
+%         Ktotal = change_parametrisation_kernels('rhovsvp', 'rhomulambda', Kseis, Model_bg);
+%     end
 elseif strcmp(use_grav,'yes') && ~strcmp(use_seis, 'yesseis')
     switch parametrisation
         case 'rhomulambda'
-            K_total.rho.total = Kg;
-            K_total.mu.total = zeros(size(Kg));
-            K_total.lambda.total = zeros(size(Kg));
+            Ktest.rho.total = Kg;
+            Ktest.mu.total = zeros(size(Kg));
+            Ktest.lambda.total = zeros(size(Kg));
         case 'rhovsvp'
             Ktest.rho2.total = Kg;
             Ktest.vs2.total = zeros(size(Kg));
             Ktest.vp2.total = zeros(size(Kg));
-            K_total = change_parametrisation_kernels('rhovsvp', 'rhomulambda', Ktest, Model);
     end
 else
     error('help, NO data?!');
 end
 
+% saving the total kernel in rho-mu-lambda
+K_total = change_parametrisation_kernels(parametrisation,'rhomulambda', Ktest,Model_bg);
+% clear dummy variables
+clearvars('Ktest', 'Ktest1');
 
 
 %% OUTPUT to Inversion Toolbox structure

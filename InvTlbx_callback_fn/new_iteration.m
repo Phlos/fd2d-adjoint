@@ -48,26 +48,32 @@ end
 [Model_iter] = map_m_to_parameters(m, usr_par);
 K_abs_iter   = map_gradm_to_gradparameters(gm, usr_par);
 
-%% inversion output
-% InvProps.misfit(iter) = jm;
-% InvProps.misfitseis(iter) = NaN;
-% InvProps.misfitgrav(iter) = NaN;
-
-% % useful output
-% if strcmp(use_grav,'no')
-%     Kg{iter}=NaN;
-% end
-% if exist('Model_real', 'var')
-%     InvProps = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model, Model_real);
-% else
-%     InvProps = calc_inversion_output(iter, InvProps, K_total, Kg, Kseis, Model);
-% end
-
 
 %% plot stuff
 
 % model
 fig_mod = plot_model_diff(Model_iter,Model_bg,param_plot);
+% set color axes to predefined values
+%- determine number of subplots
+nsub = numel(fig_mod.Children);
+        mmrho = 53.2870;
+        mmvs  = 71.1881;
+        mmvp  = 132.9489;
+        mmmu      = 1.8932e10;
+        mmlambda  = 5.4279e9;
+if nsub == 6
+    fig_mod.Children(6).CLim = [-mmrho mmrho];
+    fig_mod.Children(4).CLim = [-mmvs mmvs];
+    fig_mod.Children(2).CLim = [-mmvp mmvp];
+else
+    fig_mod.Children(10).CLim = [-mmrho mmrho];
+    fig_mod.Children(12).CLim = [-mmrho mmrho];
+    fig_mod.Children(8).CLim = [-mmvs mmvs];
+    fig_mod.Children(6).CLim = [-mmvs mmvs];
+    fig_mod.Children(4).CLim = [-mmvp mmvp];
+    fig_mod.Children(2).CLim = [-mmvp mmvp];
+end
+
 titel = [project_name,': model diff of iter ', num2str(iter), ' and bg model'];
 mtit(fig_mod, titel, 'xoff', 0.001, 'yoff', -0.05);
 figname = [output_path,'/iter',num2str(iter,'%03d'),'.model-diff.',param_plot,'.png'];

@@ -32,6 +32,11 @@ if iter > 1
     
 end
 
+if strcmp(parametrisation, 'rhovsvp');
+    Ktotal_iter = change_parametrisation_kernels('rhomulambda', 'rhovsvp', Ktotal_iter, Model_bg);
+    Ktotal_prev = change_parametrisation_kernels('rhomulambda', 'rhovsvp', Ktotal_prev, Model_bg);
+end
+
 %% MISFITS
 
 InvProps.misfit(iter) = jm;
@@ -59,7 +64,7 @@ if(isstruct(Model_real))
     % models / abbrev:
     MR = Model_real;
     Mi = Model(iter);
-    MB = Model_bg;
+    MB = update_model(bg_model_type); %Model_bg;
     MRR = change_parametrisation('rhomulambda', 'rhovsvp', MR);
     MiR = change_parametrisation('rhomulambda', 'rhovsvp', Mi );
     MBR = change_parametrisation('rhomulambda', 'rhovsvp', MB);
@@ -81,7 +86,7 @@ if(isstruct(Model_real))
     L2nnew.mu     = norm( (Mi.mu(:) - MR.mu(:)) , 2)  ./ norm( (MR.mu(:) - MB.mu(:))  , 2);
     L2nnew.lambda = norm( (Mi.lambda(:) - MR.lambda(:)) , 2)  ./ norm( (MR.lambda(:) - MB.lambda(:))  , 2);
     L2nnew.vs     = norm( (MiR.vs(:) - MRR.vs(:)) , 2)  ./ norm( (MRR.vs(:) - MBR.vs(:))  , 2);
-    L2nnew.vs     = norm( (MiR.vp(:) - MRR.vp(:)) , 2)  ./ norm( (MRR.vp(:) - MBR.vp(:))  , 2);
+    L2nnew.vp     = norm( (MiR.vp(:) - MRR.vp(:)) , 2)  ./ norm( (MRR.vp(:) - MBR.vp(:))  , 2);
     L2nnew.total  = L2nnew.rho + L2nnew.vs + L2nnew.vp;
 else
     
@@ -110,6 +115,7 @@ InvProps.L2norm_normd.lambda(iter) = L2nnew.lambda;
 InvProps.L2norm_normd.vs(iter)     = L2nnew.vs;
 InvProps.L2norm_normd.vp(iter)     = L2nnew.vp;
 InvProps.L2norm_normd.total_rvv(iter)  = (L2nnew.rho + L2nnew.vs + L2nnew.vp)/3;
+InvProps.L2norm_normd.total_rml(iter)  = (L2nnew.rho + L2nnew.mu + L2nnew.lambda)/3;
 
 
 
@@ -139,11 +145,6 @@ elseif strcmp(parametrisation, 'rhovsvp');
 else
     error('calc_inversion_output_InvTlbx: parametrisation of knls not recognised');
 end
-% else
-%     InvProps.norm.Kseis(iter) = NaN;
-%     InvProps.norm.Kg(iter) = NaN;
-%     InvProps.norm.Ktotal(iter) = NaN;
-% end
     
 
 %% KERNEL ANGLE
