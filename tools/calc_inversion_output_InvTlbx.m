@@ -5,8 +5,10 @@ function [InvProps] = calc_inversion_output_InvTlbx(iter, currentIterFields, pre
 
 
 input_parameters;
+Model_bg = update_model(bg_model_type);
 Model_real = checkargs(varargin(:));
 Ktotal_iter = K_total(iter);
+
 if strcmp(use_seis, 'yesseis')
     Kseis_iter = currentIterFields.Kseis;
 else
@@ -32,9 +34,14 @@ if iter > 1
     
 end
 
+% change to rho-vs-vp parametrisation if the inversion is @rho-vs-vp
 if strcmp(parametrisation, 'rhovsvp');
     Ktotal_iter = change_parametrisation_kernels('rhomulambda', 'rhovsvp', Ktotal_iter, Model_bg);
-    Ktotal_prev = change_parametrisation_kernels('rhomulambda', 'rhovsvp', Ktotal_prev, Model_bg);
+    Kseis_iter = change_parametrisation_kernels('rhomulambda', 'rhovsvp', Kseis_iter, Model_bg);
+    if iter > 1
+        Ktotal_prev = change_parametrisation_kernels('rhomulambda', 'rhovsvp', Ktotal_prev, Model_bg);
+        Kseis_prev = change_parametrisation_kernels('rhomulambda', 'rhovsvp', Kseis_prev, Model_bg);
+    end
 end
 
 %% MISFITS
@@ -64,7 +71,7 @@ if(isstruct(Model_real))
     % models / abbrev:
     MR = Model_real;
     Mi = Model(iter);
-    MB = update_model(bg_model_type); %Model_bg;
+    MB = Model_bg;
     MRR = change_parametrisation('rhomulambda', 'rhovsvp', MR);
     MiR = change_parametrisation('rhomulambda', 'rhovsvp', Mi );
     MBR = change_parametrisation('rhomulambda', 'rhovsvp', MB);
@@ -123,9 +130,10 @@ InvProps.L2norm_normd.total_rml(iter)  = (L2nnew.rho + L2nnew.mu + L2nnew.lambda
 % L2 norm of current kernels:
 % if iter < InvProps.niter
 if strcmp(use_seis, 'yesseis');
-    InvProps.norm.Kseis(iter) = norm(Kseis_iter.rho.total(:)) + ...
-                               norm(Kseis_iter.mu.total(:)) + ...
-                               norm(Kseis_iter.lambda.total(:));
+    pars = fieldnames(Kseis_iter);
+    InvProps.norm.Kseis(iter) = norm(Kseis_iter.(pars{1}).total(:)) + ...
+                               norm(Kseis_iter.(pars{2}).total(:)) + ...
+                               norm(Kseis_iter.(pars{3}).total(:));
 else
     InvProps.norm.Kseis(iter) = NaN;
 end
@@ -152,7 +160,7 @@ end
 
 % angle between kernels
 if (length(K_total) > 1 && iter > 1)
-    par = fieldnames(K_total);
+    par = fieldnames(Ktotal_iter);
     KnlTot_now = [Ktotal_iter.(par{1}).total Ktotal_iter.(par{2}).total Ktotal_iter.(par{3}).total];
     KnlTot_prv = [Ktotal_prev.(par{1}).total Ktotal_prev.(par{2}).total Ktotal_prev.(par{3}).total];
     if strcmp(use_seis,'yesseis')

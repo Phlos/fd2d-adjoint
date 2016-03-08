@@ -14,7 +14,7 @@ function fig_invres = plot_inversion_result_InvTlbx(InvProps, varargin)
 if numel(varargin) == 0
     imax = numel(InvProps.misfit);
 elseif numel(varargin) == 1
-    imax = varargin(1);
+    imax = varargin{1};
 else
     error('Panic!');
 end
