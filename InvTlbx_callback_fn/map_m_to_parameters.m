@@ -29,14 +29,14 @@ if strcmp(fix_velocities,'yes')
     vs_st = sqrt(Model_start.mu ./ Model_start.rho);
     vp_st = sqrt( (Model_start.lambda + 2*Model_start.mu) ./ Model_start.rho);
     
-    if strcmp(parametrisation, 'rhomulambda')
+%    if strcmp(parametrisation, 'rhomulambda')
         rho = Model_bg.rho .* (1 + reshape(m, nx, nz));
         mu  = vs_st .^2 .* rho;
         lambda = (vp_st.^2 - 2* vs_st.^2) .* rho;
             
-    else
-        error('parametrisation must be rhomulambda if fixing velocities');
-    end
+%    else
+%        error('parametrisation must be rhomulambda if fixing velocities');
+%    end
     
 % no fixing of parameters: there are 3*nx*nz free parameters
 else

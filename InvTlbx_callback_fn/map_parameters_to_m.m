@@ -23,11 +23,11 @@ Model_bg        = usr_par.Model_bg;
 % fixing vs and vp: there are only 1*nx*nz free parameters: rho
 if strcmp(fix_velocities,'yes')
     
-    if strcmp(parametrisation, 'rhomulambda')
+%    if strcmp(parametrisation, 'rhomulambda')
         m = Model.rho(:) ./ Model_bg.rho(:) - 1;
-    else
-        error('parametrisation must be rhomulambda if fixing velocities');
-    end
+%    else
+%        error('parametrisation must be rhomulambda if fixing velocities');
+%    end
 
 % no fixing of parameters: there are 3*nx*nz free parameters
 else

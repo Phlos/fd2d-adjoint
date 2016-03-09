@@ -59,7 +59,8 @@ if strcmp(fix_velocities,'yes')
             + K_rel.mu.total(:) ...
             + K_rel.lambda.total(:) ];
     else
-        error('parametrisation must be rhomulambda if fixing velocities');
+	gradm = K_rel.rho2.total(:);
+%        error('parametrisation must be rhomulambda if fixing velocities');
     end
     
 % no fixing of parameters: there are 3*nx*nz free parameters
@@ -71,9 +72,9 @@ else
                 K_rel.mu.total(:); ...
                 K_rel.lambda.total(:)];
         case 'rhovsvp'
-            if strcmp(fix_velocities,'yes')
-                error('WARNING! no fix vp vs defined here!')
-            end
+%            if strcmp(fix_velocities,'yes')
+%                error('WARNING! no fix vp vs defined here!')
+%            end
             gradm = [K_rel.rho2.total(:); ...
                 K_rel.vs2.total(:); ...
                 K_rel.vp2.total(:)];

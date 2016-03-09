@@ -28,7 +28,11 @@ if strcmp(fix_velocities,'yes')
         K_rel.mu.total      = zeros(size(K_rel.rho.total));
         K_rel.lambda.total  = zeros(size(K_rel.rho.total));
     else
-        error('parametrisation must be rhomulambda if fixing velocities');
+	    K_rel.rho2.total = reshape(gm, nx, nz);
+	    K_rel.vs2.total = zeros(size(K_rel.rho2.total));
+	    K_rel.vp2.total = zeros(size(K_rel.rho2.total));
+
+%    	    error('parametrisation must be rhomulambda if fixing velocities');
     end
 
 % no fixing of parameters: there are 3*nx*nz free parameters
