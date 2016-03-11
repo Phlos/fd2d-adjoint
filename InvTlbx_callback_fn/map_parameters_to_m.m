@@ -29,6 +29,24 @@ if strcmp(fix_velocities,'yes')
 %        error('parametrisation must be rhomulambda if fixing velocities');
 %    end
 
+% fixing density: there are 2*nx*nz free parameters: either vs, vp or mu, lambda
+elseif strcmp(fix_density, 'yes');
+	if strcmp(parametrisation, 'rhomulambda')
+		m2 = Model.mu ./ Model_bg.mu -1;
+		m3 = Model.lambda ./ Model_bg.lambda -1;
+
+		m = [m2(:); m3(:)];
+
+	elseif strcmp(parametrisation, 'rhovsvp')
+            Mod_rvv = change_parametrisation('rhomulambda',parametrisation, Model);
+            Mod_bg_rvv = change_parametrisation('rhomulambda',parametrisation, Model_bg);
+
+	    m5 = Mod_rvv.vs ./ Mod_bg_rvv.vs -1;
+            m6 = Mod_rvv.vp ./ Mod_bg_rvv.vp -1;
+
+	    m = [m5(:); m6(:)];
+	end
+
 % no fixing of parameters: there are 3*nx*nz free parameters
 else
 

@@ -62,6 +62,15 @@ if strcmp(fix_velocities,'yes')
 	gradm = K_rel.rho2.total(:);
 %        error('parametrisation must be rhomulambda if fixing velocities');
     end
+
+% fixing density: there are 2*nx*nz free parameters: mu+lambda or vs+vp
+elseif strcmp(fix_density, 'yes')
+
+	if strcmp(parametrisation, 'rhomulambda');
+		gradm = [K_rel.mu.total(:); K_rel.lambda.total(:)];
+	elseif strcmp(parametrisation, 'rhovsvp');
+		gradm = [K_rel.vs2.total(:); K_rel.vp2.total(:)];
+	end
     
 % no fixing of parameters: there are 3*nx*nz free parameters
 else

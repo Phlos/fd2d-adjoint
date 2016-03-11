@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-034.like-029-but-starting-model-50pct';
+project_name='Systematic.test-043.like-033-but-starting-from-040';
 
 %==========================================================================
 % inversion properties
@@ -28,6 +28,7 @@ param_plot = 'rhovsvp';
 
 % fix velocities?
 fix_velocities = 'no'; % 'yes' or 'no'
+fix_density = 'no';   % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -53,8 +54,8 @@ normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
 % stepInit = 1e4;         % PREM + 1% rho2 anomalies
 % stepInit = 1e8;         % tt and wavef inv: truemod = 100, starting = 1; (21-3-2015)
 % stepInit = 5e6;         % low freq (0.01 Hz) PREM + 1000 kg/m3 (23-3-2015)
-% stepInit = 0.02;        % L-BFGS with kernels corrected (July 2015)
-stepInit = 0.0025;      % L-BFGS, seis only, rho-vs-vp
+stepInit = 0.02;        % L-BFGS with kernels corrected (July 2015)
+% stepInit = 0.0025;      % L-BFGS, seis only, rho-vs-vp
 
 %- smoothing properties
 % % smoothing (= filtering) seismograms before adstf
@@ -111,8 +112,8 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 
 % starting model from matfile
 use_matfile_startingmodel = 'yes';
-starting_model = './models/Model86_perc50all.mat';
-% starting_model = '';
+% starting_model = '../output/Model_0.03Hz.mat';
+starting_model = 'models/Systest040.iter161.model.mat';
 
 bg_model_type = 50;     % PREM
 true_model_type = 85;   % PREM + LM and UM solid circles (all params)

@@ -131,10 +131,16 @@ InvProps.L2norm_normd.total_rml(iter)  = (L2nnew.rho + L2nnew.mu + L2nnew.lambda
 % if iter < InvProps.niter
 if strcmp(use_seis, 'yesseis');
     pars = fieldnames(Kseis_iter);
+    InvProps.norm.Kseis_par.(pars{1})(iter) = norm(Kseis_iter.(pars{1}).total(:));
+    InvProps.norm.Kseis_par.(pars{2})(iter) = norm(Kseis_iter.(pars{2}).total(:));
+    InvProps.norm.Kseis_par.(pars{3})(iter) = norm(Kseis_iter.(pars{3}).total(:));
     InvProps.norm.Kseis(iter) = norm(Kseis_iter.(pars{1}).total(:)) + ...
                                norm(Kseis_iter.(pars{2}).total(:)) + ...
                                norm(Kseis_iter.(pars{3}).total(:));
 else
+    InvProps.norm.Kseis_par.(pars{1})(iter) = NaN;
+    InvProps.norm.Kseis_par.(pars{2})(iter) = NaN;
+    InvProps.norm.Kseis_par.(pars{3})(iter) = NaN;
     InvProps.norm.Kseis(iter) = NaN;
 end
 if strcmp(use_grav, 'yes')
@@ -142,17 +148,25 @@ if strcmp(use_grav, 'yes')
 else
     InvProps.norm.Kg(iter) = NaN;
 end
-if strcmp(parametrisation, 'rhomulambda');
-    InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.rho.total(:)) + ...
-        norm(Ktotal_iter.mu.total(:)) + ...
-        norm(Ktotal_iter.lambda.total(:));
-elseif strcmp(parametrisation, 'rhovsvp');
-    InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.rho2.total(:)) + ...
-        norm(Ktotal_iter.vs2.total(:)) + ...
-        norm(Ktotal_iter.vp2.total(:));
-else
-    error('calc_inversion_output_InvTlbx: parametrisation of knls not recognised');
-end
+% Ktotal norms
+pars = fieldnames(Ktotal_iter);
+    InvProps.norm.Ktotal_par.(pars{1})(iter) = norm(Ktotal_iter.(pars{1}).total(:));
+    InvProps.norm.Ktotal_par.(pars{2})(iter) = norm(Ktotal_iter.(pars{2}).total(:));
+    InvProps.norm.Ktotal_par.(pars{3})(iter) = norm(Ktotal_iter.(pars{3}).total(:));
+    InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.(pars{1}).total(:)) + ...
+                               norm(Ktotal_iter.(pars{2}).total(:)) + ...
+                               norm(Ktotal_iter.(pars{3}).total(:));
+%if strcmp(parametrisation, 'rhomulambda');
+%    InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.rho.total(:)) + ...
+%        norm(Ktotal_iter.mu.total(:)) + ...
+%        norm(Ktotal_iter.lambda.total(:));
+%elseif strcmp(parametrisation, 'rhovsvp');
+%    InvProps.norm.Ktotal(iter) = norm(Ktotal_iter.rho2.total(:)) + ...
+%        norm(Ktotal_iter.vs2.total(:)) + ...
+%        norm(Ktotal_iter.vp2.total(:));
+%else
+%    error('calc_inversion_output_InvTlbx: parametrisation of knls not recognised');
+%end
     
 
 %% KERNEL ANGLE
