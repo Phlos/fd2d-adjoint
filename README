@@ -1,39 +1,52 @@
 :===============================================================================:
 : FD2D = Finite Difference (elastic) seismic wave propagation in 2D. both for SH
 : waves (computationally equivalent to acoustic wave propagation) and P-SV waves
+: adjoint = it is also possible to run tomographic inversions using this code.
 :===============================================================================:
 
+copyright:
+Nienke Blom
+Christian Boehm
+Andreas Fichtner
+
+You're free to use this code, but it would be really kind to acknowledge our work.
+
 The following is what you can do.
-- run a single wave propagation, for example to generate 'observed data'
+- run wave propagation in 2D for a single or multiple simultaneous sources.
 - make a movie of said wave propagation
-- run a tomographic inversion of 2D P-SV and/or SH wave propagation, either with
-  --> cross-correlation travel time residuals, or
-  --> waveform inversion (adjoint method)
+- calculate gravity data for your model.
+- run a tomographic inversion of 2D P-SV and/or SH wave propagation using 
+  waveform inversion (adjoint method)
+- include gravity measurements into the inversion.
 - look at the results of various steps
 - tune the inversion to your specific needs using input files.
 
+The inversion scheme implemented is multi-scale (Bunks 1995) and makes use of a 
+L-BFGS update algorithm (see e.g. Nocedal & Wright 1999). 
+
 The inversion consists of the following steps, which are executed until the max
-number of steps is reached (future work: or until some misfit criterion is met)
+number of steps is reached.
 - running a forward propagation for SH and/or P-SV wave propagation
+- (calculating gravity data, if required)
 - generating adjoint sources using a misfit functional based on the forward 
   simulation results and the observed data.
-- running an adjoint simulation for SH and/or P-SV wave propagation
-- calculating the descent step length with a line search, based on the previous 
-  model and adjoint kernels
-- applying hard constraints of total mass and moment of inertia, if requested
+- running an adjoint simulation for SH and/or P-SV wave propagation in order to
+  obtain gradients for the seismic data
+- (calculating the gravity gradient, if required, and combining the gradients,
+  if required)
+- calculate a model update using the L-BFGS algorithm. For this, it may be 
+  necessary to run calculate the misfit for additional models, or calculate their
+  gradient. This means that additional forward and adjoint wave propagations may
+  be executed.
 
 At each step, the process can be visualised:
 - the model (various parametrisations)
 - the wave propagation (real-time)
 - the seismograms (and difference with observed seismograms, if applicable)
 - the adjoint kernels (in various parametrisations)
-- the density update as a result of the application of hard constraints
+- a summary figure describing the misfit development, differences with the target
+  model and information on the kernels.
 
-Future work:
-- adding gravity to the inversion. Currently, some gravity information is used
-  through the mass and moment of inertia hard constraints, but I want to add
-  gravity receivers and add the difference between observed & model gravity as
-  separate data to the misfit functional.
 
 ---------------------------------------------------------------------------------
 
