@@ -16,13 +16,39 @@ The following is what you can do.
 - make a movie of said wave propagation
 - calculate gravity data for your model.
 - run a tomographic inversion of 2D P-SV and/or SH wave propagation using 
-  waveform inversion (adjoint method)
+  waveform inversion (adjoint method). This can be done with multiple events.
 - include gravity measurements into the inversion.
 - look at the results of various steps
 - tune the inversion to your specific needs using input files.
 
+INVERSION SCHEME
 The inversion scheme implemented is multi-scale (Bunks 1995) and makes use of a 
-L-BFGS update algorithm (see e.g. Nocedal & Wright 1999). 
+L-BFGS update algorithm (see e.g. Nocedal & Wright 1999). The multi-scale aspect 
+of the observed data is implemented in a rather simplistic way: instead of 
+generating high-frequency data once and then filtering them as needed, the wave
+propagation is run separately with differently filtered source time functions. This
+is computationally not extremely efficient, but otherwise fine.
+
+The most important files for running an inversion will be 
+./input/input_parameters.m                        --> change all the input here.
+./InvTlbx_callback_fn/inversion_routine_InvTlbx.m --> the wrapper script that does 
+                                                      it all.
+
+OUTPUT DIRECTORY:
+The inversion will generate output (or load it, sometimes) which will be put in a
+directory ./output/[project-name]. This project name is defined in the input params.
+
+RUNTHROUGH:
+Inside the inversion_routine file:
+
+Some preparatory steps:
+- either load or generate "observed" data for the target model. This target model
+  is defined in input_parameters. Obs data may also be present in a file (I ran
+  many inversions with the same obs data, no use in running the wave propagation 
+  every time again) which is expected to be in [projectfolder]/obs.all-vars.mat
+- preparing starting model (may be loaded from ./models or generated) and 
+  calculating the initial misfit. In a multi-scale approach, misfit is calculated
+  for each frequency band separately.
 
 The inversion consists of the following steps, which are executed until the max
 number of steps is reached.
@@ -55,31 +81,10 @@ How to do those things?
 Tuning parameters (in ./input/input_parameters)
 This script determines all the properties of both domain and inversion. Walk through it carefully to see what all the parameters do.
 
-Running an inversion (in ./code/inversion_routine)
-This is the most important thing, for my aims at least. The inversion can be adjusted using the script inversion_routine itself, but most importantly in the file input_parameters.
-The first step here is to generate observables with the function prepare_obs(modelnr). The input modelnr determines which model (found in define_material_parameters) is the 'real' model, and the rest of the model properties are taken from input_parameters.
-Next, one can simply execute the inversion script. Depending on how much you visualise, how big your domain is, how many timesteps you have and how many iterations you do, this can take a while. An inversion with no wave propagation visualisation (but plotting & saving all other output), a model size (450x390), 3500 time steps and 7 iterations takes about 40 minutes on my machine (32GB RAM)
-
-
 Run a forward simulation.
 (in ./code/run_forward)
 In order to do that, you edit the file input/input_parameters.m to your liking. You can choose any of a number models, either or both of wave propagation SH / PSV, source and receiver configurations, and a lot of other stuff too. Just take a look at it. Beware with grid size & stability issues though :) Just take a look at the header of the run_forward file to see how to run it.
-Oh you can also make a movie! That is basically what I'm so disproportionately excited about. If you just fiddle around with the stf you suddenly see what happens to the X and Z components when it points in a different direction. SO COOL.
-
-
-Look at the seismograms.
-(in ./tools/plot_recordings)
-What it says. You can look at the seismograms. Check the code to see what input is required.
-
-
-Make adjoint sources.
-(in ./tools/make_adjoint_sources)
-This function is the core of the inversion, as it determines the type of misfit and therefore the type of adjoint source. You can choose the misfit and what data to compare it to. From the forward field you got all the receiver information in X Y and Z directions, observables (if present) are compared to that and now we make sources from that by picking the wavefields.
-Currently, the following misfit types can be used:
-- a cross-correlation travel time difference
-- a waveform misfit using an L2 norm of the waveform difference
-Future work: adding other misfits that are more targeted at density, and adding gravity to at least the waveform misfit.
-
+Oh you can also make a movie! 
 
 
 Run an adjoint simulation.
@@ -90,5 +95,7 @@ A movie can be made of this process, too, and the resulting kernels can be plott
 -------------------------------------------------------------------------------------
 
 Pour le reste:
-I would like to stress that it's ugly and barely functional but it's kind of cool to be able to play around with wave propagation AND SEE IT. Note the absorbing boundaries which just multiply the wavefields by smaller and smaller number as you approach the boundaries of the field. Apparently only works in FD. Also note that you can do 2nd order or 4th order accuracy of the wave eq. I do everything with 4th order - andreas says 2nd is not really usable in any way.
+I would like to stress that it's ugly and barely functional but it's kind of cool to be able to play around with wave propagation AND SEE IT. Note the absorbing boundaries which are a Gaussian taper: just multiply the wavefields by smaller and smaller number as you approach the boundaries of the field. Also note that you can do 2nd order or 4th order accuracy of the wave eq. I do everything with 4th order - Andreas says 2nd is not really usable in any way.
+
+note to self:
 Like Gerhard explains in his course, you COULD use a combination of normal and 45 degrees rotated grid to do the forward calculations, which'll hugely reduce the nr of grid points needed. Might be worth looking into, but it'll take quite a bit of coding effort to implement so probably I'll leave it at this. That means that there's still considerable numerical dispersion -- as you'll see when you look at the seismograms.
