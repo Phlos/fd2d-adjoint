@@ -9,7 +9,7 @@
 % niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
-[project_name, ~, apply_hc, use_grav, use_seis, fix_velocities, ...
+[project_name, ~, apply_hc, use_grav, use_seis, fix_velocities, fix_density, ...
     use_matfile_startingmodel, starting_model, bg_model_type,...
     true_model_type, ~, change_freq_every, ...
     parametrisation, param_plot, rec_g, ~, ~, ~, ...
@@ -51,6 +51,11 @@ if strcmp(fix_velocities , 'yes')
     disp '-- fixing vels? .... YES!!'
 else
     disp '-- fixing vels? .... no'
+end
+if strcmp(fix_density , 'yes')
+    disp '-- fixing density? .... YES!!'
+else
+    disp '-- fixing density? .... no'
 end
 disp '======================================';
 disp '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~';
@@ -132,8 +137,8 @@ if ~strcmp(normalise_misfits, 'no')
         load(init_misfit_file);
     elseif ~exist('misfit_init', 'var')
         disp 'calculating initial misfits'
-        misfit_init = calc_initial_misfits(Model_start, sObsPerFreq, g_obs);
-        save(init_misfit_file, 'misfit_init', '-v6');
+        [misfit_init, misfit_init_traces] = calc_initial_misfits(Model_start, sObsPerFreq, g_obs);
+        save(init_misfit_file, 'misfit_init', 'misfit_init_traces',  '-v6');
     else
         disp 'initial misfits already present... proceeding...';
     end

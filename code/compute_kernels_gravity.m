@@ -1,4 +1,4 @@
-function [Kg] = compute_kernels_gravity(g_src, rec_grav, which_grav, varargin)
+function [Kg] = compute_kernels_gravity(g_src, rec_grav, which_g, varargin)
 
 % calculation of gravity kernels based on the gravity source (obtained in
 % e.g. calculate_gravity_misfit) and on domain properties.
@@ -56,7 +56,7 @@ for i = 1:nrec % separate kernel per receiver
     % calculate length or the vectors r for each point
     r{i}.length = sqrt(r{i}.x.^2 + r{i}.z.^2);
     
-    if strcmp(which_grav, 'g_vector')
+    if strcmp(which_g, 'g_vector')
         % THIS IS FOR GRAVITY DUE TO A 'SHEET' IN THE X-Z PLANE!!
         % gravity kernel per component per receiver
         % includes discretisation compensation factor dx*dz
@@ -73,7 +73,7 @@ for i = 1:nrec % separate kernel per receiver
         % gravity kernel per receiver
         Kg_rec{i}.total = Kg_rec{i}.x + Kg_rec{i}.z;
         
-    elseif strcmp(which_grav, 'g_potential')
+    elseif strcmp(which_g, 'g_potential')
         % gravity potential kernel per receiver
         % includes discretisation compensation factor dx*dz
         % NOT normalised by initial misfit (this is done in separate
@@ -111,7 +111,7 @@ for i = 1:nrec
         % top left
         figure(totalkernel)
         subplot(2,2,1)
-        Kg_sm = filter_kernels(Kg, parametrisation, smoothgwid);
+        Kg_sm = filter_2Dfield(Kg, smoothgwid);
         pcolor(X,Z, Kg_sm')
         colormap(cm);
         shading interp

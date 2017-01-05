@@ -256,6 +256,59 @@ elseif (model_type==18) % gaussian off-central mu anomaly
 %     mu(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
 %     mu(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e10;
 
+elseif (model_type==19) % block central 2% vs anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % rho-vs-vp 
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    vp    = sqrt((lambda + 2*mu) ./ rho);
+    vs    = sqrt(mu ./ rho);
+    rho2 = rho;
+    
+        % rectangular rho anomaly
+    left = round(nx/2-nx/20);
+    right = round(nx/2+nx/20);
+    top = round(nz/2+nz/20);
+    bottom = round(nz/2-nz/20);
+    
+    vs(left:right,bottom:top) = vs(left:right,bottom:top) * 1.02;
+    
+     % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+
+elseif (model_type==20) % block central 2% rho2 anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % rho-vs-vp 
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    vp    = sqrt((lambda + 2*mu) ./ rho);
+    vs    = sqrt(mu ./ rho);
+    rho2 = rho;
+    
+        % rectangular rho anomaly
+    left = round(nx/2-nx/20);
+    right = round(nx/2+nx/20);
+    top = round(nz/2+nz/20);
+    bottom = round(nz/2-nz/20);
+    
+    rho2(left:right,bottom:top) = rho2(left:right,bottom:top) * 1.02;
+    
+     % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+
+
 elseif (model_type==21) % gaussian off-central rho_v anomaly
 %% VP-VS-RHO parametrisation
 
@@ -293,6 +346,35 @@ elseif (model_type==21) % gaussian off-central rho_v anomaly
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
+elseif (model_type==22) % block central 2% rho2 anomaly
+    
+    % Tromp et al, 2005
+    rho    = 2600*ones(nx,nz);     % kg/m3
+    mu     = 2.66e10*ones(nx,nz);  % Pa
+    lambda = 3.42e10*ones(nx,nz);  % Pa
+    % rho-vs-vp 
+    % => vp = 5797.87759 m/s
+    % => vs = 3198.55736 m/s
+    vp    = sqrt((lambda + 2*mu) ./ rho);
+    vs    = sqrt(mu ./ rho);
+    rho2 = rho;
+    
+        % rectangular rho anomaly
+    left = round(nx/2-nx/20);
+    right = round(nx/2+nx/20);
+    top = round(nz/2+nz/20);
+    bottom = round(nz/2-nz/20);
+    
+    % relative strength of anomaly
+    pctage = 1.10;
+    rho2(left:right,bottom:top) = rho2(left:right,bottom:top) * pctage;
+    
+     % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+
+
 elseif (model_type==31) % five 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
 
     % Tromp et al, 2005, rho-mu-lambda
@@ -1246,6 +1328,133 @@ elseif (model_type==86) % CIRCLES and small UM circles - ONLY VS AND VP:
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2); 
     
+    
+    
+
+    
+elseif (model_type==90) % NO IMPEDANCE. 
+                        % like 85 etc -- but now a single column only:
+                        % where rho, vs, vp are chosen such that there's no
+                        % impedance for either S or P.
+                        % Layout: still CIRCLES and small UM circles:
+                        % PREM background model plus regular grid of 'hard'
+                        % edged circles - non-overlapping rho - vp - vs
+     
+    % load prem
+    [rho2, vs, vp] = load_PREM();
+    
+    % anomaly grid
+    spacing = [nx / (3+2), nz / (2+1)]; % could change this to min(xspacing, zspacing) to have a regular grid
+    %- location shift
+    shift = [0.5 -0.2] .* spacing; % [to the right, up];
+    %- divide into 3+1 horizontally
+    locX = spacing(1) * [1:3] + shift(1);
+    %- divide into 2+1 vertically
+    locZ = spacing(2) * [1:2] + shift(2);
+    [nx, nz];
+
+    
+    % anomaly properties
+    anom.strength = 1.0 * 1/100; % 1 procent
+    anom.radius = 0.30 * min(nx/(3+1), nz/(2+1));
+%     anom.radius = 0.25 * min( locX(2)-locX(1), locZ(2)-locZ(1) ); % (2)-(1) so that I can still pad the outside of the domain
+    anomUM.strength = anom.strength;
+    anomUM.radius = 0.5 * anom.radius;
+    
+
+    % LM big anomalies
+    % --> you can probably do this without loops using any()
+    %- rho in the middle
+    rhopos(1).mid = [locX(2), locZ(1)];
+    rhoneg(1).mid = [locX(2), locZ(2)];
+%     %- vs in the middle
+%     vspos(1).mid = [locX(2), locZ(1)];
+%     vsneg(1).mid = [locX(2), locZ(2)];
+%     %- vp in the middle
+%     vppos(1).mid = [locX(2), locZ(1)];
+%     vpneg(1).mid = [locX(2), locZ(2)];
+    
+    % UM small anomalies
+    rhopos(2).mid = rhoneg(1).mid + [-0.25 0.90] .* spacing;
+    rhoneg(2).mid = rhoneg(1).mid + [+0.25 0.90] .* spacing;
+%     vspos(2).mid = vsneg(1).mid + [-0.25 0.90] .* spacing;
+%     vsneg(2).mid = vsneg(1).mid + [+0.25 0.90] .* spacing;
+%     vppos(2).mid = vpneg(1).mid + [-0.25 0.90] .* spacing;
+%     vpneg(2).mid = vpneg(1).mid + [+0.25 0.90] .* spacing;
+    
+    for ii = 1:size(rho2,1)
+        for jj = 1:size(rho2,2)
+            dist_pos_rho = min([ norm([ii,jj] - rhopos(1).mid , 2)]); 
+            dist_neg_rho = min([ norm([ii,jj] - rhoneg(1).mid , 2)]); 
+%             dist_pos_vs = min([ norm([ii,jj] - vspos(1).mid , 2)]); 
+%             dist_neg_vs = min([ norm([ii,jj] - vsneg(1).mid , 2)]); 
+%             dist_pos_vp = min([ norm([ii,jj] - vppos(1).mid , 2) ]); 
+%             dist_neg_vp = min([ norm([ii,jj] - vpneg(1).mid , 2)]); 
+            
+            distUM_pos_rho = min([ norm([ii,jj] - rhopos(2).mid , 2) ]); 
+            distUM_neg_rho = min([ norm([ii,jj] - rhoneg(2).mid , 2) ]); 
+%             distUM_pos_vs = min([ norm([ii,jj] - vspos(2).mid , 2) ]); 
+%             distUM_neg_vs = min([ norm([ii,jj] - vsneg(2).mid , 2) ]); 
+%             distUM_pos_vp = min([ norm([ii,jj] - vppos(2).mid , 2) ]); 
+%             distUM_neg_vp = min([ norm([ii,jj] - vpneg(2).mid , 2) ]); 
+            
+            % LM anomalies (all in one location)
+            if dist_pos_rho < anom.radius;
+                rho2(ii,jj) = rho2(ii,jj) * (1 + anom.strength);
+                vs(ii,jj) = vs(ii,jj) / (1 + anom.strength);
+                vp(ii,jj) = vp(ii,jj) / (1 + anom.strength);
+            end
+            if dist_neg_rho < anom.radius;
+                rho2(ii,jj) = rho2(ii,jj) * (1 - anom.strength);
+                vs(ii,jj) = vs(ii,jj) / (1 - anom.strength);
+                vp(ii,jj) = vp(ii,jj) / (1 - anom.strength);
+            end
+            % UM anomalies (all in one location)
+            if distUM_pos_rho < anomUM.radius
+                rho2(ii,jj) = rho2(ii,jj) * (1 + anomUM.strength);
+                vs(ii,jj) = vs(ii,jj) / (1 + anom.strength);
+                vp(ii,jj) = vp(ii,jj) / (1 + anom.strength);
+            end
+            if distUM_neg_rho < anomUM.radius
+                rho2(ii,jj) = rho2(ii,jj) * (1 - anomUM.strength);
+                vs(ii,jj) = vs(ii,jj) / (1 - anom.strength);
+                vp(ii,jj) = vp(ii,jj) / (1 - anom.strength);
+            end
+%             % vs
+%             if dist_pos_vs < anom.radius;
+%                 vs(ii,jj) = vs(ii,jj) * (1 + anom.strength);
+%             end
+%             if dist_neg_vs < anom.radius;
+%                 vs(ii,jj) = vs(ii,jj) * (1 - anom.strength);
+%             end
+%             % vs UM
+%             if distUM_pos_vs < anomUM.radius
+%                 vs(ii,jj) = vs(ii,jj) * (1 + anomUM.strength);
+%             end
+%             if distUM_neg_vs < anomUM.radius
+%                 vs(ii,jj) = vs(ii,jj) * (1 - anomUM.strength);
+%             end
+%             % vp
+%             if dist_pos_vp < anom.radius;
+%                 vp(ii,jj) = vp(ii,jj) * (1 + anom.strength);
+%             end
+%             if dist_neg_vp < anom.radius;
+%                 vp(ii,jj) = vp(ii,jj) * (1 - anom.strength);
+%             end
+%             % vp UM
+%             if distUM_pos_vp < anomUM.radius
+%                 vp(ii,jj) = vp(ii,jj) * (1 + anomUM.strength);
+%             end
+%             if distUM_neg_vp < anomUM.radius
+%                 vp(ii,jj) = vp(ii,jj) * (1 - anomUM.strength);
+%             end
+        end
+    end
+    
+    % recalculating to rho-mu-lambda
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2); 
     
     
 %% misc models    

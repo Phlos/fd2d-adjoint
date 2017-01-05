@@ -1,7 +1,9 @@
-function fig_par = plot_single_model_par(Model, Model_ref, which_param, plotoptions)
+function [fig_par, plotoptions] = plot_single_model_par(Model, Model_ref, which_param, varargin)
     % plots a single model parameter
+    % 
+    % fig_par = plot_single_model_par(Model, Model_ref, which_param, plotoptions)
     
-    plotoptions = check_options(plotoptions);
+    plotoptions = check_options(varargin);
     
     %% preparation
     input_parameters;
@@ -17,12 +19,17 @@ function fig_par = plot_single_model_par(Model, Model_ref, which_param, plotopti
 
     %% determine parameter to be plotted
     
-    if any(strcmp(which_param, {'vs', 'vp'}))
+    if any(strcmp(which_param, {'vs', 'vp', 'impedanceP', 'impedanceS'}))
         Model = change_parametrisation('rhomulambda', 'rhovsvp', Model);
         Model_ref = change_parametrisation('rhomulambda', 'rhovsvp', Model_ref);
     end
-    
-    param = Model.(which_param) - Model_ref.(which_param);
+    if strcmp(which_param, 'impedanceP')
+        param = Model.rho .* Model.vp - Model_ref.rho .* Model_ref.vp;
+    elseif strcmp(which_param, 'impedanceS')
+        param = Model.rho .* Model.vs - Model_ref.rho .* Model_ref.vs;
+    else
+        param = Model.(which_param) - Model_ref.(which_param);
+    end
     
     %% plotting
     
@@ -34,7 +41,7 @@ function fig_par = plot_single_model_par(Model, Model_ref, which_param, plotopti
     
     % difference_mumax_mumin = max(mu(:)) - min(mu(:));
     
-    if plotoptions.cscale_own
+    if plotoptions.cscale_own || any(strcmp(which_param, {'impedanceP', 'impedanceS'}))
     %- colour scale
         % max and min are calculated in this way so that the most common value
         % (i.e. the background value) is white, and that the extreme coulours
@@ -76,10 +83,10 @@ function fig_par = plot_single_model_par(Model, Model_ref, which_param, plotopti
             contour(X, Z, Model_real_rvv.rho' - Mod_ref_rvv.rho', 2, '--k');
 %         end
 %         if ~strcmp(which_param, 'vs')
-            contour(X, Z, Mod_rvv.vs' - Mod_ref_rvv.vs', 2, '--k');
+            contour(X, Z, Model_real_rvv.vs' - Mod_ref_rvv.vs', 2, '--k');
 %         end
 %         if ~strcmp(which_param, 'vp')
-            contour(X, Z, Mod_rvv.vp' - Mod_ref_rvv.vp', 2, '--k');
+            contour(X, Z, Model_real_rvv.vp' - Mod_ref_rvv.vp', 2, '--k');
 %         end
     end
     
@@ -135,7 +142,13 @@ recs.z = rec_z;
 
 end
 
-function plotoptions = check_options(plotoptions)
+function plotoptions = check_options(args)
+
+    if numel(args) == 1
+        plotoptions = args{1};
+    else
+        plotoptions.initialise = true;
+    end
     
     input_parameters;
     
@@ -160,7 +173,7 @@ function plotoptions = check_options(plotoptions)
     end
     
     if ~isfield(plotoptions, 'cscale_own')
-        plotoptions.cscale_own = false;
+        plotoptions.cscale_own = true;
     end
     
     if ~isfield(plotoptions, 'cscale_minmax')
@@ -169,6 +182,10 @@ function plotoptions = check_options(plotoptions)
         mmvp  = 132.9489;
         mmmu      = 1.8932e10;
         mmlambda  = 5.4279e9;
+%         % for impedance zero experiment (target model 90)
+%         mmrho = 53.2870;
+%         mmvs  = 71.4023;
+%         mmvp  = 130.1236;
         plotoptions.cscale_minmax.rho = [-mmrho mmrho];
         plotoptions.cscale_minmax.vs  = [-mmvs mmvs];
         plotoptions.cscale_minmax.vp  = [-mmvp mmvp];

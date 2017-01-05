@@ -1,20 +1,24 @@
-%==========================================================================
-% run forward simulation
-%
-% input:
-% -------
-% to be supplied in the file ../input/input_parameters.m
-%
-% output:
-%--------
-% vx,vy,vz: velocity seismograms
-% t: time axis
-% rec_x: x-coordinate of receiver positions
-% rec_z: z-coordinate of receiver positions
-%
-%==========================================================================
+
 
 function [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward(varargin)
+    
+    %==========================================================================
+    % run forward simulation
+    %
+    % [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward(Model, stf)
+    %
+    % input:
+    % -------
+    % to be supplied in the file ../input/input_parameters.m
+    %
+    % output:
+    %--------
+    % vx,vy,vz: velocity seismograms
+    % t: time axis
+    % rec_x: x-coordinate of receiver positions
+    % rec_z: z-coordinate of receiver positions
+    %
+    %==========================================================================
 
 [updateParams, updateable, stf] = checkargs(varargin(:));
 
@@ -32,6 +36,9 @@ fprintf([reverseStr, prevmsg]);
 % path(path,'../input/');
 
 input_parameters;
+if ~exist(['./output/',project_name], 'dir');
+    mkdir(['./output/',project_name]);
+end
 
 sfe = store_fw_every;
 nt=sfe*round(nt/sfe);
