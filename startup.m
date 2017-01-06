@@ -20,7 +20,6 @@ path(path,'./code/propagation');
 path(path,'./input');
 path(path,'./output');
 path(path,'./tools');
-path(path,'./ojwoodford-export_fig-5735e6d')
 path(path,'./mtit')
 path(path,'./quivers/')
 path(path,'./externaltools');

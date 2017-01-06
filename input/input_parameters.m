@@ -2,7 +2,7 @@
 % project name (all file names will be changed accordingly)
 %==========================================================================
 
-project_name='Systematic.test-043.like-033-but-starting-from-040';
+project_name='Systematic.test-061.anoms-10-pct';
 
 %==========================================================================
 % inversion properties
@@ -28,7 +28,6 @@ param_plot = 'rhovsvp';
 
 % fix velocities?
 fix_velocities = 'no'; % 'yes' or 'no'
-fix_density = 'no';   % 'yes' or 'no'
 
 % normalise misfits:
 normalise_misfits = 'byfirstmisfit'; % 'byfirstmisfit' or 'div_by_obs' or 'no'
@@ -111,12 +110,12 @@ order=4;    % finite-difference order (2 or 4) (2 is not recommended)
 %==========================================================================
 
 % starting model from matfile
-use_matfile_startingmodel = 'yes';
+use_matfile_startingmodel = 'no';
 % starting_model = '../output/Model_0.03Hz.mat';
-starting_model = 'models/Systest040.iter161.model.mat';
+starting_model = '';
 
 bg_model_type = 50;     % PREM
-true_model_type = 85;   % PREM + LM and UM solid circles (all params)
+true_model_type = 87;   % PREM + LM and UM solid circles (all params)
 model_type=50; %(start) % PREM + LM/UM solid circles in vp, vs only
 
 % 1=homogeneous 
