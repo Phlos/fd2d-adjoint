@@ -102,9 +102,9 @@ if strcmp(use_seis, 'yesseis');
             t   = sEventObs(isrc).t;
             recs = 1:length(vobs);
             % determine how many seismograms are actually plotted
-            if length(vobs) > 8; recs = [2:2:length(vobs)]; end
+            while length(recs) > 8; recs = [2:2:length(recs)]; end
             % actual plotting
-            fig_seis = plot_seismogram_difference(vobs, v0, t, recs);
+            fig_seis = plot_seismogram_difference(vobs, v0, t, recs, 'nodiff');
             titel = ['src ', num2str(isrc),' - observed seismograms freq range: ', ...
                 num2str(sObsPerFreq(ifr).f_min), '-',num2str(sObsPerFreq(ifr).f_max), ' Hz'];
             mtit(fig_seis, titel, 'xoff', 0.001, 'yoff', -0.05);

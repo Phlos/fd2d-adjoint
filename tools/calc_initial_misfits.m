@@ -1,6 +1,5 @@
-function misfit_init = calc_initial_misfits(Model_init, sObsPerFreq, g_obs)
+function [misfit_init, misfit_init_traces]  = calc_initial_misfits(Model_init, sObsPerFreq, g_obs)
 
-% calculates the initial misfits for all supplied frequencies
 input_parameters;
 if strcmp(use_seis, 'yesseis')
 for ifrq = 1:length(sObsPerFreq)
@@ -13,6 +12,7 @@ for ifrq = 1:length(sObsPerFreq)
         calc_misfits(Model_init, g_obs, 0, sEventInfo, sEventObs, 0, ...
         'noplot','notext');
     misfit_init(ifrq) = misfit_int;
+    misfit_init_traces{ifrq} = sEventObs;
     
 end
 

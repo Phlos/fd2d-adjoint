@@ -113,6 +113,7 @@ Lmisfit = semilogy(iters(1:imax), misfit(1:imax), 'k',...
     set(Lmisfit(2), 'LineWidth', 1)
     set(Lmisfit(3), 'LineWidth',1)
 xlim([min(iters), iters(imax)]);
+if imax>80; set(gca, 'XTick', 0:20:iters(imax)); end;
 grid on
 legenda = legend('all data combined', 'seismic data only', 'gravity data only');
 lp = get(legenda, 'Position');
@@ -127,6 +128,7 @@ if imax > 1
 Lmdifn = semilogy(iters(2:imax), modeldifn(2:imax),'k');
 end
 xlim([min(iters), iters(imax)]);
+if imax>80; set(gca, 'XTick', 0:20:iters(imax)); end;
 grid on
 set(Lmdifn, 'LineWidth', 1)
 text(0.5, 0.9, '|current - previous model| / |1st model|', ...
@@ -144,6 +146,7 @@ Langle = plot(iters(2:imax), angletot(2:imax) ./ pi .* 180, 'k',...
     set(Langle(3), 'LineWidth',1)
 end
 xlim([min(iters), iters(imax)]);
+if imax>80; set(gca, 'XTick', 0:20:iters(imax)); end;
 ax = gca;
 ax.YTick = 0:30:180;
 ylim([0 180]);
@@ -161,6 +164,7 @@ set(RKnorm(1), 'LineWidth', 2)
 set(RKnorm(2), 'LineWidth', 1)
 set(RKnorm(3), 'LineWidth',1)
 xlim([min(iters), iters(imax)]);
+if imax>80; set(gca, 'XTick', 0:20:iters(imax)); end;
 grid on;
 text(0.5, 0.9, 'norm of kernels', ...
     'Units', 'normalized', 'HorizontalAlignment','center');
@@ -197,6 +201,7 @@ if(exist('normL2','var'))
     eilim = ylim;
     ylim([0 max(1, eilim(2))]);
     xlim([min(iters) iters(imax)]);
+    if imax>80; set(gca, 'XTick', 0:20:iters(imax)); end;
     grid on
     set(RmdifReal_rvv, 'LineWidth', 1)
     set(RmdifReal_rml, 'LineWidth', 1)
@@ -223,6 +228,7 @@ if(exist('normL2Par', 'var'))
     eilim = ylim;
     ylim([0 max(1, eilim(2))]);
     xlim([min(iters) iters(imax)]);
+    if imax>80; set(gca, 'XTick', 0:20:iters(imax)); end;
     eilim = ylim;
     if eilim(1) < 5e-2
         ylim([5e-2 eilim(2)]);

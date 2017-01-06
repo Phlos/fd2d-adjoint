@@ -29,5 +29,17 @@ spectrum=2*abs(Y(1:NFFT/2+1));
 semilogx(f,spectrum);
     xlabel('frequency [Hz]');
     title('... and its frequency (amp) spectrum');
+
+% check frequency
+input_parameters;
+dx = Lx / (nx-1); dz = Lz / (nz-1);
+npw = 10; % n samples per wavelength
+vs_minimum = 3200;
+min_wavelength = min(npw*dx, npw*dz);
+max_freq = vs_minimum / min_wavelength;
+eilim = ylim;
+hold on; plot([max_freq, max_freq], eilim, '-r');
+
+disp(['For v_s = ',num2str(vs_minimum), ', your maximum allowed stf frequency is ', num2str(max_freq), ' Hz']);
     
 end

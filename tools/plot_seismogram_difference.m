@@ -65,8 +65,8 @@ for irows = 1:nrec;
         vrec = v_rec{irec}.(comp{icomp});
         vobs = v_obs{irec}.(comp{icomp});
         hold on
-        plot(t,vrec,'k', ...
-             t,vobs,'r--');
+        plot(t,vobs,'-k', 'LineWidth', 1.0);
+        plot(t,vrec,'-r', 'LineWidth', 0.5);
          if strcmp(plot_diff, 'yesdiff')
              plot(t,10*(vrec - vobs), 'b');
              % plot(t,vrec - vobs, 'b', 'LineWidth',2)
@@ -80,9 +80,9 @@ for irows = 1:nrec;
         
         if irows==1
             if strcmp(plot_diff, 'yesdiff')
-                title({[comp{icomp},' component:']; 'synth - black, obs - red, 10*(synth-obs) - blue'})
+                title({[comp{icomp},' component:']; 'synth - red, obs - black, 10*(synth-obs) - blue'})
             else
-                title({[comp{icomp},' component:']; 'synth - black, obs - red'})
+                title({[comp{icomp},' component:']; 'synth - red, obs - black'})
             end
         end
         if irec==nrec

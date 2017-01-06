@@ -281,7 +281,7 @@ end
 temps = n*dt;
 
 if any(savetimes == temps)
-    filename = [snapshotfile,'_forward_t',num2str(temps),'.png'];
+    filename = [snapshotfile,'Velocity.forward_t',num2str(temps),'.png'];
     disp(['saving at time ',num2str(temps),' with filename ',filename, '!'])
     print(gcf,'-dpng','-r1000',filename)
 end

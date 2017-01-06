@@ -23,7 +23,7 @@ use_seis = 'yesseis'; % 'yesseis' or 'noseis'
 % what misfit functional are we using
 misfit_type = 'waveform_difference'; % 'waveform_difference' or 'cc_time_shift
 % inversion parametrisation
-parametrisation = 'rhovsvp';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
+parametrisation = 'rhomulambda';   % 'rhovsvp' or 'rhomulambda', maybe later 'rhomukappa'
 param_plot = 'rhovsvp';
 
 % fix velocities?
