@@ -1,12 +1,7 @@
-% inversion routine that interacts with Christian's code
+% inversion routine that interacts with Christian's Optimisation Toolbox 
+% code
 
 %% preparation
-
-% number of iterations
-% InvProps.niter = 120;
-% istart = 1;
-% 
-% niter = InvProps.niter;
 
 % obtain useful parameters from input_parameters
 [project_name, ~, apply_hc, use_grav, use_seis, fix_velocities, fix_density, ...
@@ -97,10 +92,10 @@ end
 
 disp 'preparing inversion starting model...'
 
-% % save initial model (from input_parameters)
+% % make initial model (from input_parameters)
 % Model_start = update_model();
 
-% save background model (for plotting purposes)
+% make background model (for plotting purposes)
 Model_bg = update_model(bg_model_type);
 
 % % set the background values for plot_model to mode of the initial model
@@ -239,7 +234,8 @@ for ifreq = 1:nfreq
 %     % retrieve model
 %     m = map_parameters_to_m(usr_par.Model(end), usr_par);
     
-    % run L-BFGS
+    % run L-BFGS (this is the actual inversion of all the iterations for
+    % this frequency band)
     [flag, mfinal, usr_par]=optlib_lbfgs(m, options, usr_par);
 
     % set cumulative iter to itself - 1 because we're going to recalculate
@@ -247,7 +243,7 @@ for ifreq = 1:nfreq
     usr_par.cumulative_iter = usr_par.cumulative_iter - 1;
     m = mfinal;
     
-        % save optlib output for later use (if crash between freqs)
+    % save optlib output for later use (if crash between freqs)
     save([output_path, '/freq-', num2str(ifreq, '%03d'), '.optlib_output.mat'], ...
         'ifreq', 'flag', 'm' , 'usr_par')
 end
