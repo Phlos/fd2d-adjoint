@@ -59,7 +59,7 @@ if strcmp(fix_velocities,'yes')
             + K_rel.mu.total(:) ...
             + K_rel.lambda.total(:) ];
     else
-	gradm = K_rel.rho2.total(:);
+        gradm = K_rel.rho2.total(:);
 %        error('parametrisation must be rhomulambda if fixing velocities');
     end
 
@@ -70,7 +70,22 @@ elseif strcmp(fix_density, 'yes')
 		gradm = [K_rel.mu.total(:); K_rel.lambda.total(:)];
 	elseif strcmp(parametrisation, 'rhovsvp');
 		gradm = [K_rel.vs2.total(:); K_rel.vp2.total(:)];
-	end
+    end
+    
+% scaling density to S-velocity through some scaling factor - there are 
+% 2*nx*nz free parameters.    
+elseif strcmp(scale_rho_to_vs, 'yesscale')
+    
+    switch parametrisation
+        
+        case 'rhomulambda'
+            error('param rhomulambda not implemented for scaling rho to vs');
+            
+        case 'rhovsvp'
+            gradm = [K_rel.rho2.total(:) * scaling_factor_rhovs ... 
+                     + K_rel.vs2.total(:); ...
+                     K_rel.vp2.total(:)];
+    end
     
 % no fixing of parameters: there are 3*nx*nz free parameters
 else

@@ -199,6 +199,9 @@ if(exist('normL2','var'))
     RmdifReal_rvv = plot(iters(1:imax), normL2.rvv(1:imax));
     RmdifReal_rml = plot(iters(1:imax), normL2.rml(1:imax));
     eilim = ylim;
+    if eilim(2) > 10
+	    eilim(2) = 2;
+    end
     ylim([0 max(1, eilim(2))]);
     xlim([min(iters) iters(imax)]);
     if imax>80; set(gca, 'XTick', 0:20:iters(imax)); end;
@@ -226,6 +229,9 @@ if(exist('normL2Par', 'var'))
         RdifrealPar_lm = plot(iters(1:imax), normL2Par.lambda(1:imax));
 %     end
     eilim = ylim;
+    if eilim(2) > 10
+	    eilim(2) = 5;
+    end
     ylim([0 max(1, eilim(2))]);
     xlim([min(iters) iters(imax)]);
     if imax>80; set(gca, 'XTick', 0:20:iters(imax)); end;

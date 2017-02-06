@@ -32,13 +32,22 @@ if nprev > 0
         
         % previous model and gradient under consideration
         Mod_iprev = usr_par.Model(end - iprev);
-        Knl_iprev = usr_par.K_abs(end - iprev);
+%         Knl_iprev = usr_par.K_abs(end - iprev);
         
         % load model nr countback into m
         m = map_parameters_to_m(Mod_iprev, usr_par);
         
         usr_par.Mod_current = usr_par.Model(end);
-        gm = map_gradparameters_to_gradm(Knl_iprev, usr_par);
+%         gm = map_gradparameters_to_gradm(Knl_iprev, usr_par);
+        if isfield(usr_par, 'gm')
+            gm = usr_par.gm(end - iprev).gm;
+        else
+            warning('WARNING: using K_abs from usr_par as previous gradients. ONLY works if not scaling rho to vs');
+            disp 'WARNING: using K_abs from usr_par as previous gradients. ONLY works if not scaling rho to vs';
+            Knl_iprev = usr_par.K_abs(end - iprev);
+            usr_par.Mod_current = usr_par.Model(end);
+            gm = map_gradparameters_to_gradm(Knl_iprev, usr_par);
+        end
         
         % add m to previous_models
         previous_models(:,maxprev - iprev + 1) = m;

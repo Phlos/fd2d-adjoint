@@ -206,6 +206,7 @@ clearvars fig_knl titel figname;
 usr_par.Model(iter) = Model_iter;
 usr_par.K_abs(iter) = K_abs_iter;
 usr_par.misfit(iter) = jm;
+usr_par.gm(iter).gm  = gm;
 usr_par.cumulative_iter = iter;
 
 %% plot inversion result 

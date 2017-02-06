@@ -37,31 +37,56 @@ if strcmp(fix_velocities,'yes')
 
 % fixing density: there are 2*nx*nz free parameters: mu/lambda or vs/vp
 elseif strcmp(fix_density, 'yes')
-	
-	switch parametrisation
-
-	case 'rhomulambda'
-
-	    gm2 = gm(          1 :   nx*nz);
+    
+    switch parametrisation
+        
+        case 'rhomulambda'
+            
+            gm2 = gm(          1 :   nx*nz);
             gm3 = gm(  nx*nz + 1 : 2*nx*nz);
-
-	    % reshape
-		K_rel.mu.total     = reshape(gm2, nx, nz);
-		K_rel.lambda.total = reshape(gm3, nx, nz);
-		K_rel.rho.total    = zeros(size(K_rel.mu.total));
-
-	case 'rhovsvp'
-
-	    gm5 = gm(          1 :   nx*nz);
+            
+            % reshape
+            K_rel.mu.total     = reshape(gm2, nx, nz);
+            K_rel.lambda.total = reshape(gm3, nx, nz);
+            K_rel.rho.total    = zeros(size(K_rel.mu.total));
+            
+        case 'rhovsvp'
+            
+            gm5 = gm(          1 :   nx*nz);
             gm6 = gm(  nx*nz + 1 : 2*nx*nz);
             
             % reshape
             K_rel.vs2.total  = reshape(gm5, nx, nz);
             K_rel.vp2.total  = reshape(gm6, nx, nz);
             K_rel.rho2.total = zeros(size(K_rel.vs2.total));
+            
+    end
+    
+% scaling density to S-velocity through some scaling factor - there are
+% 2*nx*nz free parameters.
+elseif strcmp(scale_rho_to_vs, 'yesscale')
+    
+    switch parametrisation
+        
+        case 'rhomulambda'
+            error('param rhomulambda not implemented for scaling rho to vs');
+            
+        case 'rhovsvp'
+            
+          % gm5 = gm(          1 :   nx*nz);
+            gm6 = gm(  nx*nz + 1 : 2*nx*nz);
+            
+            % reshape
+            % the only K_rel that has any meaning is K_rel.vp2. 
+            % information on vs and density is present, but jumbled
+            % together in gm5, without a possibility to peel them apart.
+            K_rel.vp2.total  = reshape(gm6, nx, nz);
+            K_rel.rho2.total = zeros(size(K_rel.vp2.total));
+            K_rel.vs2.total  = zeros(size(K_rel.vp2.total));
 
-    	end
-
+            
+    end
+   
 % no fixing of parameters: there are 3*nx*nz free parameters
 else
 

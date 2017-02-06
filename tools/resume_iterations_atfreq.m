@@ -1,6 +1,6 @@
 % resume iterations at frequency startfreq
 
-startfreq = 4;
+startfreq = 2;
 
 disp ' ';
 disp(['STARTFREQ = ', num2str(startfreq)]);
@@ -11,7 +11,7 @@ disp ' ';
 
 % initial stuff
 % obtain useful parameters from input_parameters
-[project_name, ~, apply_hc, use_grav, use_seis, fix_velocities, ...
+[project_name, ~, apply_hc, use_grav, use_seis, fix_velocities, fix_density, ...
     use_matfile_startingmodel, starting_model, bg_model_type,...
     true_model_type, ~, change_freq_every, ...
     parametrisation, param_plot, rec_g, ~, ~, ~, ...

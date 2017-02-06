@@ -122,7 +122,8 @@ while (model.normg > options.tolerance *normg0 && ...
     end
     
     % try larger step lengths if sigma = initial step length
-    if (sigma == options.init_step_length || sigma == options.grad_step_length)
+%     if (sigma == options.init_step_length || sigma == options.grad_step_length)
+    if (sigma == options.grad_step_length)
         try_larger_steps = true;
     else
         try_larger_steps = options.wolfe_try_to_increase_step_length;

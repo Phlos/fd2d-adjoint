@@ -42,6 +42,7 @@ if strcmp(fix_velocities,'yes')
 elseif strcmp(fix_density, 'yes');
 
 	switch parametrisation
+        
 		case 'rhomulambda';
 
 			m2 = m(        1 :   nx*nz);
@@ -64,9 +65,38 @@ elseif strcmp(fix_density, 'yes');
 
 			mu = rho .* vs.^2;
 			lambda = rho .* (vp .^2 - 2.*vs .^2);
-	end
+            
+    end
 
+    
+% scaling density to S-velocity through some factor c - there are 2*nx*nz
+% free parameters.
+elseif strcmp(scale_rho_to_vs, 'yesscale')
+    
+    switch parametrisation
+        
+        case 'rhomulambda'
+            
+            error('Haven''t implemented parametrisation rho-mu-lambda yet');
+            
+        case 'rhovsvp'
+            
+            Model_bg = change_parametrisation('rhomulambda', 'rhovsvp', Model_bg);
 
+			m5 = m(        1 :   nx*nz);
+			m6 = m(nx*nz + 1 : 2*nx*nz);
+
+			rho = Model_bg.rho.* (1+ scaling_factor_rhovs .* reshape(m5, nx,nz));
+			vs  = Model_bg.vs .* (1+ reshape(m5, nx,nz));
+			vp  = Model_bg.vp .* (1+ reshape(m6, nx,nz));
+
+            % parametrise back to 'standard' parameters.
+			mu = rho .* vs.^2;
+			lambda = rho .* (vp .^2 - 2.*vs .^2);
+            
+    end
+    
+    
 % no fixing of parameters: there are 3*nx*nz free parameters
 else
     
