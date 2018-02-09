@@ -10,6 +10,9 @@ Christian Boehm
 Andreas Fichtner
 
 You're free to use this code, but it would be really kind to acknowledge our work.
+The publication relating to this code is Blom, Boehm, Fichtner (GJI 2017) - 
+"Synthetic inversions for density using seismic and gravity data" -- doi link:
+https://doi.org/10.1093/gji/ggx076
 
 The following is what you can do.
 - run wave propagation in 2D for a single or multiple simultaneous sources.
