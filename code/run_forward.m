@@ -9,14 +9,16 @@ function [v_rec,t,u_fw,v_fw,rec_x,rec_z]=run_forward(varargin)
     %
     % input:
     % -------
-    % to be supplied in the file ../input/input_parameters.m
+    % Model:    the model nr through which the fwd propagation is run
     %
     % output:
     %--------
-    % vx,vy,vz: velocity seismograms
-    % t: time axis
-    % rec_x: x-coordinate of receiver positions
-    % rec_z: z-coordinate of receiver positions
+    % v_rec:    velocity seismograms
+    % t:        time axis
+    % u_fw:     displacement forward field
+    % v_fw:     velocity forward field
+    % rec_x:    x-coordinate of receiver positions
+    % rec_z:    z-coordinate of receiver positions
     %
     %==========================================================================
 
@@ -36,7 +38,7 @@ fprintf([reverseStr, prevmsg]);
 % path(path,'../input/');
 
 input_parameters;
-if ~exist(['./output/',project_name], 'dir');
+if ~exist(['./output/',project_name], 'dir')
     mkdir(['./output/',project_name]);
 end
 
@@ -72,6 +74,8 @@ end
 model.rho = rho;
 model.mu = mu;
 model.lambda = lambda;
+model.vs = sqrt(mu ./ rho);
+model.vp = sqrt((lambda + 2*mu) ./ rho);
 % fig_mod = plot_model(model, param_plot);
 
 
