@@ -238,6 +238,9 @@ for i=1:nplots
     if exist('plot_contour_rho_anom', 'var') && plot_contour_rho_anom
         contour(X_new, Z_new, model.rho', 1, '--k');
     end
+    if exist('plot_contour_vs_anom', 'var') && plot_contour_vs_anom
+        contour(X_new, Z_new, model.vs', 1, '--k');
+    end
     
     %- plot timestamp and velocity max value
     timestamp_text=['t = ',num2str(floor(n*dt),'%4.0f'), ' s'];
