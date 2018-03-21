@@ -43,7 +43,8 @@ load 'propagation/cm_model.mat';
 %% recalculation of lengths
 [X,Z,~,~]=define_computational_domain(Lx,Lz,nx,nz);
 
-[X,Z, srcs, recs] = recalculate_to_km(X, Z, src_info, rec_x, rec_z);
+if model_category == 'PREM_type'
+    [X,Z, srcs, recs] = recalculate_to_km(X, Z, src_info, rec_x, rec_z);
 
 
 %% figure
@@ -339,7 +340,7 @@ end
 
 function [X, Z, srcs, recs] = recalculate_to_km(X, Z, src_info, rec_x, rec_z);
     
-    % convert distances to km & set Z to depth below surface
+% convert distances to km & set Z to depth below surface
 surface_level = 2890; % only valid in PREM
 X = X ./ 1000;
 Z = Z ./ 1000;

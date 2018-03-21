@@ -269,6 +269,12 @@ savetimes = [];
 param_plot = 'rhomulambda'; % 'rhomulambda' or 'rhovsvp'
 plot_UM_separate = false;   % only useful for PREM like models
 
+% determine model category for plotting purposes
+%  -- if the model is any of the PREM models, Z coordinate should be depth
+%  beneath the surface which is set at 2891 km height... otherwise, it
+%  should just be Z pointing up positive.
+model_category = 'PREM_type'; % 'PREM_type' or 'other'
+
 %- movies 
 make_movie='no';                                   % 'yes' or 'no'
 make_movie_adj='no';                               % 'yes' or 'no'
