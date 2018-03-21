@@ -273,7 +273,7 @@ plot_UM_separate = false;   % only useful for PREM like models
 %  -- if the model is any of the PREM models, Z coordinate should be depth
 %  beneath the surface which is set at 2891 km height... otherwise, it
 %  should just be Z pointing up positive.
-model_category = 'PREM_type'; % 'PREM_type' or 'other'
+model_category = 'other'; % 'PREM_type' or 'other'
 
 %- movies 
 make_movie='no';                                   % 'yes' or 'no'
