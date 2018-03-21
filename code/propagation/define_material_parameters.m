@@ -104,6 +104,7 @@ elseif (model_type==11) % tromp05-homogeneous + rect. mu anomaly
     
     mu(left:right,bottom:top) = mu(left:right,bottom:top) + 1e10;
     
+    
 elseif (model_type==12) % tromp05-homogeneous + rect. rho anomaly
     
     % Tromp et al, 2005
@@ -120,8 +121,9 @@ elseif (model_type==12) % tromp05-homogeneous + rect. rho anomaly
     bottom = round(nz/2-nz/20);
     
     rho(left:right,bottom:top) = rho(left:right,bottom:top) + 1e3;
-    
-elseif (model_type==13) % tromp05-homogeneous + 1e3 rect. rho2 anomaly
+
+
+elseif (model_type==13) % tromp05-homogeneous + rect. rho2 anomaly (vs, vp constant)
     
     % Tromp et al, 2005
     rho    = 2600*ones(nx,nz);     % kg/m3
@@ -248,14 +250,7 @@ elseif (model_type==18) % gaussian off-central mu anomaly
     % add the anomaly to the density field at (anom.dx, anom.dz)
     mu = add_crop_matrix(mu, filt.fnorm*10^3, anom.dx, anom.dz);
     
-%     gwid = round(0.05 * max([nx nz]));
-%     filt = fspecial('gaussian',[floor((1-dxz)*nx) floor((1-dxz)*nz)],gwid);
-%     filt2 = filt / max(filt(:));
-% %     size_filt2 = size(filt2)
-% %     size_rhocut = size(rho(ceil((1-dxz)*nx)+1:end, ceil((1-dxz)*nz)+1:end))
-%     mu(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) = ...
-%     mu(ceil(dxz*nx)+1:end, ceil(dxz*nz)+1:end) + filt2 * 1.0e10;
-
+    
 elseif (model_type==19) % block central 2% vs anomaly
     
     % Tromp et al, 2005
@@ -269,7 +264,7 @@ elseif (model_type==19) % block central 2% vs anomaly
     vs    = sqrt(mu ./ rho);
     rho2 = rho;
     
-        % rectangular rho anomaly
+    % rectangular anomaly
     left = round(nx/2-nx/20);
     right = round(nx/2+nx/20);
     top = round(nz/2+nz/20);
@@ -281,6 +276,7 @@ elseif (model_type==19) % block central 2% vs anomaly
     rho     = rho2;
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+    
 
 elseif (model_type==20) % block central 2% rho2 anomaly
     
@@ -309,8 +305,9 @@ elseif (model_type==20) % block central 2% rho2 anomaly
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
 
 
+
 elseif (model_type==21) % gaussian off-central rho_v anomaly
-%% VP-VS-RHO parametrisation
+
 
     % Tromp et al, 2005, rho-mu-lambda
     rho    = 2600*ones(nx,nz);     % kg/m3
@@ -345,6 +342,7 @@ elseif (model_type==21) % gaussian off-central rho_v anomaly
     rho     = rho2;
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
+
     
 elseif (model_type==22) % block central 10% rho2 anomaly
     
@@ -443,8 +441,6 @@ elseif (model_type==31) % five 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
 
     end
     
-   
-    
     
 elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
                         % 5x positive and 5x negative
@@ -467,18 +463,21 @@ elseif (model_type==41) % ten 'rand' rho2 anomalies (rho2 = rho in rho-vs-vp)
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
+    
+    
+    
 %% PREM bg models    
 elseif (model_type==50) % PREM background model
                         % IMPORTANT: 
                         % model values will be sampled at height above CMB!
                         % so don't make the model higher than 2891 km!!
                         
-    [rho_new, vs_new, vp_new] = load_PREM();    
+    [rho2, vs, vp] = load_PREM();    
     
     %- convert to rho,mu,lambda
-    rho     = rho_new;
-    mu      = vs_new .^ 2 .* rho_new;
-    lambda  = rho_new .* ( vp_new.^2 - 2* vs_new.^2);
+    rho     = rho2;
+    mu      = vs .^ 2 .* rho2;
+    lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
     
     
     
@@ -488,6 +487,8 @@ elseif (model_type==51) % PREM background model + 10 rand +&- rho2 anoms
                         % so don't make the model higher than 2891 km!!
                       
     [rho2, vs, vp] = load_PREM();
+    
+    % add anomalies
     rho2 = add_10randanoms(rho2, 1000,1);
    
     % recalculating to rho-mu-lambda
@@ -502,6 +503,8 @@ elseif (model_type==52) % PREM background model + 10 rand +&-1000 m/s vs anoms
                         % so don't make the model higher than 2891 km!!
                         
     [rho2, vs, vp] = load_PREM();
+    
+    % add anomalies
     vs = add_10randanoms(vs, 1e3,1);
   
     % recalculating to rho-mu-lambda
@@ -516,6 +519,8 @@ elseif (model_type==53) % PREM background model + 10 1% rand +&- vs anoms
                         % so don't make the model higher than 2891 km!!
 
     [rho2, vs, vp] = load_PREM();
+    
+    % add anomalies
     vs = add_10randanoms(vs, 0.01*max(vs(:)),1);
     
     % recalculating to rho-mu-lambda
@@ -530,13 +535,16 @@ elseif (model_type==54) % PREM background model + 10 1% rand +&- rho2 anoms
                         % so don't make the model higher than 2891 km!!
 
     [rho2, vs, vp] = load_PREM();
+    
+    % add anomalies
     rho2 = add_10randanoms(rho2, 0.01*max(rho2(:)),1);
     
     % recalculating to rho-mu-lambda
     rho     = rho2;
     mu      = vs .^ 2 .* rho2;
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);
-
+    
+    
 elseif (model_type==55) % PREM background model + 10 1000 kg/m3 rand +&- RHO0 anoms
                         % IMPORTANT: 
                         % Model values will be sampled at height above CMB!
@@ -551,7 +559,7 @@ elseif (model_type==55) % PREM background model + 10 1000 kg/m3 rand +&- RHO0 an
     
     rho = add_10randanoms(rho, 1000,1);
     
-
+    
 elseif model_type == 56
     
     [rho2, vs, vp] = load_PREM();
@@ -1613,7 +1621,7 @@ elseif (model_type==88) % CIRCLES and small UM circles:
     lambda  = rho2 .* ( vp.^2 - 2* vs.^2);     
     
 
-elseif (model_type==89) % CIRCLES and small UM circles: (10 pct)
+elseif (model_type==89) % CIRCLES and small UM circles: (UM = 10 pct)
                         % PREM background model plus regular grid of 'hard'
                         % edged circles - non-overlapping rho - vp - vs
                         % anomalies 10pct instead of 1pct (@ model 85)
@@ -1798,12 +1806,12 @@ elseif (model_type==90) % NO IMPEDANCE.
 %             distUM_neg_vp = min([ norm([ii,jj] - vpneg(2).mid , 2) ]); 
             
             % LM anomalies (all in one location)
-            if dist_pos_rho < anom.radius;
+            if dist_pos_rho < anom.radius
                 rho2(ii,jj) = rho2(ii,jj) * (1 + anom.strength);
                 vs(ii,jj) = vs(ii,jj) / (1 + anom.strength);
                 vp(ii,jj) = vp(ii,jj) / (1 + anom.strength);
             end
-            if dist_neg_rho < anom.radius;
+            if dist_neg_rho < anom.radius
                 rho2(ii,jj) = rho2(ii,jj) * (1 - anom.strength);
                 vs(ii,jj) = vs(ii,jj) / (1 - anom.strength);
                 vp(ii,jj) = vp(ii,jj) / (1 - anom.strength);
@@ -1982,8 +1990,7 @@ elseif (model_type==103) % PREM background model + raised 670 (by 30 km)
 %% no model has been given    
 else
     
-    load(['models/mu_' model_type]);
-    load(['models/rho_' model_type]);
+    error(['model type ' num2str(model_type) ' not recognised'])
     
 end
 
